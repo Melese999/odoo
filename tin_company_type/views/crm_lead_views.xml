@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit the Lead Form View to make all required changes -->
+        <record id="crm_lead_view_form_customizations" model="ir.ui.view">
+            <field name="name">crm.lead.form.customizations</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Requirement 4: Remove default "Customer" field -->
+                <!-- We find the field and make it completely invisible. -->
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <!-- Requirement 1 & 2: Add Industry and TIN Number fields -->
+                <!-- We will add them after the "Company Name" field for a logical layout. -->
+                <xpath expr="//field[@name='partner_name']" position="after">
+                    <field name="company_type" string="Industry / Company Type"/>
+                    <field name="tin_number" string="TIN Number"/>
+                </xpath>
+
+                <!--
+                    Bonus Improvement: Make "Company Name" a simple text field
+                    as discussed previously, to avoid confusion.
+                -->
+                <xpath expr="//field[@name='partner_name']" position="replace">
+                    <field name="partner_name" string="Company Name" placeholder="Company Name" class="o_form_inline"/>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

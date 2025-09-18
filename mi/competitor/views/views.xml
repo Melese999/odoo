@@ -1,0 +1,97 @@
+<odoo>
+  <data>
+
+    <record model="ir.ui.view" id="competitor.list">
+      <field name="name">Competitor list</field>
+      <field name="model">competitor.competitor</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="description"/>
+          <field name="website"/>
+          <field name="company_ids"/>
+          <field name="country_id"/>
+          <field name="industry_ids"/>
+          <field name="phone"/>
+          <field name="email"/>
+          <field name="active"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_competitor_form" model="ir.ui.view">
+      <field name="name">competitor.competitor.form</field>
+      <field name="model">competitor.competitor</field>
+      <field name="arch" type="xml">
+        <form string="Competitor">
+          <sheet>
+            <group>
+              <field name="name" class="text-primary" placeholder="competitor full name"/>
+            </group>
+            <group>
+              <group>
+                <field name="industry_ids" widget="many2many_tags" placeholder="please select industry type"/>
+                <field name="description"/>
+                <field name="company_ids" widget="many2many_tags" placeholder="select company's this competitor belongs to"/>
+              </group>
+              <group>
+                <field name="website" placeholder="https://www.example.com"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="country_id" placeholder="please select a country"/>
+              </group>
+              <notebook>
+                <page name="name" string="Notes">
+                   <field name="notes"/>
+                </page>
+                <page name="extra_info" string="Extra Info">
+                   <field name="latitude"/>
+                   <field name="longitude" />
+                </page>
+              </notebook>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="competitor_industry_view">
+      <field name="name">Industry Types</field>
+      <field name="model">competitor.industry</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="active"/>
+        </tree>
+      </field>
+    </record>
+
+  <record model="ir.ui.view" id="competitor_industry_form">
+    <field name="name">Industry Type</field>
+    <field name="model">competitor.industry</field>
+    <field name="arch" type="xml">
+      <form string="Industry">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="active"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+
+    <record model="ir.actions.act_window" id="competitor.action_window">
+      <field name="name">Competitors</field>
+      <field name="res_model">competitor.competitor</field>
+      <field name="view_mode">tree,form,kanban,activity</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="competitor_industries_action_window">
+      <field name="name">Industries</field>
+      <field name="res_model">competitor.industry</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+  </data>
+</odoo>

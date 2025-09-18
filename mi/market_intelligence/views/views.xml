@@ -1,0 +1,109 @@
+<odoo>
+  <data>
+
+    <record model="ir.ui.view" id="market_intelligence.list">
+      <field name="name">Market intelligence list</field>
+      <field name="model">market_intelligence.market_intelligence</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="date"/>
+          <field name="competitor_id"/>
+          <field name="company_ids"/>
+          <field name="line_ids"/>
+          <field name="remark"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_market_intelligence_form" model="ir.ui.view">
+      <field name="name">market_intelligence.market_intelligence.form</field>
+      <field name="model">market_intelligence.market_intelligence</field>
+      <field name="arch" type="xml">
+        <form string="market_intelligence" chatter_position="sided">
+          <sheet>
+
+            <group>
+              <group>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="competitor_id"/>
+                <field name="company_ids" widget="many2many_tags" placeholder="select company's this market_intelligence belongs to"/>
+                <field name="remark"/>
+
+              </group>
+              <notebook>
+                <page string="Product Lines">
+                  <field name="line_ids">
+                    <tree editable="bottom">
+                      <field name="product_id"/>
+                      <field name="unit_price"/>
+                      <field name="unit_price_uom_id"/>
+                      <field name="stock"/>
+                      <field name="stock_uom_id"/>
+                    </tree>
+                    <form>
+                      <group>
+                        <field name="product_id"/>
+                        <field name="unit_price"/>
+                        <field name="unit_price_uom_id"/>
+                        <field name="stock"/>
+                        <field name="stock_uom_id"/>
+                        <field name="description"/>
+                      </group>
+                    </form>
+                  </field>
+                </page>
+              </notebook>
+
+            </group>
+          </sheet>
+          <div class="oe_chatter">
+                <field name="message_follower_ids" widget="mail_followers"/>
+                <field name="activity_ids" widget="mail_activity"/>
+                <field name="message_ids" widget="mail_thread"/>
+            </div>
+        </form>
+      </field>
+    </record>
+
+
+
+    <record model="ir.actions.act_window" id="market_intelligence.action_window">
+      <field name="name">Market intelligence</field>
+      <field name="res_model">market_intelligence.market_intelligence</field>
+      <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+
+<menuitem name="Market Intelligence"
+          id="market_intelligence.menu_root"
+          sequence="10"
+          groups="base.group_user"/> 
+          
+<menuitem name="Market Intelligence List"
+          id="market_intelligence_menu_list"
+          parent="market_intelligence.menu_root"
+          action="market_intelligence.action_window"
+          groups="base.group_user"/>
+
+<menuitem name="Competitors"
+          id="competitor_menu_list"
+          parent="market_intelligence.menu_root"
+          action="competitor.action_window"
+          groups="base.group_user"/>
+
+<menuitem id="market_intelligence_menu_settings"
+          name="Settings"
+          parent="market_intelligence.menu_root"
+          groups="base.group_user"/>
+
+<menuitem name="Industry Types"
+          id="market_intelligence_menu_industry"
+          parent="market_intelligence_menu_settings"
+          action="competitor.competitor_industries_action_window"
+          groups="base.group_user"/>
+
+
+  </data>
+</odoo>

@@ -1,0 +1,32 @@
+<odoo>
+    <record id="view_crm_lead_form_inherit_geo" model="ir.ui.view">
+        <field name="name">crm.lead.view.form.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook/page[@name='extra']" position="inside">
+                <group string="Geolocation">
+                    <field name="latitude" readonly="1" force_save="1"/>
+                    <field name="longitude" readonly="1" force_save="1"/>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <group>
+                <field name="company_ids" widget="many2many_tags" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm_lead_map" model="ir.ui.view">
+        <field name="name">crm.lead.map</field>
+        <field name="model">crm.lead</field>
+        <field name="arch" type="xml">
+            <lmap test="crm.lead"/>
+        </field>
+    </record>
+    <record id="crm.crm_lead_all_leads" model="ir.actions.act_window">
+        <field name="view_mode">kanban,tree,form,calendar,activity,lmap</field>
+    </record>
+
+</odoo>

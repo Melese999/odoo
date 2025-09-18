@@ -1,0 +1,16 @@
+<odoo>
+  <data>
+<record id="competitor_rule_company_manager" model="ir.rule">
+    <field name="name">Company Manager: Competitor by company</field>
+    <field name="model_id" ref="competitor.model_competitor_competitor"/>
+    <field name="groups" eval="[(4, ref('crm_lead_geolocation.group_company_manager'))]"/>
+    <field name="domain_force">
+        ['|',
+            ('company_ids', 'in', user.company_ids.ids),
+            ('company_ids', '=', False)
+        ]
+    </field>
+</record>
+
+  </data>
+</odoo>

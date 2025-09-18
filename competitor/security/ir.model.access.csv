@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_competitor_competitor,competitor.competitor,model_competitor_competitor,base.group_user,1,1,1,1
+access_competitor_industry,access_competitor_industry,model_competitor_industry,base.group_user,1,1,1,1
+
+access_competitor_competitor_company_manager,Competitor: Company Manager,model_competitor_competitor,crm_lead_geolocation.group_company_manager,1,1,1,0
+access_competitor_industry_company_manager,Competitor: Company Manager,model_competitor_industry,crm_lead_geolocation.group_company_manager,1,1,1,0
