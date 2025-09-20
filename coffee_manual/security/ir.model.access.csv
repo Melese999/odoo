@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coffee_manual_section,access_coffee_manual_section,model_coffee_manual_section,base.group_user,1,0,0,0
+access_coffee_manual_progress,access_coffee_manual_progress,model_coffee_manual_progress,base.group_user,1,1,1,0
+access_coffee_manual_quiz,access_coffee_manual_quiz,model_coffee_manual_quiz,base.group_user,1,0,0,0
+access_coffee_manual_quiz_question,access_coffee_manual_quiz_question,model_coffee_manual_quiz_question,base.group_user,1,0,0,0
+access_coffee_manual_quiz_answer,access_coffee_manual_quiz_answer,model_coffee_manual_quiz_answer,base.group_user,1,1,1,0

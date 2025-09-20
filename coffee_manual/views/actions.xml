@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_coffee_manual" model="ir.actions.act_url">
+    <field name="name">Coffee Manual</field>
+    <field name="type">ir.actions.act_url</field>
+    <field name="target">self</field>
+    <field name="url">/coffee/manual</field>
+  </record>
+</odoo>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Management System: The Ultimate User Quest ☕🏆</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #6f4e37; /* Coffee brown */
+            border-bottom: 2px solid #d2a679;
+            padding-bottom: 10px;
+        }
+        details {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        details:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #6f4e37;
+            font-size: 1.2em;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        summary::marker {
+            color: #d2a679;
+        }
+        summary::after {
+            content: ' 🔽';
+            margin-left: auto;
+        }
+        details[open] summary::after {
+            content: ' 🔼';
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .badge {
+            background-color: #4caf50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .tip {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .alert {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+        /* Interactive card flip effect for fun */
+        .card {
+            perspective: 1000px;
+            margin: 20px 0;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .card-front {
+            background-color: #bbdefb;
+            color: #333;
+        }
+        .card-back {
+            background-color: #2196f3;
+            color: white;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+    <h1>Coffee Management System: The Ultimate User Quest ☕🏆</h1>
+    <p>Welcome, Coffee Adventurer! 🌟 You've just unlocked the gateway to mastering the Coffee Management System – a magical Odoo module that turns chaotic coffee chaos into a smooth, traceable brew of efficiency. Think of this manual as your interactive quest log. You'll level up through challenges, earn virtual badges, and conquer workflows like a pro barista battling a stubborn espresso machine.</p>
+    <p><strong>Your Mission:</strong> Transform from a Coffee Novice to a Grand Master Roaster by completing quests, following step-by-step maps, and collecting tips along the way. Each section is a level – complete them in order for the best experience, or jump around if you're feeling bold!</p>
+    <p><strong>Pro Tip:</strong> Bookmark this manual in your browser. Use emojis as your guides: ☕ for coffee facts, 🏆 for badges, 📝 for checklists, and ⚠️ for warnings.</p>
+    <p><strong>Quest Rewards:</strong></p>
+    <ul>
+        <li><strong>Full Traceability:</strong> Track every bean like a detective!</li>
+        <li><strong>Epic Efficiency:</strong> Save time and avoid mix-ups.</li>
+        <li><strong>Data Power-Ups:</strong> Reports that make you feel like a wizard.</li>
+    </ul>
+    <p><strong>System Requirements (Your Gear Check):</strong></p>
+    <ul>
+        <li>Odoo Enterprise v16.0+ (your enchanted platform)</li>
+        <li>4GB RAM minimum (8GB for boss-level operations)</li>
+        <li>PostgreSQL 12+ (the database dragon)</li>
+        <li>Modern browser (Chrome, Firefox, Edge – your trusty steed)</li>
+    </ul>
+    <p><strong>Supported Languages & Regions (Global Adventure Mode):</strong></p>
+    <ul>
+        <li>English ☕, Amharic, Spanish, French, Arabic</li>
+        <li>Customize dates, numbers, units (metric/imperial), and currencies (USD, EUR, ETB) in Settings > Translations > Languages.</li>
+    </ul>
+    <p><strong>Training Treasures (Power-Up Your Skills):</strong></p>
+    <ul>
+        <li>Watch video tutorials: <a href="#">Getting Started Playlist</a> – Short, fun clips!</li>
+        <li>Join webinars or forums for community quests.</li>
+        <li>Earn certifications: <a href="#">Coffee Management Certification Course</a> – Become a legend!</li>
+    </ul>
+    <p>Ready? Let's brew this! 🚀</p>
+
+    <!-- Level 1 -->
+    <details>
+        <summary>Level 1: Setup Your Base Camp – Master Data Configuration 🛠️📋</summary>
+        <p><strong>Quest Objective:</strong> Build your foundation. This is a one-time setup (or rare updates) done by an admin. Complete this to unlock all other levels!</p>
+        <p><strong>Why It Matters:</strong> Like planting coffee seeds – get this right, and everything grows smoothly.</p>
+        <p><strong>Step-by-Step Checklist:</strong> 📝</p>
+        <ol>
+            <li><strong>Geographical Zones & Districts:</strong>
+                <ul>
+                    <li>Go to <code>Coffee Management > Configuration > Zones/Province</code>.</li>
+                    <li>Add your operational areas (e.g., Guji Zone). 🗺️</li>
+                    <li>Then, <code>Coffee Management > Configuration > Woredas/District</code> – Add districts within zones.</li>
+                </ul>
+            </li>
+            <li><strong>Coffee Classifications:</strong>
+                <ul>
+                    <li>In <code>Configuration</code>, define:</li>
+                    <li><strong>Coffee Types</strong> (e.g., Washed ☕, Unwashed).</li>
+                    <li><strong>Coffee Origins</strong> (e.g., Sidamo, Yirgacheffe).</li>
+                    <li><strong>ECX Coffee Grades</strong> (official grades like G1, G2).</li>
+                </ul>
+            </li>
+            <li><strong>ECX Product Templates:</strong>
+                <ul>
+                    <li><code>Configuration > ECX Coffee Products</code>.</li>
+                    <li>Create combos like "Guji-Washed-G1" – These are your magic templates for arrivals.</li>
+                </ul>
+            </li>
+            <li><strong>Finished Goods & Recipes (BoMs):</strong>
+                <ul>
+                    <li><code>Inventory > Products > Products</code>.</li>
+                    <li>Create storable products (e.g., "Roasted Guji G1 Coffee").</li>
+                    <li>Add a <strong>Bill of Materials (BoM)</strong>: List raw materials (e.g., raw beans) – This powers auto-production!</li>
+                </ul>
+            </li>
+        </ol>
+        <p><strong>User Permissions (Your Party Roles):</strong></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Powers Unlocked</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Coffee Management: User</td>
+                    <td>Create arrivals & basics</td>
+                </tr>
+                <tr>
+                    <td>Quality Technician</td>
+                    <td>Evaluate beans like a pro</td>
+                </tr>
+                <tr>
+                    <td>Warehouse Operator</td>
+                    <td>Record weights & stock</td>
+                </tr>
+                <tr>
+                    <td>Inventory: User</td>
+                    <td>Receive into inventory</td>
+                </tr>
+                <tr>
+                    <td>Sales: User</td>
+                    <td>Create contracts</td>
+                </tr>
+                <tr>
+                    <td>Administrator</td>
+                    <td>Change configs & rule the realm</td>
+                </tr>
+            </tbody>
+        </table>
+        <p><strong>Level Complete?</strong> <span class="badge">🏆 Badge Earned: Base Camp Builder!</span> You've set the stage. If issues arise, check FAQ for troubleshooting.</p>
+        <div class="tip"><strong>Quick Quiz (Self-Test):</strong> What happens if you skip templates? (Hint: Arrivals get stuck – no auto-products!)</div>
+    </details>
+
+    <!-- Level 2 -->
+    <details>
+        <summary>Level 2: Explore the Map – Core Workflows Overview 🗺️🔍</summary>
+        <p><strong>Quest Objective:</strong> Get the big picture. Understand the two main paths: Procurement (buying raw coffee) and Sales (selling finished brews).</p>
+        <p><strong>Procurement Path: From Truck to Treasure (Raw Coffee Arrival)</strong></p>
+        <ul>
+            <li><strong>Steps Teaser:</strong> Arrival → Quality Check → Weigh → Stock It!</li>
+            <li><strong>Goal:</strong> Turn raw beans into graded inventory with full traceability.</li>
+            <li><strong>Fun Fact:</strong> Every batch gets a unique name – no more generic "coffee" mix-ups! ☕</li>
+        </ul>
+        <p><strong>Sales Path: From Deal to Delivery (Finished Product Sales)</strong></p>
+        <ul>
+            <li><strong>Steps Teaser:</strong> Create Contract → Confirm → Auto-Orders → Ship & Produce!</li>
+            <li><strong>Goal:</strong> Sell roasted magic with linked deliveries and manufacturing.</li>
+            <li><strong>Power-Up:</strong> System auto-creates orders – less clicking, more sipping!</li>
+        </ul>
+        <p><strong>Workflow Visuals (Your Treasure Maps):</strong></p>
+        <img src="images/procurement_workflow.png" alt="Procurement Workflow">
+        <p><em>Figure 1: Coffee Procurement Workflow - From arrival to graded stock</em></p>
+        <img src="images/sales_workflow.png" alt="Sales Workflow">
+        <p><em>Figure 2: Coffee Sales Workflow - From contract to production</em></p>
+        <p><strong>Level Complete?</strong> <span class="badge">🏆 Badge Earned: Map Master!</span> Now you're oriented. Pro Tip: Print these diagrams for your desk – instant cheat sheets!</p>
+        <div class="tip"><strong>Challenge:</strong> Spot the key automation in each workflow. (Answer: Quality eval creates products; Contract confirm spawns orders.)</div>
+    </details>
+
+    <!-- Level 3 -->
+    <details>
+        <summary>Level 3: Embark on Daily Quests – Detailed Step-by-Step Guides 🛤️🚀</summary>
+        <p><strong>Quest Objective:</strong> Hands-on adventures! Follow these like a recipe – complete one per day to level up fast.</p>
+
+        <!-- Sub-quest 3.1 with flip card for fun -->
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h3>Quest 3.1: Managing a New Coffee Arrival (The Welcome Wagon) 🚚</h3>
+                    <p>Hover to flip for steps!</p>
+                </div>
+                <div class="card-back">
+                    <ol>
+                        <li>Go to <code>Coffee Management > Operations > Coffee Arrival</code>.</li>
+                        <li>Click <strong>New</strong> – Your adventure begins!</li>
+                        <li>Fill in: Supplier, Vehicle Plate, ECX Product (from templates), Woreda/District.</li>
+                        <li><strong>Save</strong> – Status: Draft. Product field? Empty for now – magic incoming!</li>
+                    </ol>
+                    <div class="tip"><strong>Mini-Challenge:</strong> Create a test arrival. Time yourself – under 2 minutes? +1 Speed Badge!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-quest 3.2 -->
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h3>Quest 3.2: Performing a Quality Evaluation (The Taste Test) 👩‍🔬</h3>
+                    <p>Hover to flip for steps!</p>
+                </div>
+                <div class="card-back">
+                    <ol>
+                        <li>From Draft arrival, click <strong>Evaluate Quality</strong>.</li>
+                        <li>Popup: Enter Moisture %, Defects, Cup Scores (Acidity, Body, Flavor – rate 1-10!).</li>
+                        <li><strong>Save</strong> – Boom! System calculates Grade (e.g., G1), creates/names product (e.g., "Raw-Guji-Washed-G1-Coffee"), updates status to <code>Quality Evaluated</code>.</li>
+                    </ol>
+                    <div class="alert">⚠️ <strong>Boss Alert:</strong> If grade is "UG" (Under Grade), quest fails – reject and retry!</div>
+                    <div class="tip"><strong>Fun Twist:</strong> Pretend you're a coffee critic. High scores? Celebrate with a real cup! ☕</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-quest 3.3 -->
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h3>Quest 3.3: Recording the Weight (The Scale Saga) ⚖️</h3>
+                    <p>Hover to flip for steps!</p>
+                </div>
+                <div class="card-back">
+                    <ol>
+                        <li>From Evaluated arrival, click <strong>Record Weight</strong>.</li>
+                        <li>Popup: Bags, Gross Weight (KG), Truck Weight.</li>
+                        <li><strong>Confirm</strong> – Status: <code>Weight Recorded</code>. Data logged!</li>
+                    </ol>
+                    <div class="tip"><strong>Pro Tip:</strong> Double-check numbers – accuracy wins the game!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-quest 3.4 -->
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h3>Quest 3.4: Receiving the Coffee into Stock (The Vault Unlock) 📦</h3>
+                    <p>Hover to flip for steps!</p>
+                </div>
+                <div class="card-back">
+                    <ol>
+                        <li><code>Coffee Management > Operations > Stock Receiving > New</code>.</li>
+                        <li>Select Arrival – Auto-fills product/weight.</li>
+                        <li>Choose Warehouse & Block (location).</li>
+                        <li><strong>Save</strong> > <strong>Receive Stock</strong> – Inventory updates, Arrival to <code>Done</code>!</li>
+                    </ol>
+                    <div class="tip"><strong>Victory Dance:</strong> Check inventory – your graded coffee is now "On Hand"!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-quest 3.5 -->
+        <div class="card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h3>Quest 3.5: Creating and Managing a Coffee Contract (The Deal Maker) 💼</h3>
+                    <p>Hover to flip for steps!</p>
+                </div>
+                <div class="card-back">
+                    <ol>
+                        <li><code>Coffee Management > Contracts > Coffee Contracts > New</code>.</li>
+                        <li>Fill: Buyer, Warehouse, Date.</li>
+                        <li>Add Line: Select finished product, Quantity (Tons), Price (USD/LB) – Subtotal auto-calcs!</li>
+                        <li><strong>Save</strong> (Draft) > <strong>Confirm</strong> – Auto-creates Delivery & Manufacturing Orders. Status: <code>Confirmed</code>.</li>
+                        <li>Use smart buttons to view orders – one-click access!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <p><strong>Level Complete?</strong> <span class="badge">🏆 Badge Earned: Workflow Warrior!</span> You've conquered the core quests. Repeat daily to grind levels (pun intended).</p>
+        <div class="tip"><strong>Gamified Tip:</strong> Track your completions in a journal. 10 arrivals? Unlock "Arrival Ace" title!</div>
+    </details>
+
+    <!-- Level 4 -->
+    <details>
+        <summary>Level 4: Unlock Insights – Reporting and Analytics 📊🔮</summary>
+        <p><strong>Quest Objective:</strong> Turn data into decisions. No more guessing – become a data detective!</p>
+        <h3>Sub-Quest 4.1: Wizard-Based PDF Reports (Printable Power-Ups)</h3>
+        <ul>
+            <li><code>Coffee Management > Reporting</code>.</li>
+            <li>Pick type (e.g., Arrival & Quality), date range, <strong>Generate PDF</strong>.</li>
+            <li>Reports: Arrivals summary, Stock movements, Contract progress, Manufacturing overviews.</li>
+        </ul>
+        <div class="tip"><strong>Fun Element:</strong> Share PDFs in team meetings – who has the best quality scores? Leaderboard time!</div>
+
+        <h3>Sub-Quest 4.2: On-Screen Analytics (Interactive Dashboards)</h3>
+        <ul>
+            <li><code>Coffee Management > Reporting > Analytics & Reports</code>.</li>
+            <li>Pivot/Graph views: Filter by supplier, grade, etc.</li>
+            <li>Export to Excel for custom magic.</li>
+        </ul>
+        <p><strong>Level Complete?</strong> <span class="badge">🏆 Badge Earned: Analytics Alchemist!</span> Pro Tip: Set up favorites for quick access.</p>
+    </details>
+
+    <!-- Level 5 -->
+    <details>
+        <summary>Level 5: Boss Battles – FAQ & Troubleshooting ⚔️🛡️</summary>
+        <p><strong>Quest Objective:</strong> Defeat common glitches. Use this as your potion kit!</p>
+        <ul>
+            <li><strong>Q: No Manufacturing Order on contract confirm?</strong><br>
+                <strong>A:</strong> Check: Selling finished product? BoM defined? "Manufacture" & "MTO" routes enabled? Fix and retry!</li>
+            <li><strong>Q: Negative stock balance?</strong><br>
+                <strong>A:</strong> Product type must be "Storable" – not Consumable. Update in Inventory.</li>
+            <li><strong>Q: Can't select supplier/product?</strong><br>
+                <strong>A:</strong> Suppliers need a Purchase Order first. Products need "Is a Coffee Product" checked.</li>
+            <li><strong>Q: System slow during peaks?</strong><br>
+                <strong>A:</strong> Schedule reports off-peak, boost server resources, use batch mode.</li>
+            <li><strong>Q: Fix wrong quality eval?</strong><br>
+                <strong>A:</strong> Cancel receiving, reset to Draft, re-eval, redo workflow.</li>
+        </ul>
+        <p><strong>Level Complete?</strong> <span class="badge">🏆 Badge Earned: Troubleshooting Titan!</span> If stumped, contact support – they're your allies.</p>
+    </details>
+
+    <!-- Epilogue -->
+    <details>
+        <summary>Epilogue: Your Coffee Legacy 🌟☕</summary>
+        <p>Congratulations, Grand Master! You've completed the quest. Now, implement in real life:</p>
+        <ul>
+            <li>Start small: One arrival, one contract.</li>
+            <li>Gather feedback: What quests need tweaks?</li>
+            <li>Case Study Inspiration: Like the Ethiopian Cooperative (40% faster processing) or USA Roaster (25% less waste) – you can achieve epic wins too!</li>
+        </ul>
+        <p><strong>Final Badge:</strong> <span class="badge">Coffee Conqueror!</span> Share this manual, train your team, and keep brewing success. Questions? Dive back in or reach out.</p>
+        <p>Happy Managing! 🚀🏆</p>
+    </details>
+
+</body>
+</html>

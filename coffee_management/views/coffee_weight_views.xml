@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="coffee_weight_history_view_form" model="ir.ui.view">
+        <field name="name">coffee.weight.history.form</field>
+        <field name="model">coffee.weight.history</field>
+        <field name="arch" type="xml">
+            <form string="Weight History">
+                <header>
+                    <button name="action_confirm_weight" string="Confirm Weight" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="arrival_id" readonly="1"/>
+                        <field name="num_of_bags"/>
+                        <field name="damage_percentage"/>
+                        <field name="damage_bag_count" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="gross_weight"/>
+                        <field name="truck_weight"/>
+                        <field name="net_weight" readonly="1"/>
+                        <field name="empty_jute_bag_weight"/>
+                        <field name="moisture_loss_adjustment"/>
+                        <field name="grand_net_weight" readonly="1"/>
+                        <field name="coffee_tea_weight" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

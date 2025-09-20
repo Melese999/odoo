@@ -1,0 +1,15 @@
+.cm-grid { display: grid; grid-template-columns: 260px 1fr; gap: 24px; margin-top: 24px; }
+.cm-sidebar { position: sticky; top: 12px; height: calc(100vh - 24px); overflow: auto; padding: 12px; border-right: 1px solid #e5e7eb; }
+.cm-sidebar h3 { margin: 0 0 8px; font-weight: 600; }
+.cm-sidebar ul { list-style: none; padding: 0; margin: 0; }
+.cm-sidebar li { margin: 6px 0; }
+.cm-sidebar a { color: #111827; text-decoration: none; }
+.cm-content { padding: 8px 0 48px; }
+.cm-section { scroll-margin-top: 20px; margin-bottom: 48px; }
+.cm-controls { display: flex; gap: 8px; margin-top: 12px; }
+.btn { border: 1px solid #e5e7eb; background: #fff; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.btn-primary { background: #111827; color: #fff; border-color: #111827; }
+.btn-secondary { background: #f3f4f6; }
+.cm-quiz .cm-question { margin: 10px 0; }
+.cm-options label { display: block; font-size: 14px; margin: 4px 0; }
+.cm-quiz-result { margin-top: 8px; font-weight: 600; }

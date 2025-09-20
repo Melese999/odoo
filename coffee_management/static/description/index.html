@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Management System - Odoo Module</title>
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="custom_addons/coffee_management/static/src/css/all.min.css">
+    <!-- Google Fonts for a professional look -->
+    <link href="custom_addons/coffee_management/static/src/css/css2.scc?family=Roboto:wght@400;500;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.7;
+            color: #4c4c4c;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 30px auto;
+            background: #fff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        h1, h2, h3 {
+            font-family: 'Poppins', sans-serif;
+            color: #2a374c;
+            font-weight: 700;
+        }
+        a {
+            color: #875A7B;
+            text-decoration: none;
+        }
+        /* --- Header Section --- */
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #714B67 0%, #2c3e50 100%);
+            color: #fff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 3.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        .header img {
+            width: 70px;
+            height: 70px;
+            margin-right: 25px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+        .header .tagline {
+            font-size: 1.4em;
+            margin-top: 15px;
+            opacity: 0.9;
+        }
+        /* --- Tab Navigation --- */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            background-color: #f1f3f5;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .tab-link {
+            padding: 16px 32px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-link:hover {
+            color: #714B67;
+        }
+        .tab-link.active {
+            color: #714B67;
+            font-weight: 700;
+            border-bottom-color: #714B67;
+        }
+        /* --- Tab Content --- */
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.6s;
+        }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- Features Section --- */
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; margin-top: 20px; }
+        .feature-item { background: #fff; padding: 30px; border-radius: 10px; border: 1px solid #e9ecef; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .feature-item:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09); }
+        .feature-item .icon { font-size: 2.8em; color: #714B67; margin-bottom: 15px; }
+        .feature-item h3 { margin-top: 0; font-size: 1.5em; color: #2c3e50; }
+        .feature-item p { color: #555; }
+        /* --- Workflow Section --- */
+        .workflow-section { margin-top: 20px; }
+        .workflow-section h3 { padding-bottom: 10px; border-bottom: 2px solid #714B67; }
+        .workflow-section ol { list-style: none; padding-left: 0; }
+        .workflow-section ol li { position: relative; padding-left: 40px; margin-bottom: 20px; }
+        .workflow-section ol li::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #714B67;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        .workflow-section ol li strong { color: #2c3e50; }
+        /* --- Screenshots Section --- */
+        .screenshots { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .screenshot-item img { width: 100%; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .screenshot-item img:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .screenshot-item p { text-align: center; font-weight: 500; color: #555; margin-top: 15px; font-size: 1.1em; }
+        /* --- Footer --- */
+        .footer { text-align: center; padding: 25px; margin-top: 20px; background: #2c3e50; color: #ecf0f1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><img src="icon.gif" alt="Module Icon"> Coffee Management System</h1>
+            <p class="tagline">The Complete ERP Solution for the Coffee Supply Chain</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-link active" data-tab="features">Features</button>
+            <button class="tab-link" data-tab="workflow">Workflow</button>
+            <button class="tab-link" data-tab="reports">Reporting</button>
+            <button class="tab-link" data-tab="screenshots">Screenshots</button>
+            <button class="tab-link" data-tab="configuration">Configuration</button>
+        </nav>
+
+        <main>
+            <section id="features" class="tab-content active">
+                <h2>A Specialized Workflow for a Specialized Industry</h2>
+                <div class="features">
+                    <div class="feature-item"><div class="icon"><i class="fas fa-magic-wand-sparkles"></i></div><h3>Dynamic Product Creation</h3><p>Automatically creates new, distinctly graded product variants based on quality control results. This ensures your inventory is always tracked by its true, evaluated grade, not a generic name.</p></div>
+                    <div class="feature-item"><div class="icon"><i class="fas fa-file-signature"></i></div><h3>Direct Manufacturing Control</h3><p>Confirming a sales contract instantly creates both the Delivery Order and the corresponding Manufacturing Order, giving you explicit, manual control over your production pipeline and bypassing complex automation rules.</p></div>
+                    <div class="feature-item"><div class="icon"><i class="fas fa-truck-fast"></i></div><h3>Specialized Procurement</h3><p>A unique multi-step process for handling coffee arrivals, from quality to weight to final stock reception, capturing far more detail than the standard purchase workflow.</p></div>
+                    <div class="feature-item"><div class="icon"><i class="fas fa-boxes-stacked"></i></div><h3>Intelligent Component Checking</h3><p>Before confirming a Manufacturing Order, the system automatically checks for component availability and creates a warning activity for planners if there are shortages, preventing production delays.</p></div>
+                    <div class="feature-item"><div class="icon"><i class="fas fa-globe"></i></div><h3>Granular Data Classification</h3><p>Leverage custom models for Coffee Type, Origin, ECX Grade, Zones, and Woredas to build a highly structured, filterable, and accurate database of your coffee products.</p></div>
+                    <div class="feature-item"><div class="icon"><i class="fas fa-cogs"></i></div><h3>Full ERP Integration</h3><p>Seamlessly integrated with Odoo's core Inventory, Manufacturing, and Accounting applications, ensuring all operations are fully traceable and auditable.</p></div>
+                </div>
+            </section>
+
+            <section id="workflow" class="tab-content">
+                <h2>Unique Business Workflows</h2>
+                <div class="workflow-section">
+                    <h3>Inbound: From Arrival to Graded Stock</h3>
+                    <ol>
+                        <li data-step="1"><strong>Coffee Arrival:</strong> The process begins when a delivery arrives. A user creates an Arrival record, capturing supplier, vehicle, and initial coffee details from pre-configured ECX classifications.</li>
+                        <li data-step="2"><strong>Quality Evaluation:</strong> An expert performs a detailed quality assessment. Upon saving, the system calculates a final AMG Grade.</li>
+                        <li data-step="3"><strong>Dynamic Product Assignment:</strong> The system automatically searches for a product matching the Origin, Type, and final AMG Grade. If one doesn't exist, a new product is created on the fly and linked to the arrival.</li>
+                        <li data-step="4"><strong>Weight Recording:</strong> The precise weight of the batch is recorded and logged for auditing.</li>
+                        <li data-step="5"><strong>Stock Receiving:</strong> A Goods Receiving Note (GRN) is created. Confirming the GRN creates and validates an Odoo inventory transfer, moving the specific, newly-graded product into a warehouse location.</li>
+                    </ol>
+                </div>
+                <div class="workflow-section">
+                    <h3>Outbound: From Contract to Production</h3>
+                    <ol>
+                        <li data-step="1"><strong>Create Coffee Contract:</strong> A user creates a sales contract, adding finished goods to the contract lines.</li>
+                        <li data-step="2"><strong>Confirm Contract:</strong> A single click on "Confirm" executes a powerful custom logic.</li>
+                        <li data-step="3"><strong>Automated Creation:</strong> The system instantly creates a Delivery Order and, for each relevant product line, manually creates a Manufacturing Order, linking them all back to the source contract for full traceability.</li>
+                        <li data-step="4"><strong>Check Availability:</strong> If raw material components are unavailable, the Manufacturing Order is created in "Draft" and an activity is scheduled to alert planners, preventing production holds.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="reports" class="tab-content">
+                <h2>Advanced Reporting Suite</h2>
+                <p>The module includes a comprehensive reporting suite to provide insights into every corner of your coffee operations.</p>
+                <h3>Wizard-based PDF Reports</h3>
+                <p>A custom wizard allows users to generate detailed, professional PDF reports for a selected date range. These are perfect for formal documentation, meetings, and audits.</p>
+                <ul>
+                    <li><strong>Arrival & Quality Report:</strong> Summarizes all incoming batches with their final quality scores and grades.</li>
+                    <li><strong>Warehouse Stock Report:</strong> A stock movement report showing beginning balance, receipts, issues, and ending balance for coffee products.</li>
+                    <li><strong>Contract Fulfillment Report:</strong> Tracks the progress and financial value of all confirmed sales contracts.</li>
+                    <li><strong>Manufacturing Report:</strong> Provides an overview of all production orders, their status, and their link to sales contracts.</li>
+                </ul>
+                <h3>Analytical Dashboards</h3>
+                <p>A dedicated "Analytics & Reports" menu provides pivot tables and graph views for real-time analysis, allowing you to slice and dice your data interactively.</p>
+                <ul>
+                    <li>Analyze arrivals by supplier, grade, or date.</li>
+                    <li>View quality evaluation scores across different origins.</li>
+                    <li>Track contract fulfillment and value by customer.</li>
+                </ul>
+            </section>
+            
+            <section id="screenshots" class="tab-content">
+                <h2>Screenshots</h2>
+                <div class="screenshots">
+                    <div class="screenshot-item"><img src="images/screenshot_arrival.png" alt="Coffee Arrival Form"><p>Detailed Coffee Arrival Form</p></div>
+                    <div class="screenshot-item"><img src="images/screenshot_quality.png" alt="Quality Evaluation Popup"><p>In-depth Quality Evaluation</p></div>
+                    <div class="screenshot-item"><img src="images/screenshot_contract.png" alt="Coffee Contract Form"><p>Streamlined Coffee Contract</p></div>
+                    <div class="screenshot-item"><img src="images/screenshot_reports.png" alt="Reporting Dashboard"><p>Powerful Analytics and Reporting</p></div>
+                </div>
+            </section>
+
+            <section id="configuration" class="tab-content">
+                <h2>Setup & Configuration</h2>
+                <p>To ensure seamless operation, a one-time configuration of your master data is required.</p>
+                <ol>
+                    <li><strong>Install Dependencies:</strong> From the manifest, ensure `stock`, `mrp`, `purchase`, `sale`, `product`, `contacts`, `account`, and `mail` apps are installed.</li>
+                    <li><strong>Configure Classifications:</strong> Navigate to <code>Coffee Management > Configuration</code> and populate your master data for `Coffee Types`, `Coffee Origins`, `ECX Coffee Grades`, `Zones`, and `Woredas`.</li>
+                    <li><strong>Define ECX Products:</strong> In <code>Configuration > ECX Coffee Products</code>, create the base combinations of Origin, Type, and Grade. These are used as templates for the dynamic product creation during the arrival process.</li>
+                    <li><strong>Configure Finished Goods & BoMs:</strong> For any coffee product you intend to manufacture (e.g., "Roasted Guji G1 Coffee"), you must manually create it as a <code>Storable Product</code> and define a Bill of Materials (BoM) for it.</li>
+                </ol>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>&copy; 2025 AMG Enterprise Application Development Team. A Specialized Solution for the Coffee Industry.</p>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-link');
+            const contents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 <odoo>
   <data>
+
 <record id="market_intelligence_rule_company_manager" model="ir.rule">
     <field name="name">Company Manager: Records by company</field>
     <field name="model_id" ref="market_intelligence.model_market_intelligence_market_intelligence"/>

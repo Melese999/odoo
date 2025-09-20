@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ecx_coffee_view_form" model="ir.ui.view">
+            <field name="name">ecx.coffee.form</field>
+            <field name="model">ecx.coffee</field>
+            <field name="arch" type="xml">
+                <form string="ECX Coffee">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="ecx_coffee_name" readonly="1"/>
+                                <field name="coffee_origin_id"/>
+                            </group>
+                            <group>
+                                <field name="coffee_type_id"/>
+                                <field name="coffee_grade_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="ecx_coffee_view_tree" model="ir.ui.view">
+            <field name="name">ecx.coffee.tree</field>
+            <field name="model">ecx.coffee</field>
+            <field name="arch" type="xml">
+                <tree string="ECX Coffee">
+                    <field name="ecx_coffee_name"/>
+                    <field name="coffee_origin_id"/>
+                    <field name="coffee_type_id"/>
+                    <field name="coffee_grade_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="ecx_coffee_view_search" model="ir.ui.view">
+            <field name="name">ecx.coffee.view.search</field>
+            <field name="model">ecx.coffee</field>
+            <field name="arch" type="xml">
+                <search string="Search ECX Records">
+                    <field name="ecx_coffee_name" string="ECX Coffee Name"/>
+                    <field name="coffee_origin_id" string="Origin"/>
+                    <field name="coffee_type_id" string="Type"/>
+                    <field name="coffee_grade_id" string="Grade"/>
+
+                    <separator/>
+
+                    <!-- Group By Options -->
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_origin" string="Origin" context="{'group_by': 'coffee_origin_id'}"/>
+                        <filter name="group_by_type" string="Coffee Type" context="{'group_by': 'coffee_type_id'}"/>
+                        <filter name="group_by_grade" string="Grade" context="{'group_by': 'coffee_grade_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_ecx_coffee" model="ir.actions.act_window">
+            <field name="name">ECX Coffee</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">ecx.coffee</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new ECX coffee record.
+                </p>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

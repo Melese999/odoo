@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_coffee_contract_form" model="ir.ui.view">
+            <field name="name">coffee.contract.form</field>
+            <field name="model">coffee.contract</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_confirm_contract" string="Confirm" type="object" class="btn-primary"
+                                invisible="state != 'draft'"/>
+                        <button name="action_cancel" string="Cancel" type="object" class="btn-secondary"
+                                invisible="state not in ['draft', 'confirmed']"/>
+                        <button name="action_done" string="Mark as Done" type="object" class="btn-primary"
+                                invisible="state != 'confirmed'"/>
+                        <button name="action_reset_to_draft" string="Reset to Draft" type="object" class="btn-secondary"
+                                invisible="state != 'cancelled'"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="contract_number" readonly="1"/>
+                            </h1>
+                        </div>
+
+                        <group>
+                            <group string="Contract Details">
+                                <field name="buyer_id"/>
+                                <field name="contract_date"/>
+                                <field name="expected_delivery_date"/>
+                                <field name="state" string="Contract Status"/>
+                            </group>
+                            <group string="Shipment Details">
+                                <field name="shipment_period_month" string="Shipment Period"/>
+                                <field name="shipment_status" widget="badge"
+                                       decoration-success="shipment_status == 'fulfilled'"
+                                       decoration-warning="shipment_status == 'partial'"
+                                       decoration-info="shipment_status == 'pending'"
+                                       decoration-danger="shipment_status == 'over_fulfilled'"/>
+                            </group>
+                        </group>
+
+                        <group>
+                            <group string="Manufacturing Details">
+                                <field name="auto_create_mo"/>
+                                <field name="manufacturing_route_id"/>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Contract Lines">
+                                <field name="contract_line_ids" context="{'default_contract_id': id}">
+                                    <tree editable="bottom">
+                                        <field name="product_id"/>
+                                        <field name="quantity_tons"/>
+                                        <field name="unit_price_usd_per_lb"/>
+                                        <field name="subtotal_usd"/>
+                                    </tree>
+                                </field>
+                            </page>
+
+                            <page string="Deliveries">
+                                <div class="oe_button_box" name="button_box">
+                                    <button name="action_view_delivery" type="object" class="oe_stat_button"
+                                            icon="fa-truck">
+                                        <field name="delivery_count" widget="statinfo" string="Deliveries"/>
+                                    </button>
+                                    <button name="action_view_manufacturing_orders" type="object" class="oe_stat_button"
+                                            icon="fa-cogs">
+                                        <field name="manufacturing_count" widget="statinfo" string="Manufacturing"/>
+                                    </button>
+                                </div>
+                                <field name="delivered_kg"/>
+                                <field name="fulfillment_percentage"/>
+                                <field name="actual_delivery_date"/>
+                            </page>
+
+                            <page string="Notes">
+                                <field name="notes" nolabel="1"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Coffee Contract Tree View -->
+        <record id="view_coffee_contract_tree" model="ir.ui.view">
+            <field name="name">coffee.contract.tree</field>
+            <field name="model">coffee.contract</field>
+            <field name="arch" type="xml">
+                <tree string="Coffee Contracts">
+                    <field name="contract_number"/>
+                    <field name="contract_date"/>
+                    <field name="buyer_id"/>
+                    <field name="shipment_period_month" string="Shipment Period"/>
+                    <field name="fulfillment_percentage" string="Contract Fulfillment" widget="progressbar"/>
+                    <field name="state" widget="badge"
+                           decoration-success="state == 'confirmed'"
+                           decoration-danger="state == 'cancelled'"
+                           decoration-warning="state == 'draft'"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="coffee_contract_view_search" model="ir.ui.view">
+            <field name="name">coffee.contract.view.search</field>
+            <field name="model">coffee.contract</field>
+            <field name="arch" type="xml">
+                <search string="Search Contracts">
+                    <field name="contract_number" string="Contract Number"
+                           filter_domain="[('contract_number', 'ilike', self)]"/>
+                    <field name="buyer_id" string="Buyer"/>
+                    <field name="contract_date" string="Contract Date"/>
+                    <field name="expected_delivery_date" string="Expected Delivery Date"/>
+                    <!--<field name="product_ids" string="Product"/>-->
+
+                    <separator/>
+
+                    <!-- Pre-defined Filters by Status -->
+                    <filter name="status_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                    <filter name="status_confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                    <filter name="status_done" string="Done" domain="[('state', '=', 'done')]"/>
+                    <filter name="status_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
+
+                    <separator/>
+
+                    <!-- Pre-defined Filters by Shipment Status -->
+                    <filter name="shipment_pending" string="Pending Shipments"
+                            domain="[('shipment_status', '=', 'pending')]"/>
+                    <filter name="shipment_partial" string="Partially Shipped"
+                            domain="[('shipment_status', '=', 'partial')]"/>
+                    <filter name="shipment_fulfilled" string="Fulfilled"
+                            domain="[('shipment_status', '=', 'fulfilled')]"/>
+
+                    <separator/>
+
+                    <!-- Pre-defined Filters by Date -->
+                    <filter name="today_contracts" string="Today's Contracts"
+                            domain="[('contract_date', '=', context_today())]"/>
+                    <filter string="This Week" name="this_week_contracts"
+                            domain="[('contract_date', '&gt;=', (context_today() - relativedelta(weeks=1)))]"/>
+                    <filter string="Contract Date" name="filter_contract_date" date="contract_date"/>
+                    <filter string="Delivery Date" name="filter_delivery_date" date="expected_delivery_date"/>
+
+                    <!-- Group By Options -->
+                    <group expand="0" string="Group By">
+                        <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                        <filter name="group_by_buyer" string="Buyer" context="{'group_by': 'buyer_id'}"/>
+                        <filter name="group_by_shipment_status" string="Shipment Status"
+                                context="{'group_by': 'shipment_status'}"/>
+                        <filter name="group_by_year" string="Contract Date"
+                                context="{'group_by': 'contract_date:year'}"/>
+                        <filter name="group_by_shipment_period_month" string="Shipment Month"
+                                context="{'group_by': 'shipment_period_month'}"/>
+                        <filter name="group_by_shipment_period_year" string="Shipment Year"
+                                context="{'group_by': 'shipment_period_year'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action for Coffee Contracts -->
+        <record id="action_coffee_contract" model="ir.actions.act_window">
+            <field name="name">Coffee Contracts</field>
+            <field name="res_model">coffee.contract</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>

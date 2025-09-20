@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Coffee Type Views -->
+    <record id="coffee_type_view_tree" model="ir.ui.view">
+        <field name="name">coffee.type.tree</field>
+        <field name="model">coffee.type</field>
+        <field name="arch" type="xml">
+            <tree string="Coffee Types">
+                <field name="name"/>
+                <field name="is_default" optional="hide"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="coffee_type_view_form" model="ir.ui.view">
+        <field name="name">coffee.type.form</field>
+        <field name="model">coffee.type</field>
+        <field name="arch" type="xml">
+            <form string="Coffee Type">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="is_default"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Coffee Origin Views -->
+    <record id="coffee_origin_view_tree" model="ir.ui.view">
+        <field name="name">coffee.origin.tree</field>
+        <field name="model">coffee.origin</field>
+        <field name="arch" type="xml">
+            <tree string="Coffee Origins">
+                <field name="name"/>
+                <field name="country_id"/>
+                <field name="region_id"/>
+                <field name="altitude" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="coffee_origin_view_form" model="ir.ui.view">
+        <field name="name">coffee.origin.form</field>
+        <field name="model">coffee.origin</field>
+        <field name="arch" type="xml">
+            <form string="Coffee Origin">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="country_id"/>
+                            <field name="region_id"/>
+                        </group>
+                        <group>
+                            <field name="altitude"/>
+                            <field name="coffee_type_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="coffee_origin_view_search" model="ir.ui.view">
+        <field name="name">coffee.origin.view.search</field>
+        <field name="model">coffee.origin</field>
+        <field name="arch" type="xml">
+            <search string="Search Coffee Origins">
+                <field name="name" string="Origin"/>
+                <field name="region_id" string="Region"/>
+                <field name="country_id" string="Country"/>
+
+                <separator/>
+
+                <!-- Pre-defined Filters -->
+                <filter name="filter_oromia" string="Oromia" domain="[('region_id', '=', 'Oromia')]"/>
+                <filter name="filter_sidama" string="Sidama" domain="[('region_id', '=', 'Sidama')]"/>
+                <filter name="filter_south_west_ethiopia" string="South West Ethiopia" domain="[('region_id', '=', 'South West Ethiopia')]"/>
+
+                <separator/>
+
+                <!-- Group By Options -->
+                <group expand="0" string="Group By">
+                    <filter name="group_by_country" string="Country" context="{'group_by': 'country_id'}"/>
+                    <filter name="group_by_region" string="Region" context="{'group_by': 'region_id'}"/>
+                    <filter name="group_by_altitude" string="Altitude" context="{'group_by': 'altitude'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="coffee_grade_view_tree" model="ir.ui.view">
+        <field name="name">coffee.grade.tree</field>
+        <field name="model">coffee.grade</field>
+        <field name="arch" type="xml">
+            <tree string="ECX Coffee Grades">
+                <field name="name"/>
+                <field name="grade_code"/>
+                <field name="description"/>
+                <!--<field name="coffee_origin_id"/>-->
+            </tree>
+        </field>
+    </record>
+    <record id="coffee_grade_view_form" model="ir.ui.view">
+        <field name="name">coffee.grade.form</field>
+        <field name="model">coffee.grade</field>
+        <field name="arch" type="xml">
+            <form string="Coffee Grade">
+                <sheet>
+                    <group string="ECX Coffee Grade Information">
+                        <field name="name"/>
+                        <field name="grade_code"/>
+                        <field name="description"/>
+                        <!--<field name="coffee_origin_id"/>-->
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- Actions and Menu Items -->
+    <record id="coffee_type_action" model="ir.actions.act_window">
+        <field name="name">Coffee Types</field>
+        <field name="res_model">coffee.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="coffee_origin_action" model="ir.actions.act_window">
+        <field name="name">Coffee Origins</field>
+        <field name="res_model">coffee.origin</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="coffee_grade_action" model="ir.actions.act_window">
+        <field name="name">Coffee Grades</field>
+        <field name="res_model">coffee.grade</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

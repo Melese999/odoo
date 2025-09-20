@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_coffee_arrival_user,coffee.arrival.user,model_coffee_arrival,base.group_user,1,1,1,0
+access_coffee_arrival_admin,coffee.arrival.admin,model_coffee_arrival,base.group_system,1,1,1,1
+access_coffee_quality_user,coffee.quality.user,model_coffee_quality_evaluation,base.group_user,1,1,1,0
+access_coffee_quality_admin,coffee.quality.admin,model_coffee_quality_evaluation,base.group_system,1,1,1,1
+access_coffee_weight_user,coffee.weight.user,model_coffee_weight_history,base.group_user,1,1,1,0
+access_coffee_weight_admin,coffee.weight.admin,model_coffee_weight_history,base.group_system,1,1,1,1
+access_coffee_weight_log_user,coffee.weight.log.user,model_coffee_weight_history_log,base.group_user,1,0,0,0
+access_coffee_weight_log_admin,coffee.weight.log.admin,model_coffee_weight_history_log,base.group_system,1,1,1,1
+access_coffee_contract_user,coffee.contract.user,model_coffee_contract,base.group_user,1,1,1,0
+access_coffee_contract_admin,coffee.contract.admin,model_coffee_contract,base.group_system,1,1,1,1
+access_coffee_contract_line_user,coffee.contract.line.user,model_coffee_contract_line,base.group_user,1,1,1,1
+access_coffee_stock_receiving_user,coffee.stock.receiving.user,model_coffee_stock_receiving,base.group_user,1,1,1,0
+access_coffee_stock_receiving_admin,coffee.stock.receiving.admin,model_coffee_stock_receiving,base.group_system,1,1,1,1
+access_coffee_stock_issue_user,coffee.stock.issue.user,model_coffee_stock_issue,base.group_user,1,1,1,0
+access_coffee_stock_issue_admin,coffee.stock.issue.admin,model_coffee_stock_issue,base.group_system,1,1,1,1

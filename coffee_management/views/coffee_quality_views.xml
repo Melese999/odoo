@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="coffee_quality_evaluation_view_form" model="ir.ui.view">
+        <field name="name">coffee.quality.evaluation.form</field>
+        <field name="model">coffee.quality.evaluation</field>
+        <field name="arch" type="xml">
+            <form string="Quality Evaluation">
+                <sheet>
+                    <group>
+                        <field name="arrival_id" readonly="1"/>
+                        <field name="moisture_content"/>
+                        <field name="screen_percentage"/>
+                    </group>
+                    <notebook>
+                        <page string="Raw Attributes">
+                            <group>
+                                <field name="primary_defect"/>
+                                <field name="secondary_defect"/>
+                                <field name="odour"/>
+                            </group>
+                        </page>
+                        <page string="Cup Attributes">
+                            <group>
+                                <field name="cup_clean"/>
+                                <field name="acidity"/>
+                                <field name="body"/>
+                                <field name="flavor"/>
+                            </group>
+                        </page>
+                    </notebook>
+                    <group>
+                        <field name="total_score" readonly="1"/>
+                        <field name="amg_grade" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

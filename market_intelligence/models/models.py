@@ -19,9 +19,16 @@ class MarketIntelligenceLine(models.Model):
         store=True,   # important! must be stored to use in graph/read_group
         readonly=True
     )
+    competitor_id = fields.Many2one(
+        "competitor.competitor",
+        string="Competitor",
+        related="market_intelligence_id.competitor_id",
+        store=True,
+        readonly=True
+    )
 
     @api.model
-    def get_price_trend(self, competitor_id=None, product_ids=None, date_from=fields.Date.mo, date_to=None):
+    def get_price_trend(self, competitor_id=None, product_ids=None, date_from=None, date_to=None):
         """
         Returns aggregated price trend for selected product(s) and competitor over time.
         """

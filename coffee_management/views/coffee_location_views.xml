@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Coffee Zone Views -->
+        <!-- Form View -->
+        <record id="coffee_zone_view_form" model="ir.ui.view">
+            <field name="name">coffee.zone.form</field>
+            <field name="model">coffee.zone</field>
+            <field name="arch" type="xml">
+                <form string="Coffee Zone">
+                    <sheet>
+                        <group>
+                            <!-- The 'country_id' field is now present to resolve the validation error. -->
+                            <field name="country_id" readonly="1"/>
+                            <field name="name"/>
+                            <field name="region_id"/>
+                            <field name="description"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View -->
+        <record id="coffee_zone_view_tree" model="ir.ui.view">
+            <field name="name">coffee.zone.tree</field>
+            <field name="model">coffee.zone</field>
+            <field name="arch" type="xml">
+                <tree string="Coffee Zones">
+                    <field name="name"/>
+                    <field name="region_id"/>
+                    <field name="country_id"/>
+                    <field name="description" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="coffee_zone_view_search" model="ir.ui.view">
+            <field name="name">coffee.zone.search</field>
+            <field name="model">coffee.zone</field>
+            <field name="arch" type="xml">
+                <search string="Coffee Zones">
+                    <field name="name"/>
+                    <field name="region_id"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action for Coffee Zone -->
+        <record id="coffee_zone_action" model="ir.actions.act_window">
+            <field name="name">Coffee Zones</field>
+            <field name="res_model">coffee.zone</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Coffee Woreda Views -->
+        <!-- Form View -->
+        <record id="coffee_woreda_view_form" model="ir.ui.view">
+            <field name="name">coffee.woreda.form</field>
+            <field name="model">coffee.woreda</field>
+            <field name="arch" type="xml">
+                <form string="Coffee Woreda">
+                    <sheet>
+                        <group>
+                            <group string="Basic Details">
+                                <field name="name"/>
+                                <field name="zone_id"/>
+                                <field name="description"/>
+                            </group>
+                            <group string="Agricultural Details">
+                                <field name="soil_type"/>
+                                <field name="altitude"/>
+                                <field name="weather"/>
+                                <field name="avg_temperature_c"/>
+                                <field name="annual_rainfall_mm"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Demographics">
+                                <field name="population"/>
+                                <field name="area_sq_km"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View -->
+        <record id="coffee_woreda_view_tree" model="ir.ui.view">
+            <field name="name">coffee.woreda.tree</field>
+            <field name="model">coffee.woreda</field>
+            <field name="arch" type="xml">
+                <tree string="Coffee Woredas">
+                    <field name="name"/>
+                    <field name="zone_id"/>
+                    <field name="soil_type"/>
+                    <field name="altitude"/>
+                    <field name="weather"/>
+                    <field name="population" optional="hide"/>
+                    <field name="area_sq_km" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="coffee_woreda_view_search" model="ir.ui.view">
+            <field name="name">coffee.woreda.search</field>
+            <field name="model">coffee.woreda</field>
+            <field name="arch" type="xml">
+                <search string="Coffee Woredas">
+                    <field name="name"/>
+                    <field name="zone_id"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action for Coffee Woreda -->
+        <record id="coffee_woreda_action" model="ir.actions.act_window">
+            <field name="name">Coffee Woredas</field>
+            <field name="res_model">coffee.woreda</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>

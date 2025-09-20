@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <menuitem id="menu_coffee_help_section" name="Help" parent="coffee_management.menu_coffee_management_root" sequence="99" />
+  <menuitem id="menu_coffee_manual_link" name="Coffee Manual" parent="menu_coffee_help_section" action="action_coffee_manual" sequence="10" />
+</odoo>

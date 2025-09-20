@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Wizard for Date Range Selection -->
+        <record id="wizard_report_date_range_form_view" model="ir.ui.view">
+            <field name="name">report.date.range.wizard.form</field>
+            <field name="model">report.date.range.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Report Date Range">
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="report_model" invisible="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="check_report" string="Generate Report" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action to open the Date Range Wizard -->
+        <record id="action_report_date_range_wizard" model="ir.actions.act_window">
+            <field name="name">Generate Report</field>
+            <field name="res_model">report.date.range.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Individual report actions -->
+        <record id="action_report_coffee_arrival_quality" model="ir.actions.act_window">
+            <field name="name">Arrival &amp; Quality Report</field>
+            <field name="res_model">report.date.range.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_report_model': 'report.coffee.arrival_quality'}</field>
+        </record>
+
+        <record id="action_report_coffee_stock_movement" model="ir.actions.act_window">
+            <field name="name">Warehouse Stock Report</field>
+            <field name="res_model">report.date.range.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_report_model': 'report.coffee.stock_movement'}</field>
+        </record>
+
+        <record id="action_report_coffee_contract_fulfillment" model="ir.actions.act_window">
+            <field name="name">Contract Fulfillment Report</field>
+            <field name="res_model">report.date.range.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_report_model': 'report.coffee.contract_fulfillment'}</field>
+        </record>
+
+        <record id="action_report_coffee_manufacturing_production" model="ir.actions.act_window">
+            <field name="name">Manufacturing Report</field>
+            <field name="res_model">report.date.range.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_report_model': 'report.coffee.manufacturing_production'}</field>
+        </record>
+
+        <!-- Report Actions for PDF Generation -->
+        <record id="report_action_coffee_arrival_quality" model="ir.actions.report">
+            <field name="name">Coffee Arrival and Quality Report</field>
+            <field name="model">report.date.range.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">coffee_management.report_coffee_arrival_quality_document</field>
+            <field name="print_report_name">'Coffee Arrival and Quality Report - %s' % (object.date_from)</field>
+            <field name="binding_model_id" ref="model_report_date_range_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <record id="report_action_coffee_stock_movement" model="ir.actions.report">
+            <field name="name">Warehouse Stock and Movements Report</field>
+            <field name="model">report.date.range.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">coffee_management.report_coffee_stock_movement_document</field>
+            <field name="print_report_name">'Warehouse Stock Report - %s' % (object.date_from)</field>
+            <field name="binding_model_id" ref="model_report_date_range_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <record id="report_action_coffee_contract_fulfillment" model="ir.actions.report">
+            <field name="name">Contract Fulfillment Report</field>
+            <field name="model">report.date.range.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">coffee_management.report_coffee_contract_fulfillment_document</field>
+            <field name="print_report_name">'Contract Fulfillment Report - %s' % (object.date_from)</field>
+            <field name="binding_model_id" ref="model_report_date_range_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <record id="report_action_coffee_manufacturing_production" model="ir.actions.report">
+            <field name="name">Manufacturing and Production Report</field>
+            <field name="model">report.date.range.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">coffee_management.report_coffee_manufacturing_production_document</field>
+            <field name="print_report_name">'Manufacturing Report - %s' % (object.date_from)</field>
+            <field name="binding_model_id" ref="model_report_date_range_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- QWeb Report Templates with enhanced styling -->
+
+        <!-- Common header template that safely handles company information -->
+        <template id="report_coffee_common_header">
+            <div style="border-bottom: 2px solid #8B4513; padding-bottom: 15px; margin-bottom: 25px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <!-- Logo Column -->
+                        <td style="width: 25%; vertical-align: middle; padding-right: 20px;">
+                            <t t-set="company" t-value="user.company_id"/>
+                            <t t-if="company and company.logo">
+                                <!--<div style="text-align: center; padding: 10px; background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <img t-att-src="'data:image/png;base64,%s' % company.logo"
+                                         style="max-height: 80px; max-width: 150px; object-fit: contain;"/>
+                                </div>-->
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <img t-attf-src="data:image/png;base64,{{ company.logo }}"
+                                         style="max-height: 100px; max-width: 180px; object-fit: contain;"/>
+                                </div>
+                            </t>
+                        </td>
+
+                        <!-- Empty spacer column -->
+                        <td style="width: 40%;"></td>
+
+                        <!-- Company Info Column -->
+                        <td style="width: 35%; vertical-align: top; text-align: right;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                <div style="font-weight: bold; font-size: 18px; color: #2c3e50; margin-bottom: 10px;">
+                                    <span t-esc="company.name if company else 'Company'"/>
+                                </div>
+                                <t t-if="company">
+                                    <div style="border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 10px;">
+                                        <t t-if="company.street">
+                                            <div style="color: #555; font-size: 13px; line-height: 1.5;" t-esc="company.street"/>
+                                        </t>
+                                        <t t-if="company.street2">
+                                            <div style="color: #555; font-size: 13px; line-height: 1.5;" t-esc="company.street2"/>
+                                        </t>
+                                        <t t-if="company.city or company.zip or company.state_id or company.country_id">
+                                            <div style="color: #555; font-size: 13px; line-height: 1.5;">
+                                                <t t-if="company.city" t-esc="company.city"/>
+                                                <t t-if="company.zip">, <t t-esc="company.zip"/></t>
+                                                <t t-if="company.state_id">, <t t-esc="company.state_id.name"/></t>
+                                                <t t-if="company.country_id">, <t t-esc="company.country_id.name"/></t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div style="border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 10px;">
+                                        <t t-if="company.phone">
+                                            <div style="color: #555; font-size: 13px;">
+                                                <i class="fa fa-phone" style="margin-right: 5px; color: #8B4513;"/>
+                                                <span t-esc="company.phone"/>
+                                            </div>
+                                        </t>
+                                        <t t-if="company.email">
+                                            <div style="color: #555; font-size: 13px;">
+                                                <i class="fa fa-envelope" style="margin-right: 5px; color: #8B4513;"/>
+                                                <span t-esc="company.email"/>
+                                            </div>
+                                        </t>
+                                        <t t-if="company.website">
+                                            <div style="color: #555; font-size: 13px;">
+                                                <i class="fa fa-globe" style="margin-right: 5px; color: #8B4513;"/>
+                                                <span t-esc="company.website"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </template>
+
+        <!-- QWeb Template for Coffee Arrival and Quality Report -->
+        <template id="report_coffee_arrival_quality_document">
+            <t t-call="web.html_container">
+                <t t-call="web.internal_layout">
+                    <t t-foreach="docs" t-as="o">
+                        <!-- Include common header -->
+                        <t t-call="coffee_management.report_coffee_common_header"/>
+
+                        <!-- Report Header Section -->
+                        <div style="background: linear-gradient(to right, #8B4513, #A0522D); color: white; padding: 15px; border-radius: 5px 5px 0 0; margin-bottom: 20px;">
+                            <table style="width: 100%; color: white;">
+                                <tr>
+                                    <td style="width: 70%; vertical-align: middle;">
+                                        <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px;">COFFEE ARRIVAL And QUALITY REPORT</h1>
+                                    </td>
+                                    <td style="width: 30%; text-align: right; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">
+                                            <span style="background: white; color: #8B4513; padding: 3px 10px; border-radius: 3px;">
+                                                <span t-esc="o.date_from or 'Date Range'"/>
+                                            </span>
+                                        </div>
+                                        <div style="font-size: 14px;">
+                                            <i class="fa fa-calendar" style="margin-right: 5px;"/>
+                                            <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Date Range Info Card -->
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 25px; border-left: 4px solid #8B4513;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 50%; vertical-align: top;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">REPORT PERIOD</div>
+                                        <div style="font-size: 16px;">
+                                            <i class="fa fa-calendar-check-o" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="o.date_from"/> to <span t-esc="o.date_to"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; vertical-align: top; text-align: right;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">GENERATED BY</div>
+                                        <div style="font-size: 14px; color: #555;">
+                                            <i class="fa fa-user" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="user.name or 'System'"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="page">
+                            <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden; margin-bottom: 30px;">
+                                <thead>
+                                    <tr style="background: #8B4513; color: white;">
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Issue No.</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Supplier</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Arrival Date</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Net Weight (KG)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Moisture (%)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Total Score</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">AMG Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="report_data" t-value="o.get_report_data(o.date_from, o.date_to, 'arrival_quality')"/>
+                                    <t t-foreach="report_data['arrivals']" t-as="arrival">
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="arrival.get('issue_no', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="arrival.get('supplier_name', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="arrival.get('arrival_date', '')"/></td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="arrival.get('net_weight_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="arrival.get('moisture_content', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="arrival.get('total_score', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="arrival.get('amg_grade', '')"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+
+                            <div style="margin-top: 30px;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2c3e50; padding-bottom: 8px; border-bottom: 2px solid #8B4513;">
+                                    SUMMARY
+                                </h3>
+                                <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden;">
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;">Total Arrivals</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('total_arrivals', 0)"/>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;">Total KG</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('total_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;">Average Moisture</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('avg_moisture', 0)" t-options='{"widget": "float", "precision": 2}'/>%
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;">Average Score</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('avg_score', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold;">Low Grade Count (UG/G5)</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('low_grade_count', 0)"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Footer Section -->
+                        <div class="footer" style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; color: #777; font-size: 12px;">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 5px;">
+                                    <t t-set="company" t-value="user.company_id"/>
+                                    <span t-esc="company.name if company else 'Company'"/> • Generated on <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                </div>
+                                <div>
+                                    Page <span class="page"/> of <span class="topage"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- QWeb Template for Warehouse Stock and Movements Report -->
+        <template id="report_coffee_stock_movement_document">
+            <t t-call="web.html_container">
+                <t t-call="web.internal_layout">
+                    <t t-foreach="docs" t-as="o">
+                        <!-- Include common header -->
+                        <t t-call="coffee_management.report_coffee_common_header"/>
+
+                        <!-- Report Header Section -->
+                        <div style="background: linear-gradient(to right, #8B4513, #A0522D); color: white; padding: 15px; border-radius: 5px 5px 0 0; margin-bottom: 20px;">
+                            <table style="width: 100%; color: white;">
+                                <tr>
+                                    <td style="width: 70%; vertical-align: middle;">
+                                        <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px;">WAREHOUSE STOCK REPORT</h1>
+                                    </td>
+                                    <td style="width: 30%; text-align: right; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">
+                                            <span style="background: white; color: #8B4513; padding: 3px 10px; border-radius: 3px;">
+                                                <span t-esc="o.date_from or 'Date Range'"/>
+                                            </span>
+                                        </div>
+                                        <div style="font-size: 14px;">
+                                            <i class="fa fa-calendar" style="margin-right: 5px;"/>
+                                            <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Date Range Info Card -->
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 25px; border-left: 4px solid #8B4513;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 50%; vertical-align: top;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">REPORT PERIOD</div>
+                                        <div style="font-size: 16px;">
+                                            <i class="fa fa-calendar-check-o" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="o.date_from"/> to <span t-esc="o.date_to"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; vertical-align: top; text-align: right;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">GENERATED BY</div>
+                                        <div style="font-size: 14px; color: #555;">
+                                            <i class="fa fa-user" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="user.name or 'System'"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="page">
+                            <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden; margin-bottom: 30px;">
+                                <thead>
+                                    <tr style="background: #8B4513; color: white;">
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Product</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Beginning Balance (KG)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Received (KG)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Issued (KG)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Ending Balance (KG)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="report_data" t-value="o.get_report_data(o.date_from, o.date_to, 'stock_movement')"/>
+                                    <t t-foreach="report_data['stock_summary']" t-as="stock">
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="stock.get('product_name', '')"/></td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="stock.get('beginning_balance_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="stock.get('received_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="stock.get('issued_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="stock.get('ending_balance_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer Section -->
+                        <div class="footer" style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; color: #777; font-size: 12px;">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 5px;">
+                                    <t t-set="company" t-value="user.company_id"/>
+                                    <span t-esc="company.name if company else 'Company'"/> • Generated on <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                </div>
+                                <div>
+                                    Page <span class="page"/> of <span class="topage"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- QWeb Template for Contract Fulfillment Report -->
+        <template id="report_coffee_contract_fulfillment_document">
+            <t t-call="web.html_container">
+                <t t-call="web.internal_layout">
+                    <t t-foreach="docs" t-as="o">
+                        <!-- Include common header -->
+                        <t t-call="coffee_management.report_coffee_common_header"/>
+
+                        <!-- Report Header Section -->
+                        <div style="background: linear-gradient(to right, #8B4513, #A0522D); color: white; padding: 15px; border-radius: 5px 5px 0 0; margin-bottom: 20px;">
+                            <table style="width: 100%; color: white;">
+                                <tr>
+                                    <td style="width: 70%; vertical-align: middle;">
+                                        <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px;">CONTRACT FULFILLMENT REPORT</h1>
+                                    </td>
+                                    <td style="width: 30%; text-align: right; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">
+                                            <span style="background: white; color: #8B4513; padding: 3px 10px; border-radius: 3px;">
+                                                <span t-esc="o.date_from or 'Date Range'"/>
+                                            </span>
+                                        </div>
+                                        <div style="font-size: 14px;">
+                                            <i class="fa fa-calendar" style="margin-right: 5px;"/>
+                                            <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Date Range Info Card -->
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 25px; border-left: 4px solid #8B4513;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 50%; vertical-align: top;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">REPORT PERIOD</div>
+                                        <div style="font-size: 16px;">
+                                            <i class="fa fa-calendar-check-o" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="o.date_from"/> to <span t-esc="o.date_to"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; vertical-align: top; text-align: right;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">GENERATED BY</div>
+                                        <div style="font-size: 14px; color: #555;">
+                                            <i class="fa fa-user" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="user.name or 'System'"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="page">
+                            <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden; margin-bottom: 30px;">
+                                <thead>
+                                    <tr style="background: #8B4513; color: white;">
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 50;">Contract No.</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 50;">Buyer</th>
+                                        <th style="text-align: left; padding: 25px 18px; font-weight: 50;">Contract Date</th>
+                                        <th style="text-align: left; padding: 25px 18px;font-weight: 50;">Shipment Period</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 50;">Status</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 50;">Ordered (KG)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 50;">Delivered (KG)</th>                                        
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 50;">Fulfillment (%)</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 50;">Total Value (ETB)</th>
+                                    </tr>
+                                </thead>
+                                <!--<tbody>
+                                    <t t-set="report_data" t-value="o.get_report_data(o.date_from, o.date_to, 'contract_fulfillment')"/>
+                                    <t t-foreach="report_data['contracts']" t-as="contract">
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('contract_number', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('buyer_name', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('contract_date', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('state', '')"/></td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="contract.get('total_ordered_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;"/>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="contract.get('delivered_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="contract.get('fulfillment_percentage', 0)" t-options='{"widget": "float", "precision": 2}'/>%
+                                            </td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                $<t t-esc="contract.get('total_contract_value', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>-->
+                                <tbody>
+                                    <t t-set="report_data" t-value="o.get_report_data(o.date_from, o.date_to, 'contract_fulfillment')"/>
+                                    <t t-foreach="report_data['contracts']" t-as="contract">
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            <td style="padding: 20px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('contract_number', '')"/></td>
+                                            <td style="padding: 20px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('buyer_name', '')"/></td>
+                                            <td style="padding: 20px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('contract_date', '')"/></td>
+                                            <!-- === ADD THIS NEW DATA CELL === -->
+                                            <!-- This will display the human-readable label (e.g., "January") -->
+                                            <td>
+                                                <span t-esc="dict(o.env['coffee.contract']._fields['shipment_period_month'].selection).get(contract.get('shipment_period_month'))"/>
+                                                <span t-esc="contract.get('shipment_period_year', '')"/>
+                                            </td>
+                                            <!-- === END OF NEW DATA CELL === -->
+                                            <td style="padding: 20px 15px; border-bottom: 1px solid #eee;"><t t-esc="contract.get('state', '')"/></td>
+                                            <td style="text-align: right; padding: 20px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="contract.get('total_ordered_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 20px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="contract.get('delivered_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="text-align: right; padding: 20px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="contract.get('fulfillment_percentage', 0)" t-options='{"widget": "float", "precision": 2}'/>%
+                                            </td>
+                                            <td style="text-align: right; padding: 20px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <span style="margin-right: 15px;">ETB</span><t t-esc="contract.get('total_contract_value', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+
+                            </table>
+                            <div style="margin-top: 30px;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2c3e50; padding-bottom: 8px; border-bottom: 2px solid #8B4513;">
+                                    SUMMARY
+                                </h3>
+                                <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden;">
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;">Total Contracts</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('total_contracts', 0)"/>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;">Total Ordered (KG)</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('total_ordered_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                    </tr>
+                                    <tr style="background: #f8f9fa;">
+                                        <td style="padding: 12px 15px; font-weight: bold;">Total Delivered (KG)</td>
+                                        <td style="text-align: right; padding: 12px 15px; font-weight: bold; font-family: monospace;">
+                                            <t t-esc="report_data['summary'].get('total_delivered_kg', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Footer Section -->
+                        <div class="footer" style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; color: #777; font-size: 12px;">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 5px;">
+                                    <t t-set="company" t-value="user.company_id"/>
+                                    <span t-esc="company.name if company else 'Company'"/> • Generated on <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                </div>
+                                <div>
+                                    Page <span class="page"/> of <span class="topage"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- QWeb Template for Manufacturing and Production Report -->
+        <template id="report_coffee_manufacturing_production_document">
+            <t t-call="web.html_container">
+                <t t-call="web.internal_layout">
+                    <t t-foreach="docs" t-as="o">
+                        <!-- Include common header -->
+                        <t t-call="coffee_management.report_coffee_common_header"/>
+
+                        <!-- Report Header Section -->
+                        <div style="background: linear-gradient(to right, #8B4513, #A0522D); color: white; padding: 15px; border-radius: 5px 5px 0 0; margin-bottom: 20px;">
+                            <table style="width: 100%; color: white;">
+                                <tr>
+                                    <td style="width: 70%; vertical-align: middle;">
+                                        <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px;">MANUFACTURING REPORT</h1>
+                                    </td>
+                                    <td style="width: 30%; text-align: right; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">
+                                            <span style="background: white; color: #8B4513; padding: 3px 10px; border-radius: 3px;">
+                                                <span t-esc="o.date_from or 'Date Range'"/>
+                                            </span>
+                                        </div>
+                                        <div style="font-size: 14px;">
+                                            <i class="fa fa-calendar" style="margin-right: 5px;"/>
+                                            <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Date Range Info Card -->
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 25px; border-left: 4px solid #8B4513;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 50%; vertical-align: top;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">REPORT PERIOD</div>
+                                        <div style="font-size: 16px;">
+                                            <i class="fa fa-calendar-check-o" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="o.date_from"/> to <span t-esc="o.date_to"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; vertical-align: top; text-align: right;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">GENERATED BY</div>
+                                        <div style="font-size: 14px; color: #555;">
+                                            <i class="fa fa-user" style="margin-right: 8px; color: #8B4513;"/>
+                                            <span t-esc="user.name or 'System'"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="page">
+                            <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden; margin-bottom: 30px;">
+                                <thead>
+                                    <tr style="background: #8B4513; color: white;">
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">MO No.</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Product</th>
+                                        <th style="text-align: right; padding: 12px 15px; font-weight: 500;">Quantity</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Status</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Contract</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">Start Date</th>
+                                        <th style="text-align: left; padding: 12px 15px; font-weight: 500;">End Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="report_data" t-value="o.get_report_data(o.date_from, o.date_to, 'manufacturing_production')"/>
+                                    <t t-foreach="report_data['manufacturing_orders']" t-as="mo">
+                                        <tr style="border-bottom: 1px solid #eee;">
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="mo.get('name', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="mo.get('product_name', '')"/></td>
+                                            <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace;">
+                                                <t t-esc="mo.get('quantity_produced', 0)" t-options='{"widget": "float", "precision": 2}'/>
+                                            </td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="mo.get('state', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="mo.get('contract_number', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="mo.get('start_date', '')"/></td>
+                                            <td style="padding: 10px 15px; border-bottom: 1px solid #eee;"><t t-esc="mo.get('end_date', '')"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 30px;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2c3e50; padding-bottom: 8px; border-bottom: 2px solid #8B4513;">
+                                    SUMMARY BY STATUS
+                                </h3>
+                                <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden;">
+                                    <t t-foreach="report_data['summary_by_state']" t-as="state">
+                                        <tr style="background: #f8f9fa;">
+                                            <td style="padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd;"><t t-esc="state"/></td>
+                                            <td style="text-align: right; padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; font-family: monospace;">
+                                                <t t-esc="report_data['summary_by_state'].get(state, 0)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Footer Section -->
+                        <div class="footer" style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #eee; color: #777; font-size: 12px;">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 5px;">
+                                    <t t-set="company" t-value="user.company_id"/>
+                                    <span t-esc="company.name if company else 'Company'"/> • Generated on <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                </div>
+                                <div>
+                                    Page <span class="page"/> of <span class="topage"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

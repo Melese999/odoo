@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Product Form View -->
+        <record id="product_product_view_form_coffee" model="ir.ui.view">
+            <field name="name">product.product.form.coffee</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='categ_id']" position="after">
+                    <field name="is_coffee_product"/>
+                    <field name="esex_grade"/>
+                    <field name="amg_grade"/>
+                    <field name="weight_per_bag"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Product Tree View -->
+        <record id="product_product_view_tree_coffee" model="ir.ui.view">
+            <field name="name">product.product.tree.coffee</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <field name="amg_grade"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

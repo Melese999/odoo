@@ -1,0 +1,261 @@
+<odoo>
+    <data>
+        <record id="view_coffee_arrival_pivot" model="ir.ui.view">
+            <field name="name">coffee.arrival.pivot</field>
+            <field name="model">coffee.arrival</field>
+            <field name="arch" type="xml">
+                <pivot string="Coffee Arrivals" disable_linking="True">
+                    <field name="supplier_id" type="row"/>
+                    <field name="date" type="col"/>
+                    <field name="coffee_issue_no"/>
+                    <field name="product_id" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_coffee_arrival_graph" model="ir.ui.view">
+            <field name="name">coffee.arrival.graph</field>
+            <field name="model">coffee.arrival</field>
+            <field name="arch" type="xml">
+                <graph string="Coffee Arrivals" type="bar">
+                    <field name="supplier_id" type="measure"/>
+                    <field name="coffee_issue_no"/>
+                </graph>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_arrival_calendar" model="ir.ui.view">
+            <field name="name">coffee.arrival.calendar</field>
+            <field name="model">coffee.arrival</field>
+            <field name="arch" type="xml">
+                <calendar string="Coffee Arrivals"
+                          date_start="date" mode="month"
+                          color="supplier_id" quick_add="False">
+                    <field name="coffee_issue_no"/>
+                    <field name="vehicle_plate_no"/>
+                </calendar>
+            </field>
+        </record>-->
+
+        <record id="action_coffee_arrival_report_all" model="ir.actions.act_window">
+            <field name="name">Coffee Arrival Reports</field>
+            <field name="res_model">coffee.arrival</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No data to display.
+                </p>
+            </field>
+        </record>
+
+
+        <record id="view_coffee_quality_pivot" model="ir.ui.view">
+            <field name="name">coffee.quality.evaluation.pivot</field>
+            <field name="model">coffee.quality.evaluation</field>
+            <field name="arch" type="xml">
+                <pivot string="Coffee Quality Evaluations" disable_linking="True">
+                    <field name="amg_grade" type="row"/>
+                    <field name="total_score" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_coffee_quality_graph" model="ir.ui.view">
+            <field name="name">coffee.quality.evaluation.graph</field>
+            <field name="model">coffee.quality.evaluation</field>
+            <field name="arch" type="xml">
+                <graph string="Coffee Quality Scores" type="bar">
+                    <field name="amg_grade"/>
+                    <field name="total_score" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_quality_calendar" model="ir.ui.view">
+            <field name="name">coffee.quality.evaluation.calendar</field>
+            <field name="model">coffee.quality.evaluation</field>
+            <field name="arch" type="xml">
+                <calendar string="Quality Evaluations"
+                          date_start="arrival_date" mode="month"
+                          color="amg_grade" quick_add="False">
+                    <field name="arrival_id"/>
+                    <field name="amg_grade"/>
+                </calendar>
+            </field>
+        </record>-->
+
+        <record id="action_coffee_quality_report_all" model="ir.actions.act_window">
+            <field name="name">Coffee Quality Reports</field>
+            <field name="res_model">coffee.quality.evaluation</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No data to display.
+                </p>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_weight_pivot" model="ir.ui.view">
+            <field name="name">coffee.weight.history.pivot</field>
+            <field name="model">coffee.weight.history</field>
+            <field name="arch" type="xml">
+                <pivot string="Coffee Weight History" disable_linking="True">
+                    <field name="arrival_id.supplier_id" type="row"/>
+                    <field name="grand_net_weight" type="measure"/>
+                </pivot>
+            </field>
+        </record>-->
+
+        <record id="view_coffee_weight_pivot" model="ir.ui.view">
+            <field name="name">coffee.weight.history.pivot</field>
+            <field name="model">coffee.weight.history</field>
+            <field name="arch" type="xml">
+                <pivot string="Coffee Weight History" disable_linking="True">
+                    <field name="supplier_id" type="row"/>
+                    <field name="grand_net_weight" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_weight_graph" model="ir.ui.view">
+            <field name="name">coffee.weight.history.graph</field>
+            <field name="model">coffee.weight.history</field>
+            <field name="arch" type="xml">
+                <graph string="Coffee Weight History" type="bar">
+                    <field name="arrival_id.supplier_id"/>
+                    <field name="grand_net_weight" type="measure"/>
+                </graph>
+            </field>
+        </record>-->
+
+        <record id="view_coffee_weight_graph" model="ir.ui.view">
+            <field name="name">coffee.weight.history.graph</field>
+            <field name="model">coffee.weight.history</field>
+            <field name="arch" type="xml">
+                <graph string="Coffee Weight History" type="bar">
+                    <field name="supplier_id"/>
+                    <field name="grand_net_weight" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_weight_calendar" model="ir.ui.view">
+            <field name="name">coffee.weight.history.calendar</field>
+            <field name="model">coffee.weight.history</field>
+            <field name="arch" type="xml">
+                <calendar string="Weight Records" date_start="arrival_id.date" mode="month"
+                          color="arrival_id.supplier_id" quick_add="False">
+                    <field name="arrival_id"/>
+                    <field name="grand_net_weight"/>
+                </calendar>
+            </field>
+        </record>-->
+
+        <record id="action_coffee_weight_report_all" model="ir.actions.act_window">
+            <field name="name">Coffee Weight Reports</field>
+            <field name="res_model">coffee.weight.history</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No data to display.
+                </p>
+            </field>
+        </record>
+
+
+
+        <record id="view_coffee_receiving_pivot" model="ir.ui.view">
+            <field name="name">coffee.stock.receiving.pivot</field>
+            <field name="model">coffee.stock.receiving</field>
+            <field name="arch" type="xml">
+                <pivot string="Coffee Stock Receiving" disable_linking="True">
+                    <field name="warehouse_id" type="row"/>
+                    <field name="received_kg" type="measure"/>
+                    <field name="received_bags" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_coffee_receiving_graph" model="ir.ui.view">
+            <field name="name">coffee.stock.receiving.graph</field>
+            <field name="model">coffee.stock.receiving</field>
+            <field name="arch" type="xml">
+                <graph string="Coffee Stock Receiving" type="bar">
+                    <field name="warehouse_id"/>
+                    <field name="received_kg" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_receiving_calendar" model="ir.ui.view">
+            <field name="name">coffee.stock.receiving.calendar</field>
+            <field name="model">coffee.stock.receiving</field>
+            <field name="arch" type="xml">
+                <calendar string="Stock Receiving" date_start="create_date" mode="month"
+                          color="warehouse_id" quick_add="False">
+                    <field name="grn"/>
+                    <field name="received_kg"/>
+                </calendar>
+            </field>
+        </record>-->
+
+        <record id="action_coffee_receiving_report_all" model="ir.actions.act_window">
+            <field name="name">Coffee Receiving Reports</field>
+            <field name="res_model">coffee.stock.receiving</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No data to display.
+                </p>
+            </field>
+        </record>
+
+        <record id="view_coffee_contract_pivot" model="ir.ui.view">
+            <field name="name">coffee.contract.pivot</field>
+            <field name="model">coffee.contract</field>
+            <field name="arch" type="xml">
+                <pivot string="Coffee Contracts" disable_linking="True">
+                    <field name="buyer_id" type="row"/>
+                    <field name="contract_date" type="col"/>
+                    <field name="fulfillment_percentage" type="measure"/>
+                    <field name="delivered_kg" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_coffee_contract_graph" model="ir.ui.view">
+            <field name="name">coffee.contract.graph</field>
+            <field name="model">coffee.contract</field>
+            <field name="arch" type="xml">
+                <graph string="Coffee Contracts" type="bar">
+                    <field name="buyer_id"/>
+                    <field name="delivered_kg" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!--<record id="view_coffee_contract_calendar" model="ir.ui.view">
+            <field name="name">coffee.contract.calendar</field>
+            <field name="model">coffee.contract</field>
+            <field name="arch" type="xml">
+                <calendar string="Contracts" date_start="contract_date" date_stop="actual_delivery_date" mode="month"
+                          color="buyer_id" quick_add="False">
+                    <field name="contract_number"/>
+                    <field name="buyer_id"/>
+                </calendar>
+            </field>
+        </record>-->
+
+        <record id="action_coffee_contract_report_all" model="ir.actions.act_window">
+            <field name="name">Coffee Contract Reports</field>
+            <field name="res_model">coffee.contract</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No data to display.
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

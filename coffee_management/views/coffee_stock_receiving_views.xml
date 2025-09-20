@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="coffee_stock_receiving_view_tree" model="ir.ui.view">
+        <field name="name">coffee.stock.receiving.tree</field>
+        <field name="model">coffee.stock.receiving</field>
+        <field name="arch" type="xml">
+            <tree string="Stock Receiving">
+                <field name="grn"/>
+                <field name="arrival_id"/>
+                <field name="warehouse_id"/>
+                <field name="location_id"/>
+                <field name="product_id"/>
+                <field name="received_bags"/>
+                <field name="received_kg"/>
+                <field name="current_stock_balance_kg"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'cancelled'"
+                       decoration-warning="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="coffee_stock_receiving_view_form" model="ir.ui.view">
+        <field name="name">coffee.stock.receiving.form</field>
+        <field name="model">coffee.stock.receiving</field>
+        <field name="arch" type="xml">
+            <form string="Stock Receiving">
+                <header>
+                    <button name="action_receive_stock" string="Receive Stock" type="object" class="oe_highlight"
+                            invisible="state != 'draft'" groups="base.group_system"/>
+                    <!-- START OF NEW CODE: Add the button to create a Manufacturing Order -->
+                    <!-- <button name="action_create_manufacturing_order" string="Create Manufacturing Order" type="object" class="oe_highlight" invisible="state != 'done'" groups="base.group_system"/>
+                     END OF NEW CODE -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="grn" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="arrival_id"/>
+                            <field name="warehouse_id"/>
+                            <field name="location_id"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="received_bags"/>
+                            <field name="received_kg"/>
+                        </group>
+                    </group>
+                    <group string="Current Stock Balances (Calculated)">
+                        <group>
+                            <field name="beginning_balance_bags" readonly="1"/>
+                            <field name="beginning_balance_kg" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="issued_bags" readonly="1"/>
+                            <field name="issued_kg" readonly="1"/>
+                            <field name="current_stock_balance_bags" readonly="1"/>
+                            <field name="current_stock_balance_kg" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--
+    <record id="coffee_stock_receiving_view_search" model="ir.ui.view">
+        <field name="name">coffee.stock.receiving.view.search</field>
+        <field name="model">coffee.stock.receiving</field>
+        <field name="arch" type="xml">
+            <search string="Search GRNs">
+                <field name="grn" string="GRN" filter_domain="[('grn', 'ilike', self)]"/>
+                <field name="arrival_id" string="Arrival Record"/>
+                <field name="product_id" string="Coffee Product"/>
+                <field name="supplier_id" string="Supplier"/>
+                <field name="warehouse_id" string="Warehouse"/>
+                <field name="location_id" string="Location"/>
+
+
+                <filter name="status_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="status_done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="status_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
+
+
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_by_warehouse" string="Warehouse" context="{'group_by': 'warehouse_id'}"/>
+                    <filter name="group_by_location" string="Location" context="{'group_by': 'location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record> -->
+
+    <!-- Search View for Coffee Stock Receiving -->
+    <record id="coffee_stock_receiving_view_search" model="ir.ui.view">
+        <field name="name">coffee.stock.receiving.view.search</field>
+        <field name="model">coffee.stock.receiving</field>
+        <field name="arch" type="xml">
+            <search string="Search GRNs">
+                <field name="grn" string="GRN" filter_domain="[('grn', 'ilike', self)]"/>
+                <field name="arrival_id" string="Arrival Record"/>
+                <field name="product_id" string="Coffee Product"/>
+                <field name="supplier_id" string="Supplier"/>
+                <field name="warehouse_id" string="Warehouse"/>
+                <field name="location_id" string="Location"/>
+                <field name="received_bags" string="Received Bags"/>
+                <field name="received_kg" string="Received KG"/>
+
+                <separator/>
+
+                <!-- Pre-defined Filters -->
+                <filter name="status_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="status_done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="status_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
+
+                <separator/>
+
+                <!-- Date Filters -->
+                <filter string="Today" name="filter_today" domain="[('create_date', '&gt;=', datetime.date.today())]"/>
+                <filter string="This Week" name="filter_this_week"
+                        domain="[('create_date', '&gt;=', (context_today() - relativedelta(weeks=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Month" name="filter_this_month"
+                        domain="[('create_date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Receiving Date" name="filter_receiving_date" date="create_date"/>
+
+                <!-- Group By Options -->
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_supplier" string="Supplier" context="{'group_by': 'supplier_id'}"/>
+                    <filter name="group_by_warehouse" string="Warehouse" context="{'group_by': 'warehouse_id'}"/>
+                    <filter name="group_by_location" string="Location" context="{'group_by': 'location_id'}"/>
+                    <filter name="group_by_product" string="Product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="coffee_stock_receiving_action" model="ir.actions.act_window">
+        <field name="name">Coffee Stock Receiving</field>
+        <field name="res_model">coffee.stock.receiving</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Record new coffee stock reception.
+            </p>
+        </field>
+    </record>
+</odoo>

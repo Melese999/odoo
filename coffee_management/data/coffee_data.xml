@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- The 'noupdate="1"' prevents this data from being overwritten on module updates. -->
+
+        <!-- Sequence for Coffee Arrivals -->
+        <record id="seq_coffee_arrival" model="ir.sequence">
+            <field name="name">Coffee Arrival Sequence</field>
+            <field name="code">coffee.arrival</field>
+            <field name="prefix">ARR</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequence for Stock Receiving (GRN) -->
+        <record id="seq_coffee_stock_receiving" model="ir.sequence">
+            <field name="name">Coffee Stock Receiving Sequence</field>
+            <field name="code">coffee.stock.receiving</field>
+            <field name="prefix">GRN</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequence for Contracts -->
+        <record id="seq_coffee_contract" model="ir.sequence">
+            <field name="name">Coffee Contract Sequence</field>
+            <field name="code">coffee.contract</field>
+            <field name="prefix">CON</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

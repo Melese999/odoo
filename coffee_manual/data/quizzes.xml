@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="quiz_level_1" model="coffee.manual.quiz">
+    <field name="name">Level 1 Basics</field>
+    <field name="section_id" ref="coffee_manual.rec_section_level_1"/>
+    <field name="sequence">10</field>
+  </record>
+  <record id="quiz_level_1_q1" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_1"/>
+    <field name="name">Which must be configured first?</field>
+    <field name="option_a">Woreda/District</field>
+    <field name="option_b">Zone/Province</field>
+    <field name="option_c">ECX Product Template</field>
+    <field name="option_d">BoM</field>
+    <field name="correct">b</field>
+  </record>
+  <record id="quiz_level_1_q2" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_1"/>
+    <field name="name">ECX Coffee Name is a combination of:</field>
+    <field name="option_a">Origin + Type + Grade</field>
+    <field name="option_b">Supplier + Date</field>
+    <field name="option_c">Warehouse + Block</field>
+    <field name="option_d">Gross + Truck Weight</field>
+    <field name="correct">a</field>
+  </record>
+  <record id="quiz_level_1_q3" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_1"/>
+    <field name="name">Finished products must be:</field>
+    <field name="option_a">Consumable</field>
+    <field name="option_b">Service</field>
+    <field name="option_c">Storable</field>
+    <field name="option_d">Undefined</field>
+    <field name="correct">c</field>
+  </record>
+
+  <record id="quiz_level_3" model="coffee.manual.quiz">
+    <field name="name">Level 3 : Workflow Steps</field>
+    <field name="section_id" ref="coffee_manual.rec_section_level_3"/>
+  </record>
+  <record id="quiz_level_3_q1" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_3"/>
+    <field name="name">When is the product auto-created?</field>
+    <field name="option_a">After weight recording</field>
+    <field name="option_b">After quality evaluation saves</field>
+    <field name="option_c">During GRN</field>
+    <field name="option_d">On contract confirmation</field>
+    <field name="correct">b</field>
+  </record>
+  <record id="quiz_level_3_q2" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_3"/>
+    <field name="name">UG grade coffee is:</field>
+    <field name="option_a">Accepted with warning</field>
+    <field name="option_b">Always escalated</field>
+    <field name="option_c">Rejected automatically</field>
+    <field name="option_d">Manually corrected</field>
+    <field name="correct">c</field>
+  </record>
+  <record id="quiz_level_3_q3" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_3"/>
+    <field name="name">Net weight is computed after entering:</field>
+    <field name="option_a">Number of Bags, Gross, Truck Weight</field>
+    <field name="option_b">ECX Grade</field>
+    <field name="option_c">Warehouse Block</field>
+    <field name="option_d">Buyer Name</field>
+    <field name="correct">a</field>
+  </record>
+
+  <record id="quiz_level_4" model="coffee.manual.quiz">
+    <field name="name">Level 4: Reporting</field>
+    <field name="section_id" ref="coffee_manual.rec_section_level_4"/>
+  </record>
+  <record id="quiz_level_4_q1" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_4"/>
+    <field name="name">Which report lists all weight logs?</field>
+    <field name="option_a">Warehouse Stock Report</field>
+    <field name="option_b">Weight History Log Report</field>
+    <field name="option_c">Contract Fulfillment</field>
+    <field name="option_d">Manufacturing Report</field>
+    <field name="correct">b</field>
+  </record>
+  <record id="quiz_level_4_q2" model="coffee.manual.quiz.question">
+    <field name="quiz_id" ref="quiz_level_4"/>
+    <field name="name">Analytics pivot measures can show:</field>
+    <field name="option_a">Average score</field>
+    <field name="option_b">Total weight</field>
+    <field name="option_c">Both A and B</field>
+    <field name="option_d">Neither</field>
+    <field name="correct">c</field>
+  </record>
+</odoo>

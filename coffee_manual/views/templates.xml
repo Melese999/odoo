@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="manual_layout" name="Coffee Manual Layout">
+    <t t-call="web.layout">
+      <div class="o_container">
+        <div class="cm-grid">
+          <aside class="cm-sidebar">
+            <h3>Coffee Manual</h3>
+            <ul>
+              <li>
+                <a href="#intro">Introduction</a>
+              </li>
+              <li>
+                <a href="#level-1">Level 1</a>
+              </li>
+              <li>
+                <a href="#level-2">Level 2</a>
+              </li>
+              <li>
+                <a href="#level-3">Level 3</a>
+              </li>
+              <li>
+                <a href="#level-4">Level 4</a>
+              </li>
+              <li>
+                <a href="#level-5">Level 5</a>
+              </li>
+              <li>
+                <a href="#glossary">Glossary</a>
+              </li>
+            </ul>
+          </aside>
+          <main class="cm-content">
+            <t t-raw="0"/>
+          </main>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <template id="manual_page" name="Coffee Manual Page">
+    <t t-call="website.layout">
+      <div class="o_container py-5">
+        <h1>Coffee Management Manual</h1>
+        <div class="cm-grid">
+
+          <aside class="cm-sidebar">
+            <h3>Table of Contents</h3>
+            <ul class="nav flex-column">
+              <li t-foreach="sections" t-as="s" class="nav-item">
+                <a class="nav-link" t-att-href="'#' + s.anchor">
+                  <i class="fa fa-book mr-2"/>
+                  <t t-esc="s.name"/>
+                </a>
+              </li>
+            </ul>
+          </aside>
+
+          <main class="cm-content">
+            <t t-foreach="sections" t-as="s">
+              <section t-att-id="s.anchor" class="cm-section card shadow-sm mb-5">
+                <div class="card-body p-4">
+                  <!-- Dynamically include the content for each section -->
+                  <t t-call="{{ 'coffee_manual.section_' + s.key }}"/>
+
+                  <!-- Controls: Mark as done button and Quiz block -->
+                  <div class="cm-controls mt-4" t-att-data-section="s.key">
+                    <t t-set="p" t-value="progress.get(s.key)"/>
+                    <button t-if="not p or p.status != 'done'" class="btn btn-primary js-mark-done" t-att-data-section="s.key">
+                                            Mark as Done
+                    </button>
+                    <button t-if="p and p.status == 'done'" class="btn btn-success" disabled="1">
+                      <i class="fa fa-check-circle mr-1"/>
+Completed
+                    </button>
+
+                    <!-- The Quiz Block is now dynamically included here -->
+                    <t t-call="coffee_manual.quiz_block">
+                      <t t-set="section_key" t-value="s.key"/>
+                    </t>
+                  </div>
+                  <!-- End of Controls -->
+                  <!-- === START OF NEW BADGE CODE === -->
+                <!-- This div will be rendered on the page but hidden with 'd-none' if the section is not completed. -->
+                <!-- The JS will remove 'd-none' to make it appear instantly on click. -->
+                <div t-if="s.badge_name" t-att-class="'alert alert-success mt-4 js-badge-award ' + ('d-none' if not (p and p.status == 'done') else '')">
+                    🏆 <strong>Badge Earned:</strong> <span t-esc="s.badge_name"/>
+                </div>
+                <!-- === END OF NEW BADGE CODE === -->
+                </div>
+              </section>
+            </t>
+          </main>
+        </div>
+      </div>
+    </t>
+  </template>
+
+  <template id="quiz_block">
+    <t t-set="quiz" t-value="request.env['coffee.manual.quiz'].sudo().search([('section_id.key', '=', section_key)], limit=1)"/>
+    <t t-if="quiz">
+      <div class="cm-quiz mt-4 p-3 border rounded" t-att-data-quiz-id="quiz.id">
+        <h4 class="mt-0">
+          <t t-esc="quiz.name"/>
+        </h4>
+        <t t-foreach="quiz.question_ids" t-as="q">
+          <div class="cm-question my-3">
+            <p class="font-weight-bold mb-1">
+              <t t-esc="q.name"/>
+            </p>
+            <div class="cm-options">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" t-attf-name="q_#{q.id}" t-attf-id="q_#{q.id}_a" value="a"/>
+                <label class="form-check-label" t-attf-for="q_#{q.id}_a">A. <t t-esc="q.option_a"/>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" t-attf-name="q_#{q.id}" t-attf-id="q_#{q.id}_b" value="b"/>
+                <label class="form-check-label" t-attf-for="q_#{q.id}_b">B. <t t-esc="q.option_b"/>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" t-attf-name="q_#{q.id}" t-attf-id="q_#{q.id}_c" value="c"/>
+                <label class="form-check-label" t-attf-for="q_#{q.id}_c">C. <t t-esc="q.option_c"/>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" t-attf-name="q_#{q.id}" t-attf-id="q_#{q.id}_d" value="d"/>
+                <label class="form-check-label" t-attf-for="q_#{q.id}_d">D. <t t-esc="q.option_d"/>
+                </label>
+              </div>
+            </div>
+          </div>
+        </t>
+        <button class="btn btn-secondary js-submit-quiz mt-2">Submit Quiz</button>
+        <div class="cm-quiz-result alert alert-info mt-3 d-none"/>
+      </div>
+    </t>
+  </template>
+
+  <template id="manual_content_index">
+    <!-- Flat text for simple search endpoint -->
+    Introduction: Purpose, Mission and Rewards, Navigation. Level 1: Setup Base Camp  Geographical data, Classification data, ECX templates, Finished goods and BoMs. Level 2: Workflows  Procurement from truck to treasure; Coffee management from deal to delivery. Level 3: Daily Quests  Arrival, Quality Evaluation, Weight, GRN, Contract. Level 4: Reports  PDF wizards, Analytics. Level 5: FAQ  MO not created, Negative stock receiving, Dropdown restrictions, Alerts. Glossary: AMG Grade, ECX Grade, GRN, BoM, MTO.
+  </template>
+
+  <template id="section_introduction">
+    <h2>1. Introduction: Your Quest Begins!</h2>
+
+    <h4>1.1 Purpose of this Manual</h4>
+    <p>
+        Welcome, Coffee Adventurer! 🌟 You've just unlocked the gateway to mastering the
+        Coffee Management System  a powerful Odoo module that turns chaotic coffee operations
+        into a smooth, traceable brew of efficiency.
+    </p>
+    <p>
+        This manual is your interactive quest log, designed for all users, from warehouse operators
+        to sales managers. It will guide you through every feature, from your first login to
+        generating advanced reports.
+    </p>
+
+    <h4>1.2 Your Mission &amp; Quest Rewards</h4>
+    <p>
+      <strong>Your Mission:</strong> To transform from a Coffee Novice to a Grand Master by completing quests, following step-by-step maps, and collecting tips along the way. Each section is a "level" in your journey.
+    </p>
+    <div class="alert alert-info">
+      <strong>Quest Rewards:</strong>
+      <ul>
+        <li>✨          <strong>Full Traceability:</strong> Track every single bean from the farm to the cup like a master detective!</li>
+        <li>🚀          <strong>Epic Efficiency:</strong> Automate your work, save time, and eliminate costly mix-ups.</li>
+        <li>📊          <strong>Data Power-Ups:</strong> Generate reports that give you wizard-like insights into your operations.</li>
+      </ul>
+    </div>
+
+    <h4>1.3 How to Navigate the System</h4>
+    <p>When you log in to the system, you will see a dashboard of applications.</p>
+    <ul>
+      <li>
+        <strong>Main Menu:</strong> Click the grid icon in the top-left corner to access all applications. Your primary hub will be the <strong>Coffee Management</strong> app.
+      </li>
+      <li>
+        <strong>Breadcrumbs:</strong> As you navigate, a path appears at the top of the screen (e.g., Coffee Management / Operations / Coffee Arrival). This is your map to know where you are.
+      </li>
+    </ul>
+    <div class="alert alert-light border">
+        ⭐      <strong>Tip &amp; Trick:</strong> The Search Bar at the top of any list is your most powerful tool. You can search for almost any record by its number, name, or date.
+    </div>
+    <!-- 
+        IMAGE PLACEHOLDER: 
+        1. Save your login screenshot as 'login_screen.png' (or any name).
+        2. Place it in 'coffee_manual/static/src/img/'.
+        3. The path below will then work correctly.
+    -->
+    <img src="/coffee_manual/static/src/img/login_screen.png" class="img-fluid border rounded my-3" alt="Odoo Login Screen"/>
+  </template>
+
+  <!-- ================================================================= -->
+  <!--    SECTION 2: LEVEL 1 - MASTER DATA                               -->
+  <!-- ================================================================= -->
+  <template id="section_level_1">
+    <h2>2. Level 1: Setup Your Base Camp &#45; Master Data Configuration</h2>
+    <p class="lead">
+      <strong>Quest Objective:</strong> Build your foundation...</p>
+    <p>
+      <strong>Why It Matters:</strong> Like planting coffee seeds...</p>
+
+    <h4>Step-by-Step Checklist:</h4>
+    <ol>
+      <li class="mb-3">
+        <strong>Geographical Data:</strong>
+        <ul>
+          <li>Navigate to <code>Coffee Management > Configuration > Zones/Province</code>.
+          </li>
+          <li>Then navigate to <code>Coffee Management > Configuration > Woredas/District</code>.
+          </li>
+        </ul>
+        <img src="/coffee_manual/static/src/img/level1_config_menu.png" class="img-fluid border rounded shadow-sm my-4" alt="Configuration Menu for Geographical Data"/>
+        <img src="/coffee_manual/static/src/img/level1_zone_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Zone/Province creation form"/>
+      </li>
+      <li class="mb-3">
+        <strong>Coffee Classification Data:</strong> In the <code>Configuration</code> menu, define your master list for Coffee Types, Origins, and ECX Grades.
+        <img src="/coffee_manual/static/src/img/level1_origin_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Coffee Origin creation form"/>
+      </li>
+      <li class="mb-3">
+        <strong>ECX Product Templates:</strong> Go to <code>Configuration > ECX Coffee Products</code> to create the base combinations of Origin, Type, and Grade.
+        <img src="/coffee_manual/static/src/img/level1_ecx_template_form.png" class="img-fluid border rounded shadow-sm my-4" alt="ECX Product Template creation form"/>
+      </li>
+      <li class="mb-3">
+        <strong>Finished Goods &amp; Recipes (BoMs):</strong> Go to <code>Inventory > Products > Products</code> to create your manufacturable products and their Bill of Materials.
+        <img src="/coffee_manual/static/src/img/level1_finished_good_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Finished Good and BoM setup"/>
+      </li>
+      <li class="mb-3">
+        <strong>Finished Goods &amp; Recipes (BoMs):</strong> Go to <code>Inventory > Products > Products</code> to create your manufacturable products and their Bill of Materials.
+        <img src="/coffee_manual/static/src/img/level1_finished_good_form2.png" class="img-fluid border rounded shadow-sm my-4" alt="Finished Good and BoM setup"/>
+      </li>
+    </ol>
+    <div class="alert alert-warning">⭐      <strong>Tip &amp; Trick: Configure in Order!</strong>...
+    </div>
+    <div class="alert alert-success">🏆      <strong>Badge Earned: Base Camp Builder!</strong>...
+    </div>
+  </template>
+
+  <!-- ================================================================= -->
+  <!--    SECTION 3: LEVEL 2 - WORKFLOWS                                 -->
+  <!-- ================================================================= -->
+  <template id="section_level_2">
+    <h2>3. Level 2: Explore the Map  Core Workflows Overview</h2>
+    <p class="lead">
+      <strong>Quest Objective:</strong> Get the big picture. Understand the two main paths of your adventure.
+    </p>
+
+    <h4>3.1 Procurement Workflow: From Truck to Treasure</h4>
+    <p>
+        This is the journey for all incoming raw coffee. The system takes you through a structured
+        process to ensure every batch is properly identified, graded, weighed, and stored.
+    </p>
+
+    <h4>3.2 Coffee Management Workflow: From Deal to Delivery</h4>
+    <p>
+        This is the journey for selling your expertly crafted coffee. The system gives you direct
+        control to turn a customer agreement into actionable production and delivery tasks with a
+        single click.
+    </p>
+    <!-- 
+        IMAGE PLACEHOLDER: 
+        Save your workflow diagram image and update the src path.
+    -->
+    <img src="/coffee_manual/static/src/img/procurement_workflow.jpg" class="img-fluid border rounded my-3" alt="Procurement Workflow Diagram"/>
+    <div class="alert alert-success">
+        🏆      <strong>Badge Earned: Map Master!</strong> You are now oriented for your daily quests.
+    </div>
+  </template>
+
+  <!-- ================================================================= -->
+  <!--    SECTION 4: LEVEL 3 - DAILY QUESTS                              -->
+  <!-- ================================================================= -->
+  <template id="section_level_3">
+    <h2>4. Level 3: Embark on Daily Quests &#45; Step-by-Step Guides</h2>
+    <p class="lead">
+      <strong>Quest Objective:</strong> Master the hands-on adventures!...</p>
+
+    <h4>4.1 Quest: Managing a New Coffee Arrival</h4>
+    <p>This process starts when a truck with raw coffee arrives at your facility.</p>
+    <ol>
+      <li>
+        <strong>Navigate:</strong> Go to <code>Coffee Management > Operations > Coffee Arrival</code>.
+      </li>
+      <li>
+        <strong>Create:</strong> Click the <strong>New</strong> button.</li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_arrival_1.png" class="img-fluid border rounded shadow-sm my-4" alt="Coffee Arrival List View"/>
+    <ol start="3">
+      <li>
+        <strong>Enter Details:</strong> Fill in the Supplier, Vehicle Plate, ECX Coffee Product, and Woreda.</li>
+      <li>
+        <strong>Save:</strong> Click <strong>Save</strong>. The arrival is now in the Draft state.</li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_arrival_form.png" class="img-fluid border rounded shadow-sm my-4" alt="New Coffee Arrival Form"/>
+
+    <hr class="my-5"/>
+
+    <h4>4.2 Quest: Performing a Quality Evaluation</h4>
+    <p>This is the most critical step...</p>
+    <ol>
+      <li>
+        <strong>Start Evaluation:</strong> Click the <strong>Evaluate Quality</strong> button.</li>
+      <li>
+        <strong>Enter Data:</strong> In the popup, enter all quality metrics.</li>
+      <li>
+        <strong>Save:</strong> Click <strong>Save</strong> to trigger the system's magic automation.</li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_quality_evaluation_Open_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Quality Evaluation Form"/>
+    <img src="/coffee_manual/static/src/img/level3_quality_evaluation_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Quality Evaluation Form"/>
+    <div class="alert alert-danger">⚠️      <strong>Warning:</strong> If the grade is "UG", the arrival will be rejected...</div>
+
+    <hr class="my-5"/>
+
+    <h4>4.3 Quest: Recording the Weight</h4>
+    <ol>
+      <li>
+        <strong>Start Weigh-In:</strong> Click the <strong>Record Weight</strong> button.</li>
+      <li>
+        <strong>Enter Data &amp; Confirm:</strong> Enter the Number of Bags, Gross Weight, and Truck Weight, then click <strong>Confirm Weight</strong>.
+      </li>
+    </ol>
+    
+    <img src="/coffee_manual/static/src/img/level3_quality_evaluation_form_Cup_eval.png" class="img-fluid border rounded shadow-sm my-4" alt="Weight Recording Form"/>
+    <img src="/coffee_manual/static/src/img/level3_weight_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Weight Recording Form"/>
+
+    <hr class="my-5"/>
+
+    <h4>4.4 Quest: Receiving Coffee into Stock (The GRN)</h4>
+    <p>This is the final step of the procurement process.</p>
+    <ol>
+      <li>
+        <strong>Navigate:</strong> Go to <code>Coffee Management > Operations > Stock Receiving</code> and click <strong>New</strong>.
+      </li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_grn.png" class="img-fluid border rounded shadow-sm my-4" alt="Stock Receiving List View"/>
+    <ol start="2">
+      <li>
+        <strong>Link Arrival &amp; Assign Location:</strong> Select the Arrival Record and the Warehouse/Block.</li>
+      <li>
+        <strong>Save &amp; Receive:</strong> Click <strong>Save</strong>, then click <strong>Receive Stock</strong>.
+      </li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_grn_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Goods Receiving Note (GRN) Form"/>
+
+    <hr class="my-5"/>
+
+    <h4>4.5 Quest: Creating and Processing a Coffee Contract</h4>
+    <p>This process is for selling your finished products.</p>
+    <ol>
+      <li>
+        <strong>Navigate:</strong> Go to <code>Coffee Management > Contracts > Coffee Contracts</code> and click <strong>New</strong>.
+      </li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_contract_menu.png" class="img-fluid border rounded shadow-sm my-4" alt="Coffee Contracts List View"/>
+    <ol start="2">
+      <li>
+        <strong>Enter Details &amp; Add Products:</strong> Fill in the buyer info and add product lines.</li>
+      <li>
+        <strong>Save &amp; Confirm:</strong> Save the draft, then click <strong>Confirm</strong> to trigger the automation.</li>
+    </ol>
+    <img src="/coffee_manual/static/src/img/level3_contract_form.png" class="img-fluid border rounded shadow-sm my-4" alt="Coffee Contract Form"/>
+
+    <div class="alert alert-success">🏆      <strong>Badge Earned: Workflow Warrior!</strong>...
+    </div>
+  </template>
+
+  <!-- ================================================================= -->
+  <!--    SECTION 5: LEVEL 4 - REPORTING                                 -->
+  <!-- ================================================================= -->
+  <template id="section_level_4">
+    <h2>5. Level 4: Unlock Insights &#45; Reporting and Analytics</h2>
+    <p class="lead">
+      <strong>Quest Objective:</strong> Turn your hard-earned data into powerful decisions.</p>
+    <p>Navigate to <code>Coffee Management > Reporting</code> to access all reports and analytics.</p>
+    <img src="/coffee_manual/static/src/img/level4_reporting_menu.png" class="img-fluid border rounded shadow-sm my-4" alt="Reporting and Analytics Menu"/>
+
+    <h4>5.1 Wizard-Based PDF Reports (Printable Power-Ups)</h4>
+    <p>Select a report from the "Generic Reports" section to open a wizard, set a date range, and generate a professional PDF.</p>
+
+    <h4>5.2 On-Screen Analytics (Interactive Dashboards)</h4>
+    <p>Select a view from the "Analytics &amp; Reports" section to open pivot tables and graphs for real-time analysis.</p>
+
+    <div class="alert alert-success">🏆      <strong>Badge Earned: Analytics Alchemist!</strong>...
+    </div>
+  </template>
+
+  <!-- ================================================================= -->
+  <!--    SECTION 6: LEVEL 5 - FAQ                                       -->
+  <!-- ================================================================= -->
+  <template id="section_level_5">
+    <h2>6. Level 5: Boss Battles  FAQ &amp; Troubleshooting</h2>
+    <p class="lead">
+      <strong>Quest Objective:</strong> Defeat common glitches and become a system champion!
+    </p>
+    <ul class="list-group">
+      <li class="list-group-item">
+        <p>
+          <strong>Q: A Manufacturing Order was not created when I confirmed a contract.</strong>
+        </p>
+        <p>
+          <strong>A:</strong> This is almost always a configuration issue. Check these three things:</p>
+        <ol>
+          <li>Are you selling a <strong>finished product</strong>, not a raw material?</li>
+          <li>Does the finished product have a <strong>Bill of Materials (BoM)</strong> defined?</li>
+          <li>Does the finished product have the "Manufacture" and "Replenish on Order (MTO)" routes checked on its Inventory tab?</li>
+        </ol>
+      </li>
+      <li class="list-group-item">
+        <p>
+          <strong>Q: The balance on my Stock Receiving form is negative.</strong>
+        </p>
+        <p>
+          <strong>A:</strong> This happens if the product being received is accidentally set to the "Consumable" product type. All coffee you track in inventory must be a "Storable Product". Go to the product form to change it.</p>
+      </li>
+      <li class="list-group-item">
+        <p>
+          <strong>Q: I cannot select a supplier or product in the dropdowns.</strong>
+        </p>
+        <p>
+          <strong>A:</strong> This is a safety feature!</p>
+        <ul>
+          <li>✓            <strong>Suppliers</strong> will only appear after you have created at least one Purchase Order for them in the standard Purchase app.</li>
+          <li>✓            <strong>Products</strong> will only appear after you have checked the "Is a Coffee Product" box on their product form.</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="alert alert-danger mt-3">
+      <strong>Common Alerts:</strong>
+      <ul>
+        <li>
+          <strong>High moisture content warning:</strong> Coffee exceeds 12% moisture.</li>
+        <li>
+          <strong>UG grade rejection:</strong> Quality score is below 31.</li>
+        <li>
+          <strong>Missing product:</strong> Ensure coffee origin and type are specified on the arrival.</li>
+      </ul>
+    </div>
+    <div class="alert alert-success">
+        🏆      <strong>Badge Earned: Troubleshooting Titan!</strong>
+    </div>
+  </template>
+
+  <!-- ================================================================= -->
+  <!--    SECTION 7: GLOSSARY                                            -->
+  <!-- ================================================================= -->
+  <template id="section_glossary">
+    <h2>7. Glossary: Your Adventurer's Dictionary</h2>
+    <ul class="list-unstyled">
+      <li>
+        <h5>AMG Grade</h5>
+        <p>The internal quality grade (G1, G2, etc.) assigned by our coffee evaluator team after evaluation.</p>
+      </li>
+      <li>
+        <h5>ECX Grade</h5>
+        <p>The official Ethiopian Commodity Exchange grade of the coffee upon purchase.</p>
+      </li>
+      <li>
+        <h5>GRN (Goods Receiving Note)</h5>
+        <p>The Coffee Stock Receiving record, used to formally accept stock into the warehouse.</p>
+      </li>
+      <li>
+        <h5>BoM (Bill of Materials)</h5>
+        <p>The "recipe" for a manufactured product, listing its raw material components.</p>
+      </li>
+      <li>
+        <h5>MTO (Make-to-Order)</h5>
+        <p>An inventory route that triggers production only when a customer places an order.</p>
+      </li>
+    </ul>
+    <hr/>
+    <p class="text-center font-weight-bold">Congratulations, you have completed the quest! You are now a master of the Coffee Management System.</p>
+  </template>
+</odoo>

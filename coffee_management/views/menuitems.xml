@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ROOT MENU -->
+        <menuitem id="menu_coffee_management_root"
+                  name="Coffee Management"
+                  sequence="10"/>
+
+        <!-- OPERATIONS MENU AND SUBMENUS -->
+        <menuitem id="menu_coffee_operations"
+                  name="Operations"
+                  parent="menu_coffee_management_root"
+                  sequence="10"/>
+
+        <menuitem id="menu_coffee_arrival"
+                  name="Coffee Arrival"
+                  parent="menu_coffee_operations"
+                  action="coffee_arrival_action"
+                  sequence="10"/>
+
+        <menuitem id="menu_coffee_stock_receiving"
+                  name="Stock Receiving"
+                  parent="menu_coffee_operations"
+                  action="coffee_stock_receiving_action"
+                  sequence="20"/>
+
+        <menuitem id="menu_coffee_stock_issue"
+                  name="Stock Issue"
+                  parent="menu_coffee_operations"
+                  action="coffee_stock_issue_action"
+                  sequence="30"/>
+
+        <!-- CONTRACTS MENU AND SUBMENUS -->
+        <menuitem id="menu_coffee_contract"
+                  name="Contracts"
+                  parent="menu_coffee_management_root"
+                  sequence="20"/>
+
+        <menuitem id="menu_coffee_contract_list"
+                  name="Coffee Contracts"
+                  parent="menu_coffee_contract"
+                  action="action_coffee_contract"
+                  sequence="10"/>
+
+        <!-- REPORTING MENU AND SUBMENUS -->
+        <menuitem id="menu_coffee_reporting"
+                  name="Reporting"
+                  parent="menu_coffee_management_root"
+                  sequence="30"/>
+
+        <menuitem id="menu_coffee_wizard_reports"
+                  name="Generic Reports"
+                  parent="menu_coffee_reporting"
+                  sequence="100"/>
+
+        <menuitem id="menu_coffee_weight_log"
+                   name="Weight History Logs"
+                   parent="menu_coffee_wizard_reports"
+                   action="coffee_weight_log_action"
+                   sequence="10"/>
+
+        <menuitem id="menu_report_coffee_arrival_quality"
+                  name="Arrival &amp; Quality Report"
+                  action="action_report_coffee_arrival_quality"
+                  parent="menu_coffee_wizard_reports"
+                  sequence="20"/>
+
+        <menuitem id="menu_report_coffee_stock_movement"
+                  name="Warehouse Stock Report"
+                  action="action_report_coffee_stock_movement"
+                  parent="menu_coffee_wizard_reports"
+                  sequence="30"/>
+
+        <menuitem id="menu_report_coffee_contract_fulfillment"
+                  name="Contract Fulfillment Report"
+                  action="action_report_coffee_contract_fulfillment"
+                  parent="menu_coffee_wizard_reports"
+                  sequence="40"/>
+
+        <menuitem id="menu_report_coffee_manufacturing_production"
+                  name="Manufacturing Report"
+                  action="action_report_coffee_manufacturing_production"
+                  parent="menu_coffee_wizard_reports"
+                  sequence="50"/>
+
+        <menuitem id="menu_coffee_reports_analytics"
+                  name="Analytics &amp; Reports"
+                  parent="menu_coffee_reporting"
+                  sequence="200"/>
+
+        <menuitem id="menu_report_coffee_arrival_analytics"
+                  name="Coffee Arrivals"
+                  action="action_coffee_arrival_report_all"
+                  parent="menu_coffee_reports_analytics"
+                  sequence="10"/>
+
+        <menuitem id="menu_report_coffee_quality_analytics"
+                  name="Coffee Quality"
+                  action="action_coffee_quality_report_all"
+                  parent="menu_coffee_reports_analytics"
+                  sequence="20"/>
+
+        <menuitem id="menu_report_coffee_weight_analytics"
+                  name="Coffee Weight"
+                  action="action_coffee_weight_report_all"
+                  parent="menu_coffee_reports_analytics"
+                  sequence="30"/>
+
+        <menuitem id="menu_report_coffee_receiving_analytics"
+                  name="Coffee Receiving"
+                  action="action_coffee_receiving_report_all"
+                  parent="menu_coffee_reports_analytics"
+                  sequence="40"/>
+
+        <menuitem id="menu_report_coffee_contract_analytics"
+                  name="Contract Fulfillment"
+                  action="action_coffee_contract_report_all"
+                  parent="menu_coffee_reports_analytics"
+                  sequence="50"/>
+
+        <!-- CONFIGURATION MENU AND SUBMENUS -->
+        <menuitem id="menu_coffee_configuration"
+                  name="Configuration"
+                  parent="menu_coffee_management_root"
+                  sequence="40"/>
+
+        <menuitem id="menu_coffee_attributes_config"
+                  name="Product Attributes"
+                  parent="menu_coffee_configuration"
+                  action="product.attribute_action"
+                  sequence="10"/>
+        <menuitem id="menu_coffee_classification"
+                  name="Coffee Types"
+                  parent="menu_coffee_configuration"
+                  action="coffee_type_action"
+                  sequence="20"/>
+        <menuitem id="menu_coffee_origin"
+                  name="Coffee Origins"
+                  parent="menu_coffee_configuration"
+                  action="coffee_origin_action"
+                  sequence="30"/>
+        <menuitem id="menu_coffee_grade"
+                  name="ECX Coffee Grades"
+                  parent="menu_coffee_configuration"
+                  action="coffee_grade_action"
+                  sequence="40"/>
+        <menuitem id="menu_ecx_coffee_product"
+                  name="ECX Coffee Products"
+                  parent="menu_coffee_configuration"
+                  action="action_ecx_coffee"
+                  sequence="50"/>
+        <menuitem id="coffee_zone_menu"
+                  name="Zones/Province"
+                  parent="menu_coffee_configuration"
+                  action="coffee_zone_action"
+                  sequence="60"/>
+        <menuitem id="coffee_woreda_menu"
+                  name="Woredas/District"
+                  parent="menu_coffee_configuration"
+                  action="coffee_woreda_action"
+                  sequence="70"/>
+    </data>
+</odoo>

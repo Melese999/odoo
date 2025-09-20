@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_coffee_contract" model="ir.actions.report">
+        <field name="name">Coffee Contract Details</field>
+        <field name="model">coffee.contract</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">coffee_management.report_coffee_contract_document</field>
+        <field name="report_file">coffee_management.report_coffee_contract_document</field>
+        <field name="print_report_name">object.contract_number</field>
+        <field name="binding_model_id" ref="model_coffee_contract"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <!-- reports/coffee_report_templates.xml -->
+     <!-- reports/coffee_report_templates.xml -->
+
+    <template id="report_coffee_contract_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Coffee Contract: <span t-field="o.contract_number"/></h2>
+                        
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>Date of Contract:</strong> <span t-field="o.contract_date"/><br/>
+                                <strong>Buyer:</strong> <span t-field="o.buyer_id.name"/><br/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Status:</strong> <span t-field="o.state"/><br/>
+                            </div>
+                        </div>
+
+                        <h3>Contract Lines</h3>
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Description</th>
+                                    <th class="text-right">Quantity (Tons)</th>
+                                    <th class="text-right">Unit Price (USD per LB)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.contract_line_ids" t-as="line">
+                                    <tr>
+                                        <td><span t-field="line.product_id.display_name"/></td>
+                                        <td><span t-field="line.name"/></td>
+                                        <td class="text-right"><span t-field="line.quantity_tons"/></td>
+                                        <td class="text-right"><span t-field="line.unit_price_usd_per_lb"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Fulfillment details can be added here if you implement recommendation #4 -->
+                        <div t-if="o.fulfillment_percentage" class="row mt32">
+                            <h3>Fulfillment Details</h3>
+                            <p>
+                                <strong>Total Delivered:</strong> <span t-field="o.delivered_kg"/> KG<br/>
+                                <strong>Fulfillment:</strong> <span t-esc="'%.2f' % o.fulfillment_percentage"/> %
+                            </p>
+                        </div>
+
+                        <p class="mt-5">
+                            This contract is subject to the terms and conditions agreed upon by both parties.
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+     
+</odoo>
