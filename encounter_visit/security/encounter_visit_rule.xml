@@ -1,0 +1,29 @@
+<odoo>
+  <data>
+
+    <!-- Salesperson: only their own encounters -->
+    <record id="encounter_visit_rule_sales_user" model="ir.rule">
+      <field name="name">Sales User: own encounters</field>
+      <field name="model_id" ref="model_encounter_encounter_visit"/>
+      <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+      <field name="domain_force">[('user_id', '=', user.id)]</field>
+    </record>
+
+    <!-- Sales Manager: encounters of their team -->
+    <record id="encounter_visit_rule_sales_manager" model="ir.rule">
+      <field name="name">Sales Manager: team encounters</field>
+      <field name="model_id" ref="model_encounter_encounter_visit"/>
+      <field name="groups" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
+      <field name="domain_force">['|', ('user_id', '=', user.id), ('team_id.user_id', '=', user.id)]</field>
+    </record>
+
+    <!-- Company Manager: see encounters by company_ids -->
+    <record id="encounter_visit_rule_company_manager" model="ir.rule">
+      <field name="name">Company Manager: encounters by company</field>
+      <field name="model_id" ref="model_encounter_encounter_visit"/>
+      <field name="groups" eval="[(4, ref('crm_lead_geolocation.group_company_manager'))]"/>
+      <field name="domain_force">['|', ('company_ids', 'in', user.company_ids.ids), ('company_ids', '=', False)]</field>
+    </record>
+
+  </data>
+</odoo>

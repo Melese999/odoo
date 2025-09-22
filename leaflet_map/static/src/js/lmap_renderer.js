@@ -1,64 +1,78 @@
 /** @odoo-module */
-
 import { Component, onWillStart, useRef, onMounted } from "@odoo/owl";
-import { loadJS, loadCSS } from "@web/core/assets";
 import { useService } from "@web/core/utils/hooks";
+import { loadJS, loadCSS } from "@web/core/assets";
 
 export class LeafletMapRenderer extends Component {
     static template = "leaflet_map.MapRenderer";
-    static props = {};
+
+    // Props that can be passed from the controller
+    static props = {
+        model: String,
+        fields: { type: Array },
+        nameField: { type: String, optional: true },
+        defaultLat: { type: Number, optional: true, default: 8.998093 },
+        defaultLng: { type: Number, optional: true, default: 38.777651 },
+        defaultZoom: { type: Number, optional: true, default: 12 },
+    };
 
     setup() {
-        this.root = useRef("map");
-        this.orm = useService("orm");
-        this.records = [];
+        this.root = useRef("map"); // container ref
+        this.orm = useService("orm"); // Odoo ORM service
+        this.records = []; // will hold fetched records
+        this.map = null;
 
-        // Load leaflet + fetch records
+        // Function to render markers
+        const renderMarkers = () => {
+            if (!this.map) return;
+            this.records.forEach((rec) => {
+                if (rec.latitude && rec.longitude) {
+                    const marker = L.marker([rec.latitude, rec.longitude]).addTo(this.map);
+                    const label = this.props.nameField ? rec[this.props.nameField] : rec.name || "No Name";
+                    marker.bindTooltip(`<b>${label}</b>`, { permanent: true, direction: "top", offset: [0, -10] });
+                    marker.bindPopup(`<b>${label}</b><br/>Lat: ${rec.latitude}, Lng: ${rec.longitude}`);
+                }
+            });
+        };
+
+        // Load Leaflet CSS and JS before rendering
         onWillStart(async () => {
             await loadCSS("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
             await loadJS("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
-            // Fetch crm.lead data (adapt fields if needed)
-            this.records = await this.orm.searchRead("crm.lead", [], [
-                "id",
-                "name",
-                "partner_name",
-                "latitude",
-                "longitude",
-            ]);
+
+            // Fetch records from Odoo model if props are provided
+            if (this.props.model && this.props.fields.length) {
+                this.records = await this.orm.searchRead(
+                    this.props.model,
+                    [],
+                    this.props.fields
+                );
+            }
         });
 
-        // Render map once DOM is ready
+        // Initialize map and markers after component is mounted
         onMounted(() => {
-            this.map = L.map(this.root.el).setView([8.998093, 38.777651], 12);
+            let initLat = this.props.defaultLat;
+            let initLng = this.props.defaultLng;
 
+            // Center map on first record if available
+            const first = this.records.find(r => r.latitude && r.longitude);
+            if (first) {
+                initLat = first.latitude;
+                initLng = first.longitude;
+            }
+
+            // Initialize Leaflet map
+            this.map = L.map(this.root.el).setView([initLat, initLng], this.props.defaultZoom);
+
+            // Add OpenStreetMap tiles
             L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 maxZoom: 19,
-                attribution:
-                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                attribution: '&copy; OpenStreetMap contributors',
             }).addTo(this.map);
 
-            // Add  markers
-            this.records.forEach((rec) => {
-                if (rec.latitude && rec.longitude) {
-                    const marker = L.marker([
-                        rec.latitude,
-                        rec.longitude,
-                    ]).addTo(this.map);
-
-               marker.bindTooltip(
-            `<b>${rec.name || "No Name"}</b>`,
-            { permanent: true, direction: "top", offset: [0, -10] }
-        );
-
-                    marker.bindPopup(`
-                        <b>${rec.name || "No Name"}</b><br/>
-                        Customer: ${rec.partner_name || "Unknown"}<br/>
-                        Lat: ${rec.latitude}, Lng: ${rec.longitude}<br/><br/>
-                        <a href="/web#id=${rec.id}&model=crm.lead&view_type=form" 
-                           class="btn btn-primary btn-sm text-white">Open</a>
-                    `);
-                }
-            });
+            // Add markers for each record
+            renderMarkers();
         });
     }
 }

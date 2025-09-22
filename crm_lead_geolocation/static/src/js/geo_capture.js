@@ -6,9 +6,9 @@ import { onMounted } from "@odoo/owl";
 
 patch(FormController.prototype, {
     setup() {
-        super.setup(...arguments);
-
+        super.setup(...arguments)
         onMounted(() => {
+            if (this.model.root.resModel === "crm.lead") {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -27,6 +27,7 @@ patch(FormController.prototype, {
                     }
                 );
             }
+        }
         });
     },
 });

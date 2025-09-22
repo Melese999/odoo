@@ -1,0 +1,20 @@
+<odoo>
+    <record id="view_crm_lead_form_inherit_encounter" model="ir.ui.view">
+        <field name="name">crm.lead.form.encounter</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+         <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    class="oe_stat_button"
+                    icon="fa-map-marker"
+                    name="action_view_encounter_visits"
+                    type="object"
+                >
+                    <field name="encounter_visit_count" string="Visits" widget="statinfo" />
+                </button>
+            </xpath>
+        </field>
+    </record>
+      
+</odoo>

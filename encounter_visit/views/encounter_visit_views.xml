@@ -1,0 +1,75 @@
+<odoo>
+    <!-- Action -->
+    <record id="action_encounter_visit" model="ir.actions.act_window">
+        <field name="name">Encounter Visits</field>
+        <field name="res_model">encounter.encounter_visit</field>
+        <field name="view_mode">tree,form,lmap</field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_encounter_visit_tree" model="ir.ui.view">
+        <field name="name">encounter.visit.tree</field>
+        <field name="model">encounter.encounter_visit</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="lead_id"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_encounter_visit_form" model="ir.ui.view">
+        <field name="name">encounter.visit.form</field>
+        <field name="model">encounter.encounter_visit</field>
+        <field name="arch" type="xml">
+            <form string="Encounter Visit" chatter_position="sided">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code" class="oe_inline" />
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="lead_id" invisible="partner_id != False"/>
+                            <field name="partner_id" invisible="lead_id != False"/>
+                        </group>
+
+                        <group>
+
+                            <field name="company_ids" widget="many2many_tags" readonly="1" force_save="1"/>
+                            <field name="team_id" readonly="1" force_save="1"/>
+                            <field name="user_id" readonly="1" force_save="1"/>
+                        </group>
+
+                    </group>
+                    <group>
+                        <field name="latitude" readonly="1" force_save="1"/>
+                        <field name="longitude" readonly="1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_encounter_visit_map" model="ir.ui.view">
+        <field name="name">encounter.visit.map</field>
+        <field name="model">encounter.encounter_visit</field>
+        <field name="type">lmap</field>
+        <field name="arch" type="xml">
+            <lmap model="encounter.encounter_visit" fields="id,name,latitude,longitude" name-field="name" default-lat="8.998093" default-lng="38.777651" default-zoom="12" />
+        </field>
+    </record>
+    <menuitem id="menu_encounter_visit_root" name="Encounter Visits" parent="crm.crm_menu_root" />
+
+    <menuitem id="menu_encounter_visit" name="Visits" parent="menu_encounter_visit_root" action="action_encounter_visit"/>
+</odoo>

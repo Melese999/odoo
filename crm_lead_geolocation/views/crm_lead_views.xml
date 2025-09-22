@@ -18,13 +18,21 @@
         </field>
     </record>
 
-    <record id="view_crm_lead_map" model="ir.ui.view">
-        <field name="name">crm.lead.map</field>
-        <field name="model">crm.lead</field>
-        <field name="arch" type="xml">
-            <lmap test="crm.lead"/>
-        </field>
-    </record>
+<record id="view_crm_lead_map" model="ir.ui.view">
+    <field name="name">crm.lead.map</field>
+    <field name="model">crm.lead</field>
+    <field name="type">lmap</field>
+    <field name="arch" type="xml">
+        <lmap 
+            model="crm.lead"
+            fields="id,name,partner_name,latitude,longitude"
+            name-field="partner_name"
+            default-lat="8.998093"
+            default-lng="38.777651"
+            default-zoom="12"
+        />
+    </field>
+</record>
     <record id="crm.crm_lead_all_leads" model="ir.actions.act_window">
         <field name="view_mode">kanban,tree,form,calendar,activity,lmap</field>
     </record>
