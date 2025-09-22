@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_encounter_encounter_visit,encounter.encounter_visit,model_encounter_encounter_visit,base.group_user,1,1,1,1
+access_encounter_encounter_visit_sales_user,CRM Encounter Sales User,model_encounter_encounter_visit,sales_team.group_sale_salesman,1,1,1,0
+access_encounter_encounter_visit_sales_manager,CRM Encounter Sales Manager,model_encounter_encounter_visit,sales_team.group_sale_manager,1,1,1,0
+access_encounter_encounter_visit_company_manager,CRM Encounter Company Manager,model_encounter_encounter_visit,crm_lead_geolocation.group_company_manager,1,1,1,0

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_partners_form_encounter_visit_inherit" model="ir.ui.view">
+        <field name="name">view.res.partner.form.encounter.inherited.visits</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="crm.view_partners_form_crm1" />
+        <field eval="18" name="priority" />
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+               <button
+                    class="oe_stat_button"
+                    icon="fa-map-marker"
+                    name="action_view_encounter_visits"
+                    type="object"
+                >
+                    <field name="encounter_visit_count" string="Visits" widget="statinfo" />
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>
