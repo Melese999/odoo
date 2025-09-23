@@ -18,8 +18,7 @@
                 <!-- Requirement 1 & 2: Add Industry and TIN Number fields -->
                 <!-- We will add them after the "Company Name" field for a logical layout. -->
                 <xpath expr="//field[@name='partner_name']" position="after">
-                    <field name="company_type" string="Industry / Company Type"/>
-                    <field name="tin_number" string="TIN Number"/>
+                     <field name="tin_number" string="TIN Number"/>
                 </xpath>
 
                 <!--

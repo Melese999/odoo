@@ -59,7 +59,7 @@ class EncounterVisit(models.Model):
             self.lead_id = False   # clear lead if partner is selected
             self.team_id = self.partner_id.team_id.id
             self.user_id = self.partner_id.user_id.id
-            self.company_ids = self.partner_id.company_id.id
+            self.company_ids = self.partner_id.company_id
 
 
     @api.model

@@ -7,21 +7,9 @@ import re
 class LeadExtension(models.Model):
     _inherit = 'crm.lead'
 
-    # 1. Add Industry / Company Type field
-    # We use a selection field for consistency. You can change these values.
-    company_type = fields.Selection([
-        ('manufacturing', 'Manufacturing'),
-        ('service', 'Service'),
-        ('retail', 'Retail'),
-        ('agriculture', 'Agriculture'),
-        ('construction', 'Construction'),
-        ('other', 'Other'),
-    ], string="Industry / Company Type")
-
-    # 2. Add TIN Number field
+    
     tin_number = fields.Char(string="TIN Number")
 
-    # 3. Add validations for Phone Number and Email
     @api.constrains('phone', 'mobile')
     def _check_phone_number(self):
         """ Validates phone and mobile numbers for Ethiopian format. """
