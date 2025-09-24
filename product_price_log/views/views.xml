@@ -1,0 +1,43 @@
+<odoo>
+    <!-- Product Price Log Tree -->
+    <record id="view_product_price_log_tree" model="ir.ui.view">
+        <field name="name">product.price.log.tree</field>
+        <field name="model">product.price.log</field>
+        <field name="arch" type="xml">
+            <tree string="Product Price Log">
+                <field name="product_id"/>
+                <field name="old_price"/>
+                <field name="new_price"/>
+                <field name="changed_date"/>
+                <field name="changed_by"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Product Price Log Graph -->
+    <record id="view_product_price_log_graph" model="ir.ui.view">
+        <field name="name">product.price.log.graph</field>
+        <field name="model">product.price.log</field>
+        <field name="arch" type="xml">
+            <graph string="Product Price Trend" type="line">
+                <field name="changed_date" type="row" interval="day"/> 
+                <field name="new_price" type="measure"/> 
+                <field name="product_id" type="col"/>  
+            </graph>
+        </field>
+    </record>
+
+    
+    <record id="action_product_price_log" model="ir.actions.act_window">
+        <field name="name">Product Price Logs</field>
+        <field name="res_model">product.price.log</field>
+        <field name="view_mode">tree,graph</field>
+        <!-- <field name="context">{'create': False}</field> -->
+    </record>
+
+              
+    <menuitem id="menu_product_price_log" 
+              name="Product Price Logs" 
+              parent="market_intelligence.market_intelligence_menu_root" 
+              action="action_product_price_log"/>
+</odoo>

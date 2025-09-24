@@ -1,0 +1,25 @@
+<odoo>
+    <record id="view_price_comparison_graph" model="ir.ui.view">
+        <field name="name">price.comparison.report.graph</field>
+        <field name="model">price.comparison.report</field>
+        <field name="arch" type="xml">
+            <graph string="AMG Price vs Competitor" type="line">
+                <field name="date" type="row" interval="day"/>
+                <field name="price" type="measure"/>
+                <field name="source" type="col"/>
+            </graph>
+        </field>
+    </record>
+  
+    <record id="action_price_comparison_report" model="ir.actions.act_window">
+        <field name="name">AMG Price vs Competitor</field>
+        <field name="res_model">price.comparison.report</field>
+        <field name="view_mode">graph</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_price_comparison_report"
+              name="AMG Price vs Competitor"
+              parent="market_intelligence.market_intelligence_menu_root"
+              action="action_price_comparison_report"/>
+</odoo>
