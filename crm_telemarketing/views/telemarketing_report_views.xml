@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_report_telemarketing_tree" model="ir.ui.view">
+        <field name="name">report.telemarketing.tree</field>
+        <field name="model">report.telemarketing</field>
+        <field name="arch" type="xml">
+            <tree string="Telemarketing Report" create="false" delete="false">
+                <field name="date"/>
+                <!--<field name="user_id"/>-->
+                <field name="lead_id"/>
+                <field name="call_type"/>
+                <!-- Use the new display field for Status -->
+                <field name="call_status_display"/>
+                <field name="duration" widget="float_time"/>
+                <field name="total_calls" sum="Total Calls"/>
+                <field name="done_calls" sum="Done Calls"/>
+                <field name="brand_awareness_created" sum="# Brand Awareness"/>
+                <!--<field name="orders_generated" sum="# Orders"/>-->
+                <field name="quality_rating"/>
+                <field name="avg_service_rating" avg="Avg Service Rating"/>
+                <field name="avg_product_rating" avg="Avg Product Rating"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Pivot and Search views remain largely the same but can be enhanced -->
+    <record id="view_report_telemarketing_pivot" model="ir.ui.view">
+        <field name="name">report.telemarketing.pivot</field>
+        <field name="model">report.telemarketing</field>
+        <field name="arch" type="xml">
+            <pivot string="Telemarketing Report">
+                <field name="user_id" type="row"/>
+                <field name="call_type" type="col"/>
+                <field name="total_calls" type="measure"/>
+                <field name="brand_awareness_created" type="measure"/>
+                <field name="orders_generated" type="measure"/>
+                <field name="duration" type="measure" string="Avg Duration (min)"/>
+                <field name="avg_service_rating" type="measure" string="Avg Service Rating"/>
+                <field name="avg_product_rating" type="measure" string="Avg Product Rating"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_report_telemarketing_search" model="ir.ui.view">
+        <field name="name">report.telemarketing.search</field>
+        <field name="model">report.telemarketing</field>
+        <field name="arch" type="xml">
+            <search string="Telemarketing Report">
+                <field name="user_id"/>
+                <field name="lead_id"/>
+                <field name="call_status_display"/>
+                <field name="call_type"/>
+                <separator/>
+                <filter string="My Calls" name="my_calls" domain="[('user_id', '=', uid)]"/>
+                <filter string="Sales Calls" name="sales_calls" domain="[('call_type', '=', 'sales')]"/>
+                <filter string="Survey Calls" name="survey_calls" domain="[('call_type', '=', 'survey')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="User" name="group_by_user" context="{'group_by':'user_id'}"/>
+                    <filter string="Call Type" name="group_by_call_type" context="{'group_by':'call_type'}"/>
+                    <filter string="Status" name="group_by_status" context="{'group_by':'call_status_display'}"/>
+                    <filter string="Quality Rating" name="group_by_quality" context="{'group_by':'quality_rating'}"/>
+                    <filter string="Month" name="group_by_month" context="{'group_by':'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_report_telemarketing" model="ir.actions.act_window">
+        <field name="name">Telemarketing Report</field>
+        <field name="res_model">report.telemarketing</field>
+        <field name="view_mode">pivot,graph,tree</field>
+        <field name="search_view_id" ref="view_report_telemarketing_search"/>
+    </record>
+
+    <menuitem id="menu_report_telemarketing_root" name="Telemarketing Reporting" parent="crm.crm_menu_report" sequence="30"/>
+    <menuitem id="menu_report_telemarketing" name="Analysis Report" parent="menu_report_telemarketing_root" action="action_report_telemarketing" sequence="1"/>
+</odoo>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_telemarketing_dashboard_group" model="spreadsheet.dashboard.group">
+        <field name="name">CRM Telemarketing Reports</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="telemarketing_spreadsheet_dashboard" model="spreadsheet.dashboard">
+        <field name="name">Telemarketing Dashboard</field>
+        <!-- This ref was missing the prefix -->
+        <field name="dashboard_group_id" ref="crm_telemarketing.crm_telemarketing_dashboard_group"/>
+        <field name="spreadsheet_data"><![CDATA[{
+            "version": 4,
+            "sheets": [{
+                "id": "a24a73a3-b789-482f-b258-a92c5a714761",
+                "name": "Telemarketing Analysis",
+                "cells": {},
+                "figures": [{
+                    "id": "a00d8d7b-11d1-4191-881c-d85c48b26f5d",
+                    "tag": "chart",
+                    "data": { "id": "a00d8d7b-11d1-4191-881c-d85c48b26f5d", "type": "bar", "title": "Inbound vs Outbound by Day", "legendPosition": "top", "background": "transparent", "dataSources": { "dataSource1": { "type": "odoo", "metaData": { "resModel": "report.telemarketing", "domain": [], "groupBy": ["date"], "measure": "total_calls", "order": null }, "searchParams": { "domain": [], "context": {}, "groupBy": ["direction"] } } } }
+                }],
+                "pivots": {
+                    "1": {
+                        "id": 1,
+                        "colGroupBys": ["direction"],
+                        "domain": [],
+                        "measures": [
+                            { "field": "total_calls", "operator": "sum" },
+                            { "field": "done_calls", "operator": "sum" },
+                            { "field": "pending_calls", "operator": "sum" }
+                        ],
+                        "model": "report.telemarketing",
+                        "rowGroupBys": ["user_id"],
+                        "name": "Calls by User - Direction",
+                        "fieldMatching": {}
+                    }
+                }
+            }]
+        }]]></field>
+    </record>
+
+    <!-- Add a menu item to access the spreadsheet dashboard -->
+    <record id="action_telemarketing_spreadsheet_dashboard_client" model="ir.actions.act_url">
+        <field name="name">Telemarketing Spreadsheet</field>
+        <field name="url" eval="'/spreadsheet/dashboard/' + str(ref('crm_telemarketing.telemarketing_spreadsheet_dashboard'))"/>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="menu_crm_telemarketing_spreadsheet_dashboard"
+              name="Spreadsheet Report"
+              parent="crm_telemarketing.menu_report_telemarketing_root"
+              action="action_telemarketing_spreadsheet_dashboard_client"
+              sequence="2"/>
+</odoo>

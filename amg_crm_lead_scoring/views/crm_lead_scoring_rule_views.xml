@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_crm_lead_scoring_rule_tree" model="ir.ui.view">
+        <field name="name">crm.lead.scoring.rule.tree</field>
+        <field name="model">crm.lead.scoring.rule</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="score_value"/>
+                <field name="application_count"/>
+                <field name="active" widget="boolean_toggle"/>
+
+                <!-- Quick info columns -->
+                <field name="country_id" optional="show"/>
+                <field name="main_industry_id" optional="show"/>
+                <field name="priority" optional="show"/>
+                <field name="min_expected_revenue" optional="show"/>
+                <field name="tag_matching_type" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View - Completely User Friendly -->
+    <record id="view_crm_lead_scoring_rule_form" model="ir.ui.view">
+        <field name="name">crm.lead.scoring.rule.form</field>
+        <field name="model">crm.lead.scoring.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="test_rule_domain" type="object" string="Test Rule" class="btn-primary"/>
+                    <button name="action_update_application_count" type="object" string="Update Count"/>
+                    <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                </header>
+
+                <sheet>
+                    <!-- Basic Information -->
+                    <group string="Rule Information">
+                        <group>
+                            <field name="name" placeholder="e.g., High-Value Ethiopian Leads"/>
+                            <field name="sequence"/>
+                            <field name="score_value"/>
+                        </group>
+                        <group>
+                            <label for="application_count"/>
+                            <div>
+                                <field name="application_count" readonly="1"/>
+                                <span>leads match this rule</span>
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- Location Based Scoring -->
+                    <group string="Location" name="location_group">
+                        <group>
+                            <field name="country_id"/>
+                            <field name="state_id"/>
+                        </group>
+                    </group>
+
+                    <!-- Industry Based Scoring -->
+                    <group string="Industry" name="industry_group">
+                        <group>
+                            <field name="main_industry_id"/>
+                        </group>
+                        <group>
+                            <field name="secondary_industry_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+
+                    <!-- Financial Based Scoring -->
+                    <group string="Revenue" name="revenue_group">
+                        <group>
+                            <field name="min_expected_revenue"/>
+                            <field name="max_expected_revenue"/>
+                        </group>
+                    </group>
+
+                    <!-- Other Criteria -->
+                    <group string="Other Criteria" name="other_criteria_group">
+                        <group>
+                            <field name="source_id"/>
+                            <field name="priority"/>
+                        </group>
+                        <group>
+                            <field name="source_id"/>
+                            <field name="tag_matching_type" widget="many2many_tags"/>
+                        </group>
+                    </group>
+
+                    <!-- Advanced Section (Collapsible) -->
+                    <group string="Advanced Rules" name="advanced_group" invisible="[('custom_domain', '=', False)]">
+                        <group>
+                            <field name="custom_domain"
+                                   placeholder="e.g., ['|', ('partner_name', 'ilike', 'Inc'), ('email_from', 'ilike', 'CEO')]"
+                                   nolabel="1"/>
+                            <div class="alert alert-info mt-2" role="alert">
+                                <strong>Advanced Usage:</strong> Use Odoo domain syntax for complex rules that can't be created with the fields above.
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- Rule Examples -->
+                    <group string="Rule Examples" colspan="2">
+                        <div class="alert alert-success" role="alert">
+                            <strong>Example Rules:</strong><br/>
+                            • <b>High-Value Ethiopian Real Estate:</b> Country = Ethiopia, Main Industry = Real Estate, Min Revenue = 50000, Score = 80<br/>
+                            • <b>European Construction Leads:</b> Country in [France, Germany, UK], Secondary Industries includes Construction, Score = 60<br/>
+                            • <b>VIP Contacts:</b> Priority = Very High, OR Tags includes VIP, Score = 100
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_crm_lead_scoring_rule_search" model="ir.ui.view">
+        <field name="name">crm.lead.scoring.rule.search</field>
+        <field name="model">crm.lead.scoring.rule</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="country_id"/>
+                <field name="main_industry_id"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="High Scoring (50+)" name="high_scoring" domain="[('score_value', '>=', 50)]"/>
+                <filter string="Negative Scoring" name="negative_scoring" domain="[('score_value', '&lt;', 0)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Country" name="group_by_country" context="{'group_by': 'country_id'}"/>
+                    <filter string="Industry" name="group_by_industry" context="{'group_by': 'main_industry_id'}"/>
+                    <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_crm_lead_scoring_rule" model="ir.actions.act_window">
+        <field name="name">Lead Scoring Rules</field>
+        <field name="res_model">crm.lead.scoring.rule</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_crm_lead_scoring_rule_tree"/>
+        <field name="search_view_id" ref="view_crm_lead_scoring_rule_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+    </record>
+
+    <menuitem
+        id="menu_crm_lead_scoring_rule"
+        name="Lead Scoring Rules"
+        parent="crm.crm_menu_config"
+        action="action_crm_lead_scoring_rule"
+        sequence="21"/>
+</odoo>

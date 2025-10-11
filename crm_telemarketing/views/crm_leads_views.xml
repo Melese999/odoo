@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    This view inherits the standard CRM Lead form to add our new fields.
+    -->
+    <record id="view_crm_lead_form_inherit_telemarketing" model="ir.ui.view">
+        <field name="name">crm.lead.form.telemarketing</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <div name="button_box" position="inside">
+                <!--
+                [FIXED] Added name and type to make the button clickable.
+                It now calls the 'action_view_data_quality_calls' Python method.
+                -->
+                <button class="oe_stat_button"
+                        icon="fa-check-square-o"
+                        type="object"
+                        name="action_view_data_quality_calls">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="data_quality_score"/> %</span>
+                        <span class="o_stat_text">Data Quality</span>
+                    </div>
+                </button>
+            </div>
+
+            <!--
+            Requirement 2: Display the 'telemarketing_call_ids' field.
+            We add a new "Telemarketing" tab (page) to the notebook on the form.
+            -->
+            <xpath expr="//page[@name='lead']" position="after">
+                <page string="Telemarketing" name="telemarketing">
+                    <field name="telemarketing_call_ids" mode="tree,form">
+                        <!-- This is how the list of calls will look inside the tab -->
+                        <tree editable="bottom">
+                            <field name="date"/>
+                            <field name="call_type"/>
+                            <field name="direction"/>
+                            <field name="state"/>
+                            <field name="status_id"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="duration" widget="float_time"/>
+                        </tree>
+                        <!-- This is the form that opens if you click to create a new call in full view -->
+                        <form>
+                            <sheet>
+                                <group>
+                                    <group string="General">
+                                        <field name="lead_id" readonly="1"/>
+                                        <field name="user_id"/>
+                                        <field name="date"/>
+                                        <field name="duration" widget="float_time"/>
+                                        <field name="direction"/>
+                                        <field name="state"/>
+                                        <field name="status_id"/>
+                                    </group>
+                                    <group string="Classification">
+                                        <field name="call_type"/>
+                                    </group>
+                                </group>
+                                <notebook>
+                                    <page string="Outbound KPIs" attrs="{'invisible': [('direction', '!=', 'outbound')]}">
+                                        <group>
+                                            <field name="brand_awareness_created"/>
+                                            <field name="quality_rating" widget="priority"/>
+                                            <field name="sale_order_ids" widget="many2many_tags"/>
+                                        </group>
+                                    </page>
+                                    <page string="Inbound KPIs" attrs="{'invisible': [('direction', '!=', 'inbound')]}">
+                                        <group>
+                                            <field name="detailed_info_provided"/>
+                                            <field name="follow_up_scheduled"/>
+                                        </group>
+                                    </page>
+                                    <page string="Data Quality Check">
+                                        <group>
+                                            <field name="name_confirmed"/>
+                                            <field name="address_confirmed"/>
+                                            <field name="phone_confirmed"/>
+                                        </group>
+                                    </page>
+                                    <page string="Satisfaction Survey" attrs="{'invisible': [('call_type', '!=', 'survey')]}">
+                                        <group>
+                                            <field name="service_rating" widget="priority"/>
+                                            <field name="product_rating" widget="priority"/>
+                                        </group>
+                                    </page>
+                                    <page string="Notes">
+                                        <field name="note"/>
+                                    </page>
+                                </notebook>
+                            </sheet>
+                        </form>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+    <!-- This is the new view from Step 2 -->
+    <record id="view_crm_telemarketing_call_quality_tree" model="ir.ui.view">
+        <field name="name">crm.telemarketing.call.quality.tree</field>
+        <field name="model">crm.telemarketing.call</field>
+        <field name="arch" type="xml">
+            <tree string="Data Quality Calls" create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="name_confirmed"/>
+                <field name="address_confirmed"/>
+                <field name="phone_confirmed"/>
+            </tree>
+        </field>
+    </record>
+</odoo>
