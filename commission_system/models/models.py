@@ -191,6 +191,7 @@ class CommissionRecords(models.Model):
             ('approved', 'Approved'),
             ('billed', 'Billed'),
             ('confirmed', 'Confirmed'),
+            ('audited', 'Audited'),
             ('paid', 'Paid')
         ],
         string='Status', default='draft', tracking=True
@@ -202,6 +203,8 @@ class CommissionRecords(models.Model):
     approved_date = fields.Datetime(string="Approved Date", readonly=True)
     confirmed_by = fields.Many2one('res.users', string='Confirmed By', readonly=True)
     confirmed_date = fields.Datetime('Confirmation Date', readonly=True)
+    audited_by = fields.Many2one('res.users', string='Audited By', readonly=True)
+    audited_date = fields.Datetime('Audit Date', readonly=True)
     paid_by = fields.Many2one('res.users', string='Paid By', readonly=True)
     paid_date = fields.Datetime('Payment Date', readonly=True)
 
@@ -334,7 +337,7 @@ class CommissionRecords(models.Model):
     def unlink(self):
         """Prevent deletion of records in certain states or linked to bills"""
         for rec in self:
-            if rec.state in ['billed', 'confirmed', 'paid']:
+            if rec.state in ['billed', 'confirmed','audited', 'paid']:
                 raise UserError(_(
                     "Cannot delete commission record in %s state."
                 ) % rec.state)
@@ -367,6 +370,7 @@ class CommissionRecords(models.Model):
             group_check = self.env.ref('commission_system.group_commission_check')
             group_approve = self.env.ref('commission_system.group_commission_approve')
             group_confirm = self.env.ref('commission_system.group_commission_confirm')
+            group_audit = self.env.ref('commission_system.group_commission_audit')
             group_pay = self.env.ref('commission_system.group_commission_pay')
 
 
@@ -386,6 +390,8 @@ class CommissionRecords(models.Model):
                     raise UserError(_("You are not allowed to approve commissions."))
                 if new_state == 'confirmed' and user not in group_confirm.users:
                     raise UserError(_("You are not allowed to Confirm bill commissions."))
+                if new_state == 'audited' and user not in group_audit.users:
+                    raise UserError(_("You are not allowed to Audit bill commissions."))
 
                 if new_state == 'paid' and user not in group_pay.users:
                     raise UserError(_("You are not allowed to pay bill commissions."))
@@ -395,12 +401,13 @@ class CommissionRecords(models.Model):
                     'checked': ['approved', 'draft'],
                     'approved': ['billed', 'checked'],
                     'billed': ['confirmed', 'approved', 'billed'],
-                    'confirmed': ['paid', 'billed', 'confirmed'],
-                    'paid': ['confirmed']
+                    'confirmed': ['billed', 'confirmed','audited'],
+                    'audited': ['confirmed','audited','paid'],
+                    'paid': ['audited']
                 }
 
                 # Special case for checked->confirmed in approved worksheets
-                if not (current_state == 'checked' and new_state == 'confirmed' and
+                if not (current_state == 'checked' and new_state == 'confirmed' and new_state == 'audited' and
                         record.worksheet_id and record.worksheet_id.state == 'approved'):
                     if new_state not in allowed_transitions.get(current_state, []):
                         raise UserError(_(
@@ -421,6 +428,8 @@ class CommissionRecords(models.Model):
                         'approved_date': False,
                         'confirmed_by': False,  # Clear if reverting
                         'confirmed_date': False,
+                        'audited_by': False, 
+                        'audited_date':False,
                         'paid_by': False,
                         'paid_date': False
                     }
@@ -430,13 +439,22 @@ class CommissionRecords(models.Model):
                         'approved_date': fields.Datetime.now(),
                         'confirmed_by': False,  # Clear if reverting
                         'confirmed_date': False,
+                        'audited_by': False, 
+                        'audited_date':False,
                         'paid_by': False,
                         'paid_date': False
                     }
                 elif new_state == 'confirmed':
                     tracking_updates[record.id] = {
                         'confirmed_by': self.env.user.id,
-                        'confirmed_date': fields.Datetime.now()
+                        'confirmed_date': fields.Datetime.now(),
+                        'audited_by': False, 
+                        'audited_date':False
+                    }
+                elif new_state == 'audited':
+                    tracking_updates[record.id] = {
+                        'audited_by': self.env.user.id,
+                        'audited_date': fields.Datetime.now()
                     }
                 elif new_state == 'paid':
                     tracking_updates[record.id] = {
@@ -448,6 +466,8 @@ class CommissionRecords(models.Model):
                     tracking_updates[record.id] = {
                         'confirmed_by': False,
                         'confirmed_date': False,
+                        'audited_by': False,
+                        'audited_date': False,
                         'paid_by': False,
                         'paid_date': False
                     }
@@ -475,7 +495,7 @@ class CommissionRecords(models.Model):
                 bills.with_context(skip_sync=True).write({
                     'state': new_state,
                     # Clear confirmation fields when reverting
-                    **({'confirmed_by': False, 'date_confirmed': False} if new_state == 'billed' else {})
+                    **({'confirmed_by': False, 'date_confirmed': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
                 })
 
             # 2. Sync with worksheet (if exists)
@@ -486,7 +506,7 @@ class CommissionRecords(models.Model):
                 worksheets.with_context(skip_sync=True).write({
                     'state': new_state,
                     # Clear confirmation fields when reverting
-                    **({'confirmed_by': False, 'confirmed_date': False} if new_state == 'billed' else {})
+                    **({'confirmed_by': False, 'confirmed_date': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
                 })
 
                 # Sync worksheet lines
@@ -496,7 +516,7 @@ class CommissionRecords(models.Model):
                     ).with_context(skip_sync=True).write({
                         'state': new_state,
                         # Clear confirmation fields when reverting
-                        **({'confirmed_by': False, 'confirmed_date': False} if new_state == 'billed' else {})
+                        **({'confirmed_by': False, 'confirmed_date': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
                     })
 
             # 3. Auto-assign to worksheet if needed
@@ -569,7 +589,7 @@ class CommissionRecords(models.Model):
     def reset_to_approved_if_bill_deleted(self):
         """Reset state to approved when linked bill is deleted"""
         for rec in self:
-            if rec.state in ['billed', 'confirmed'] and (not rec.bill_id or rec.bill_id.state != 'paid'):
+            if rec.state in ['billed', 'confirmed','audited'] and (not rec.bill_id or rec.bill_id.state != 'paid'):
                 rec.write({
                     'state': 'approved',
                     'bill_id': False
@@ -582,7 +602,8 @@ class CommissionRecords(models.Model):
             'draft': ['approved'],
             'approved': ['billed'],
             'billed': ['confirmed'],
-            'confirmed': ['paid'],
+            'confirmed': ['audited'],
+            'audited':['paid'],
             'paid': []
         }
         for record in self:
@@ -601,8 +622,9 @@ class CommissionRecords(models.Model):
             'draft': ['approved'],
             'approved': ['billed'],
             'billed': ['confirmed', 'billed'],
-            'confirmed': ['paid', 'confirmed', 'billed'],  # Explicit revert
-            'paid': ['paid', 'confirmed']
+            'confirmed': ['audited', 'confirmed', 'billed'],  # Explicit revert
+            'confirmed': ['paid', 'confirmed', 'audited'],  # Explicit revert
+            'paid': ['paid', 'audited']
         }
         for record in self:
             if record.state not in allowed_transitions:
@@ -652,13 +674,15 @@ class CommissionRecords(models.Model):
         return {
             'confirmed_by': False,
             'confirmed_date': False,
+            'audited_by': False,
+            'audited_date': False,
             'paid_by': False,
             'paid_date': False
         }
 
     def _validate_revert(self, new_state):
         """Additional validation for revert operations"""
-        if new_state == 'billed' and self.state == 'confirmed':
+        if new_state == 'billed' and self.state == 'confirmed' and self.state == 'audited':
             if any(line.payment_id for line in self.line_ids):
                 raise UserError(_(
                     "Cannot revert to billed with existing payments"
@@ -674,7 +698,7 @@ class CommissionRecords(models.Model):
             worksheets.with_context(skip_record_update=True).write({
                 'state': new_state,
                 # Ensure worksheet also clears confirmed/paid fields when reverting
-                **({'confirmed_by': False, 'confirmed_date': False} if new_state == 'billed' else {})
+                **({'confirmed_by': False, 'confirmed_date': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
             })
 
         # 2. Sync with bill
@@ -688,6 +712,8 @@ class CommissionRecords(models.Model):
                 **({
                        'confirmed_by': False,
                        'date_confirmed': False,
+                       'audited_by': False,
+                       'audited_date': False,
                        'paid_by': False,
                        'date_paid': False
                    } if new_state == 'billed' else {})
@@ -711,7 +737,8 @@ class CommissionWorksheet(models.Model):
         'checked': ['approved', 'draft'],
         'approved': ['billed', 'checked'],
         'billed': ['confirmed'],
-        'confirmed': ['paid'],
+        'confirmed': ['audited'],
+        'audited': ['paid'],
         'paid': [],
     }
 
@@ -720,7 +747,8 @@ class CommissionWorksheet(models.Model):
         'checked': ['approved', 'draft'],
         'approved': ['billed', 'checked'],
         'billed': ['confirmed', 'approved'],
-        'confirmed': ['paid', 'billed'],
+        'confirmed': ['audited', 'billed'],
+        'confirmed': ['paid', 'confirmed'],
         'paid': []
     }
 
@@ -741,6 +769,7 @@ class CommissionWorksheet(models.Model):
         ('approved', 'Approved'),
         ('billed', 'Billed'),
         ('confirmed', 'Confirmed'),
+        ('audited', 'Audited'),
         ('paid', 'Paid'),
     ], string='Status', default='draft', tracking=True)
     '''checker_id = fields.Many2one('res.users', string='Checked By', readonly=True)
@@ -1319,6 +1348,7 @@ class CommissionWorksheet(models.Model):
         state_mapping = {
             'billed': 'billed',
             'confirmed': 'confirmed',
+            'audited': 'audited',
             'paid': 'paid',
             'draft': 'approved'
         }
@@ -1342,8 +1372,9 @@ class CommissionWorksheet(models.Model):
             'draft': ['approved'],
             'approved': ['billed'],
             'billed': ['confirmed', 'billed'],  # Allow staying in billed
-            'confirmed': ['paid', 'confirmed', 'billed'],  # Explicitly allow revert
-            'paid': ['paid', 'confirmed']  # Allow partial revert
+            'confirmed': ['audited', 'confirmed', 'billed'],  # Explicitly allow revert
+            'audited': ['paid', 'confirmed', 'audited'],  # Explicitly allow revert
+            'paid': ['paid', 'audited']  # Allow partial revert
         }
         for worksheet in self:
             if worksheet.state not in allowed_transitions:
@@ -1369,7 +1400,8 @@ class CommissionWorksheet(models.Model):
                 'checked': ['approved', 'draft'],
                 'approved': ['billed', 'checked'],
                 'billed': ['confirmed', 'approved'],
-                'confirmed': ['paid', 'billed'],
+                'confirmed': ['audited', 'billed'],
+                'audited': ['paid', 'confirmed'],
                 'paid': []  # Final state
             }
 
@@ -1421,7 +1453,8 @@ class CommissionWorksheet(models.Model):
             'checked': ['approved', 'draft'],
             'approved': ['billed', 'checked'],
             'billed': ['confirmed', 'approved'],
-            'confirmed': ['paid', 'billed'],
+            'confirmed': ['audited', 'billed'],
+            'audited': ['paid', 'confirmed'],
             'paid': []
         }
         if new_state not in allowed.get(old_state, []):
@@ -1559,6 +1592,7 @@ class CommissionLine(models.Model):
         ('approved', 'Approved'),
         ('billed', 'Billed'),
         ('confirmed', 'Confirmed'),
+        ('audited', 'audited'),
         ('paid', 'Paid'),
     ], default='draft', string='Status')
     total_commission = fields.Monetary(string='Total Commission')
@@ -1568,6 +1602,8 @@ class CommissionLine(models.Model):
     amount = fields.Float(string='Amount', digits='Account')
     confirmed_by = fields.Many2one('res.users', string='Confirmed By', readonly=True)
     date_confirmed = fields.Datetime('Confirmation Date', readonly=True)
+    audited_by = fields.Many2one('res.users', string='Audited By', readonly=True)
+    audited_date = fields.Datetime('Audit Date', readonly=True)
     checked_by = fields.Many2one('res.users', string="Checked By", readonly=True)
     approved_by = fields.Many2one('res.users', string="Approved By", readonly=True)
     checked_date = fields.Datetime(string="Checked Date", readonly=True)
@@ -1579,7 +1615,7 @@ class CommissionLine(models.Model):
 
 class CommissionBill(models.Model):
     _name = 'commission_system.bill'
-    _inherit = 'base.audit.mixin'
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'base.audit.mixin']
     _description = 'Commission System Bill'
     _order = 'start_date desc, name desc'
 
@@ -1587,11 +1623,13 @@ class CommissionBill(models.Model):
     DRAFT = 'draft'
     BILLED = 'billed'
     CONFIRMED = 'confirmed'
+    AUDITED = 'audited'
     PAID = 'paid'
     STATES = [
         (DRAFT, 'Draft'),
         (BILLED, 'Billed'),
         (CONFIRMED, 'Confirmed'),
+        (AUDITED,'Audited'),
         (PAID, 'Paid'),
     ]
 
@@ -1619,8 +1657,9 @@ class CommissionBill(models.Model):
     state_changed_by = fields.Many2one('res.users', string='State Changed By', readonly=True)
     date_billed = fields.Datetime('Billed Date', readonly=True)
     date_confirmed = fields.Datetime('Confirmation Date', readonly=True)
+    audited_date = fields.Datetime('Audit Date', readonly=True)
     date_paid = fields.Datetime('Payment Date', readonly=True)
-    confirmed_by = fields.Many2one('res.users', string='Confirmed By', readonly=True)
+    audited_by = fields.Many2one('res.users', string='Audited By', readonly=True)
     paid_by = fields.Many2one('res.users', string='Paid By', readonly=True)
     month = fields.Char(string="Month")
 
@@ -1649,7 +1688,7 @@ class CommissionBill(models.Model):
     def _compute_tax(self):
         for bill in self:
             domain = [
-                ('state', 'in', ['billed', 'confirmed', 'paid']),
+                ('state', 'in', ['billed', 'confirmed','audited', 'paid']),
                 ('agent_id', '=', bill.agent_id.id),
                 ('month', '=', bill.month),
             ]
@@ -1836,6 +1875,7 @@ class CommissionBill(models.Model):
             state_mapping = {
                 self.BILLED: 'billed',
                 self.CONFIRMED: 'confirmed',
+                self.audited_by: 'audited',
                 self.PAID: 'paid',
                 self.DRAFT: 'approved'
             }
@@ -1872,6 +1912,7 @@ class CommissionBill(models.Model):
         """Determines what state child records should have"""
         return {
             self.BILLED: 'billed',
+            self.CONFIRMED: 'confirmed',
             self.CONFIRMED: 'confirmed',
             self.PAID: 'paid',
             self.DRAFT: 'approved'
@@ -2058,10 +2099,82 @@ class CommissionBill(models.Model):
 
         return True
 
+    def action_Audit(self):
+        """
+        Audit the commission bill and synchronize all related documents
+        - Validates all prerequisites
+        - Updates bill state to Audited
+        - Synchronizes worksheets, lines and commission records
+        - Provides detailed error handling
+        """
+        for bill in self:
+            # Validate bill is in correct starting state
+            if bill.state != self.CONFIRMED:
+                raise UserError(_("Only Confirmed bills can be audited"))
+
+            # Find all related worksheets
+            worksheets = self.env['commission_system.worksheet'].search([
+                ('commission_line_ids.bill_id', '=', bill.id)
+            ])
+
+            # Pre-validate worksheets and lines
+            validation_errors = []
+            for worksheet in worksheets:
+                if worksheet.state != 'confirmed':
+                    validation_errors.append(
+                        _("Worksheet %s must be in Confirmed state") % worksheet.name
+                    )
+
+                invalid_lines = worksheet.line_ids.filtered(
+                    lambda l: l.state not in ['confirmed', 'audited']
+                )
+                if invalid_lines:
+                    invalid_states = ", ".join(sorted(set(
+                        invalid_lines.mapped('state')
+                    )))
+                    validation_errors.append(
+                        _("Worksheet %s has lines in invalid states: %s") % (
+                            worksheet.name,
+                            invalid_states
+                        )
+                    )
+
+            if validation_errors:
+                raise UserError("\n".join([
+                    _("Cannot Audit bill due to the following issues:"),
+                    *validation_errors
+                ]))
+
+            # Perform confirmation
+            bill.write({
+                'state': self.AUDITED,
+                'audited_by': self.env.user.id,
+                'audited_date': fields.Datetime.now(),
+                'state_changed_by': self.env.user.id
+            })
+
+            # Synchronize all related documents
+            try:
+                bill._sync_all_related_documents()
+                bill.message_post(body=_(
+                    "Bill successfully Audited. Synchronized %d worksheets and %d records."
+                ) % (len(worksheets), len(bill.commission_records)))
+            except Exception as e:
+                _logger.error(
+                    "Post-audit sync failed for bill %s (ID: %d): %s",
+                    bill.name, bill.id, str(e),
+                    exc_info=True
+                )
+                bill.message_post(body=_(
+                    "Bill audited but synchronization encountered issues. "
+                    "Some related documents may not have been updated. Error: %s"
+                ) % str(e))
+
+        return True
     def action_pay(self):
         for bill in self:
-            if bill.state != self.CONFIRMED:
-                raise UserError(_("Only confirmed bills can be paid"))
+            if bill.state != self.AUDITED:
+                raise UserError(_("Only audited bills can be paid"))
 
             bill.write({
                 'state': self.PAID,
@@ -2082,6 +2195,25 @@ class CommissionBill(models.Model):
     def action_reopen(self):
         """Improved reopen method with complete field resetting"""
         for bill in self:
+            if bill.state == self.AUDITED:
+                bill.commission_records.write({
+                    'audited_by': False,
+                    'audited_date': False,
+                    'state': 'confirmed'
+                })
+
+                if bill.line_ids:
+                    bill.line_ids.write({
+                        'audited_by': False,
+                        'audited_date': False,
+                        'state': 'confirmed'
+                    })
+
+                bill.write({
+                    'state': self.CONFIRMED,
+                    'audited_by': False,
+                    'audited_date': False
+                })
             if bill.state == self.CONFIRMED:
                 bill.commission_records.write({
                     'confirmed_by': False,
@@ -2106,9 +2238,11 @@ class CommissionBill(models.Model):
                 bill.commission_records.write({
                     'paid_by': False,
                     'paid_date': False,
+                    'audited_by': False,
+                    'audited_date': False,
                     'confirmed_by': False,
                     'confirmed_date': False,
-                    'state': 'confirmed'
+                    'state': 'audited'
                 })
 
                 if bill.line_ids:
@@ -2117,11 +2251,13 @@ class CommissionBill(models.Model):
                         'paid_date': False,
                         'confirmed_by': False,
                         'confirmed_date': False,
-                        'state': 'confirmed'
+                        'audited_by': False,
+                        'audited_date': False,
+                        'state': 'audited'
                     })
 
                 bill.write({
-                    'state': self.CONFIRMED,
+                    'state': self.AUDITED,
                     'paid_by': False,
                     'date_paid': False
                 })
@@ -2150,7 +2286,7 @@ class CommissionBill(models.Model):
                                        'old_state': bill._fields['state'].convert_to_export(bill.state, bill),
                                        'new_state': self._fields['state'].convert_to_export(
                                            self.BILLED if bill.state == self.CONFIRMED else
-                                           self.CONFIRMED if bill.state == self.PAID else
+                                           self.CONFIRMED if bill.state == self.AUDITED else self.AUDITED if bill.state == self.PAID else
                                            self.DRAFT,
                                            bill
                                        ),
@@ -2165,8 +2301,9 @@ class CommissionBill(models.Model):
         allowed_transitions = {
             self.DRAFT: [self.BILLED],
             self.BILLED: [self.CONFIRMED, self.DRAFT],
-            self.CONFIRMED: [self.PAID, self.BILLED],
-            self.PAID: [self.CONFIRMED]
+            self.CONFIRMED: [self.AUDITED, self.BILLED],
+            self.AUDITED: [self.PAID, self.CONFIRMED],
+            self.PAID: [self.AUDITED]
         }
 
         for bill in self:
@@ -2238,7 +2375,7 @@ class CommissionBill(models.Model):
         """Find bills with overlapping date ranges for merging"""
         domain = [
             ('agent_id', '=', agent_id),
-            ('state', 'in', [self.BILLED, self.CONFIRMED]),
+            ('state', 'in', [self.BILLED, self.CONFIRMED,self.AUDITED]),
             '|',
             '&', ('start_date', '<=', end_date), ('end_date', '>=', end_date),
             '&', ('start_date', '<=', start_date), ('end_date', '>=', start_date)
@@ -2331,6 +2468,7 @@ class CommissionBill(models.Model):
         state_mapping = {
             self.BILLED: 'billed',
             self.CONFIRMED: 'confirmed',
+            self.AUDITED : 'audited',
             self.PAID: 'paid',
             self.DRAFT: 'approved'
         }
