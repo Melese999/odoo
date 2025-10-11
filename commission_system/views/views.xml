@@ -567,8 +567,8 @@
                     <header>
                         <!-- Statusbar with state buttons -->
                         <field name="state" widget="statusbar"
-                               statusbar_visible="billed,confirmed,paid"
-                               options="{'clickable': ['billed', 'confirmed', 'paid']}"/>
+                               statusbar_visible="billed,confirmed,audited,paid"
+                               options="{'clickable': ['billed', 'confirmed','audited', 'paid']}"/>
 
                         <!-- Button to add commissions (kept as it's not a state transition) -->
                         <button name="action_add_records"
@@ -632,6 +632,11 @@
                             </page>
                         </notebook>
                     </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
                 </form>
             </field>
         </record>
@@ -671,8 +676,8 @@
                                     <t t-esc="record.state.value or 'Undefined'"/>
                                 </div>
                                 <div class="o_kanban_footer">
-                                    <field name="state" widget="statusbar" statusbar_visible="billed,confirmed,paid"
-                                           help="Click to move through Billed → Confirmed → Paid status"/>
+                                    <field name="state" widget="statusbar" statusbar_visible="billed,confirmed,audited,paid"
+                                           help="Click to move through Billed → Confirmed → Audited → Paid status"/>
                                 </div>
                             </div>
                         </t>
@@ -692,6 +697,8 @@
                                 help="Bills in draft state"/>
                         <filter name="filter_confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"
                                 help="Bills that are confirmed"/>
+                        <filter name="filter_audited" string="Audited" domain="[('state', '=', 'audited')]"
+                                help="Bills that are Audited"/>
                         <filter name="filter_paid" string="Paid" domain="[('state', '=', 'paid')]"
                                 help="Bills that are marked as paid"/>
                     </separator>
@@ -774,6 +781,7 @@
                     <field name="checked_by"/>
                     <field name="approved_by"/>
                     <field name="confirmed_by"/>
+                    <field name="audited_by"/>
                     <field name="paid_by"/>
                 </tree>
             </field>
@@ -923,6 +931,7 @@
                             <filter string="Approved" name="approved" domain="[('state','=','approved')]"/>
                             <filter string="Billed" name="billed" domain="[('state','=','billed')]"/>
                             <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                            <filter string="Audited" name="audited" domain="[('state','=','audited')]"/>
                             <filter string="Paid" name="paid" domain="[('state','=','paid')]"/>
                             <filter string="Unbilled" name="unbilled" domain="[('bill_id','=',False)]"/>
                         </filter>
