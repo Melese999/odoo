@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+    This file is CORRECT. The models 'spreadsheet.measure', 'spreadsheet.group_by',
+    and 'spreadsheet.dataset' are all required configuration models from the
+    core 'spreadsheet' module. They must not be changed.
+    -->
+
+    <!-- Measures -->
+    <record id="telemarketing_measure_total_calls" model="spreadsheet.measure">
+        <field name="name">Total Calls</field>
+        <field name="field_id" ref="crm_telemarketing.field_report_telemarketing_total_calls"/>
+        <field name="aggregation">sum</field>
+    </record>
+
+    <record id="telemarketing_measure_done_calls" model="spreadsheet.measure">
+        <field name="name">Done Calls</field>
+        <field name="field_id" ref="crm_telemarketing.field_report_telemarketing_done_calls"/>
+        <field name="aggregation">sum</field>
+    </record>
+
+    <record id="telemarketing_measure_pending_calls" model="spreadsheet.measure">
+        <field name="name">Pending Calls</field>
+        <field name="field_id" ref="crm_telemarketing.field_report_telemarketing_pending_calls"/>
+        <field name="aggregation">sum</field>
+    </record>
+
+    <!-- Group By Fields -->
+    <record id="telemarketing_group_user" model="spreadsheet.group_by">
+        <field name="name">User</field>
+        <field name="field_id" ref="crm_telemarketing.field_report_telemarketing_user_id"/>
+    </record>
+
+    <record id="telemarketing_group_direction" model="spreadsheet.group_by">
+        <field name="name">Direction</field>
+        <field name="field_id" ref="crm_telemarketing.field_report_telemarketing_direction"/>
+    </record>
+
+    <record id="telemarketing_group_date" model="spreadsheet.group_by">
+        <field name="name">Date</field>
+        <field name="field_id" ref="crm_telemarketing.field_report_telemarketing_date"/>
+    </record>
+
+    <!-- Spreadsheet Dataset for Telemarketing (Now defined LAST) -->
+    <record id="telemarketing_spreadsheet_dataset" model="spreadsheet.dataset">
+        <field name="name">Telemarketing Dataset</field>
+        <field name="model_id" ref="crm_telemarketing.model_report_telemarketing"/>
+        <field name="domain">[]</field>
+        <field name="measure_ids" eval="[(6, 0, [
+            ref('crm_telemarketing.telemarketing_measure_total_calls'),
+            ref('crm_telemarketing.telemarketing_measure_done_calls'),
+            ref('crm_telemarketing.telemarketing_measure_pending_calls')
+        ])]"/>
+        <field name="group_by_ids" eval="[(6, 0, [
+            ref('crm_telemarketing.telemarketing_group_user'),
+            ref('crm_telemarketing.telemarketing_group_direction'),
+            ref('crm_telemarketing.telemarketing_group_date')
+        ])]"/>
+    </record>
+
+</odoo>

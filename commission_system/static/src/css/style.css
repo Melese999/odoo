@@ -1,0 +1,237 @@
+/* Commission System Styles */
+.o_commission_line_kanban {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef !important;
+}
+
+.o_commission_line_kanban:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    border-color: #007bff !important;
+}
+
+.commission-hover {
+    background-color: #f8f9fa !important;
+    border-color: #007bff !important;
+}
+
+.o_commission_amount {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #28a745 !important;
+}
+
+.commission-details {
+    font-size: 0.9em;
+}
+
+/* Sketch Widget Styles */
+.o_sketch_widget {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin: 1rem 0;
+}
+
+.o_sketch_widget h6 {
+    color: #495057;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Animation for commission updates */
+@keyframes commissionHighlight {
+    0% { background-color: #ffffcc; }
+    100% { background-color: transparent; }
+}
+
+.commission-updated {
+    animation: commissionHighlight 2s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .o_commission_line_kanban {
+        margin: 0.5rem 0;
+        padding: 1rem !important;
+    }
+
+    .o_sketch_widget {
+        padding: 1rem;
+    }
+}
+
+/* Custom badge styles */
+.bg-commission-paid {
+    background-color: #28a745 !important;
+}
+
+.bg-commission-pending {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.bg-commission-cancelled {
+    background-color: #dc3545 !important;
+}
+
+/* Button enhancements */
+.btn-commission {
+    border-radius: 20px;
+    padding: 0.25rem 1rem;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.btn-commission:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Sketch Widget Enhanced Styles */
+.o_sketch_widget {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    margin: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.o_sketch_canvas_container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.o_sketch_canvas_container canvas {
+    transition: all 0.3s ease;
+}
+
+.o_sketch_canvas_container canvas:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.o_sketch_tool_preview {
+    transition: all 0.2s ease;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #dee2e6;
+}
+
+.o_sketch_tool.active {
+    background-color: #007bff !important;
+    color: white !important;
+    border-color: #007bff !important;
+}
+
+/* Drawing cursor styles */
+.o_sketch_canvas_container canvas {
+    cursor: crosshair;
+}
+
+.o_sketch_canvas_container canvas:active {
+    cursor: grabbing;
+}
+
+/* Notification animations */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.o_sketch_notification {
+    animation: fadeInOut 3s ease-in-out;
+}
+
+/* Toolbar enhancements */
+.o_sketch_widget .btn-group .btn {
+    border-radius: 6px;
+    padding: 0.375rem 0.75rem;
+}
+
+.o_sketch_widget .form-control-color {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 6px;
+    border: 2px solid #dee2e6;
+    cursor: pointer;
+}
+
+.o_sketch_widget .form-select {
+    border-radius: 6px;
+    border: 2px solid #dee2e6;
+}
+
+/* Responsive design for sketch widget */
+@media (max-width: 768px) {
+    .o_sketch_widget {
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    .o_sketch_widget .btn-group {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .o_sketch_widget .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .o_sketch_canvas_container canvas {
+        height: 300px;
+    }
+}
+
+/* Hover effects for tools */
+.o_sketch_tool:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Custom scrollbar for canvas area */
+.o_sketch_canvas_container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.o_sketch_canvas_container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.o_sketch_canvas_container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.o_sketch_canvas_container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.o_sketch_canvas_container canvas {
+    /*min-width: 600px;*/
+    /*min-height: 400px;*/
+    border: 2px solid red;
+}

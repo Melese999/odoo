@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_crm_lead_form_inherit_telemarketing" model="ir.ui.view">
+        <field name="name">crm.lead.form.telemarketing</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <!-- The type="object" has been removed from this button -->
+                <button class="oe_stat_button" icon="fa-check-square-o">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="data_quality_score"/> %</span>
+                        <span class="o_stat_text">Data Quality</span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//page[@name='lead']" position="after">
+                <page string="Telemarketing" name="telemarketing">
+                    <field name="telemarketing_call_ids" mode="tree,form">
+                        <tree editable="bottom">
+                            <field name="date"/>
+                            <field name="call_type"/>
+                            <field name="direction"/>
+                            <field name="status_id"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="state"/>
+                            <field name="duration" widget="float_time"/>
+                        </tree>
+                        <form>
+                            <sheet>
+                                <group>
+                                    <group string="General">
+                                        <field name="lead_id" readonly="1"/>
+                                        <field name="user_id"/>
+                                        <field name="date"/>
+                                        <field name="duration" widget="float_time"/>
+                                        <field name="direction"/>
+                                        <field name="status_id"/>
+                                        <field name="state"/>
+                                    </group>
+                                    <group string="Classification">
+                                        <field name="call_type"/>
+                                    </group>
+                                </group>
+                                <notebook>
+                                    <page string="Outbound KPIs" attrs="{'invisible': [('direction', '!=', 'outbound')]}">
+                                        <group>
+                                            <field name="brand_awareness_created"/>
+                                            <field name="quality_rating" widget="priority"/>
+                                            <field name="sale_order_ids" widget="many2many_tags"/>
+                                        </group>
+                                    </page>
+                                    <page string="Inbound KPIs" attrs="{'invisible': [('direction', '!=', 'inbound')]}">
+                                        <group>
+                                            <field name="detailed_info_provided"/>
+                                            <field name="follow_up_scheduled"/>
+                                        </group>
+                                    </page>
+                                    <page string="Data Quality Check">
+                                        <group>
+                                            <field name="name_confirmed"/>
+                                            <field name="address_confirmed"/>
+                                            <field name="phone_confirmed"/>
+                                        </group>
+                                    </page>
+                                    <page string="Satisfaction Survey" attrs="{'invisible': [('call_type', '!=', 'survey')]}">
+                                        <group>
+                                            <field name="service_rating" widget="priority"/>
+                                            <field name="product_rating" widget="priority"/>
+                                        </group>
+                                    </page>
+                                    <page string="Notes">
+                                        <field name="note"/>
+                                    </page>
+                                </notebook>
+                            </sheet>
+                        </form>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

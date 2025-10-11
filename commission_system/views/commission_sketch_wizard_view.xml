@@ -1,0 +1,114 @@
+<odoo>
+    <data>
+        <record id="commission_sketch_wizard_view_form" model="ir.ui.view">
+            <field name="name">commission.sketch.wizard.view.form</field>
+            <field name="model">commission.sketch.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Add Design Sketch">
+                    <sheet>
+                        <group>
+                            <field name="order_line_id" invisible="1"/>
+                            <field name="description"/>
+                        </group>
+                        <separator string="Sketch Editor"/>
+                        <div id="drawing_area_container" class="oe_canvas_drawing">
+                            <field name="sketch_image" widget="image" class="oe_avatar" filename="file_name"/>
+                            <canvas id="sketch_canvas" style="border:1px solid #000;"/>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button string="Save Sketch" name="action_save_sketch" type="object" class="btn btn-primary"/>
+                        <button string="Clear Drawing" name="clear_drawing" id="clear_drawing_button" type="button" class="btn btn-secondary"/>
+                        <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action to open the wizard -->
+        <record id="action_commission_sketch_wizard" model="ir.actions.act_window">
+            <field name="name">Add Design Sketch</field>
+            <field name="res_model">commission.sketch.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Asset tag to load the drawing script -->
+        <record id="assets_backend_drawing" model="ir.asset">
+            <field name="name">drawing.assets.backend</field>
+            <field name="bundle">web.assets_backend</field>
+            <script type="text/javascript" t-raw="true">
+                document.addEventListener('DOMContentLoaded', function() {
+                    const canvas = document.getElementById('sketch_canvas');
+                    if (!canvas) {
+                        return; // The view is not this one, so we stop here.
+                    }
+                    const ctx = canvas.getContext('2d');
+                    const clearButton = document.getElementById('clear_drawing_button');
+                    const sketchImageField = document.querySelector('input[name="sketch_image"]');
+
+                    let isDrawing = false;
+                    let lastX = 0;
+                    let lastY = 0;
+
+                    function setCanvasDimensions() {
+                        const container = document.getElementById('drawing_area_container');
+                        canvas.width = container.offsetWidth - 2; // -2 for borders
+                        canvas.height = Math.min(window.innerHeight * 0.5, 400); // Set a max height
+                        ctx.lineWidth = 5;
+                        ctx.lineJoin = 'round';
+                        ctx.lineCap = 'round';
+                        ctx.strokeStyle = '#000000';
+                    }
+
+                    setCanvasDimensions();
+                    window.addEventListener('resize', setCanvasDimensions);
+
+                    function handleStart(e) {
+                        e.preventDefault();
+                        isDrawing = true;
+                        const rect = canvas.getBoundingClientRect();
+                        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                        [lastX, lastY] = [x, y];
+                    }
+
+                    function handleMove(e) {
+                        e.preventDefault();
+                        if (!isDrawing) return;
+                        const rect = canvas.getBoundingClientRect();
+                        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                        ctx.beginPath();
+                        ctx.moveTo(lastX, lastY);
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                        [lastX, lastY] = [x, y];
+                    }
+
+                    function handleEnd() {
+                        isDrawing = false;
+                        const dataURL = canvas.toDataURL('image/png');
+                        const base64Data = dataURL.split(',')[1];
+                        sketchImageField.value = base64Data;
+                    }
+
+                    canvas.addEventListener('mousedown', handleStart);
+                    canvas.addEventListener('mousemove', handleMove);
+                    canvas.addEventListener('mouseup', handleEnd);
+                    canvas.addEventListener('mouseout', handleEnd);
+
+                    canvas.addEventListener('touchstart', handleStart);
+                    canvas.addEventListener('touchmove', handleMove);
+                    canvas.addEventListener('touchend', handleEnd);
+                    canvas.addEventListener('touchcancel', handleEnd);
+
+                    clearButton.addEventListener('click', function() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        sketchImageField.value = '';
+                    });
+                });
+            </script>
+        </record>
+    </data>
+</odoo>

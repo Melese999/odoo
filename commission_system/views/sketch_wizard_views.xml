@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Wizard Form View -->
+        <record id="view_commission_sketch_wizard_form" model="ir.ui.view">
+            <field name="name">commission.sketch.wizard.form</field>
+            <field name="model">commission.sketch.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Commission System - Add Design Sketch">
+                    <sheet>
+                        <group>
+                            <group string="Sketch Details">
+                                <field name="order_line_id" invisible="1"/>
+                                <field name="description" placeholder="Enter sketch description..."/>
+                            </group>
+                            <group string="Drawing Area">
+                                <!--<div class="alert alert-info">
+                                    <i class="fa fa-info-circle"/> Draw your accessory design below.
+                                    Use different line weights and colors as needed.
+                                </div>-->
+                                <field name="sketch_image" widget="commission_sketch" options="{'width': 800, 'height': 500}"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_save_sketch" string="Save Sketch" type="object" class="btn-primary"/>
+                        <button name="action_clear_sketch" string="Clear Drawing" type="object" class="btn-secondary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Wizard Action -->
+        <record id="action_commission_sketch_wizard" model="ir.actions.act_window">
+            <field name="name">Commission System - Add Design Sketch</field>
+            <field name="res_model">commission.sketch.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_view_types">form</field>
+        </record>
+    </data>
+</odoo>

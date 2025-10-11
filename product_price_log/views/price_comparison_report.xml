@@ -10,14 +10,62 @@
             </graph>
         </field>
     </record>
-  
+
+    <record id="view_price_comparison_pivot" model="ir.ui.view">
+        <field name="name">price.comparison.report.pivot</field>
+        <field name="model">price.comparison.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Price Comparison Pivot" >
+                <field name="product_id" type="row"/>
+                <field name="date" type="row" interval="day"/>
+                <field name="price" type="measure"/>
+                <field name="source" type="col"/>
+                <field name="competitor_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_price_comparison_tree" model="ir.ui.view">
+        <field name="name">price.comparison.report.tree</field>
+        <field name="model">price.comparison.report</field>
+        <field name="arch" type="xml">
+            <tree string="Price Comparison List" default_order="date asc">
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="competitor_id"/>
+                <field name="source"/>
+                <field name="price"/>
+            </tree>
+        </field>
+    </record>
+
+<record id="view_price_comparison_search" model="ir.ui.view">
+    <field name="name">price.comparison.report.search</field>
+    <field name="model">price.comparison.report</field>
+    <field name="arch" type="xml">
+        <search string="Price Comparison Search">
+            <field name="product_id"/>
+            <field name="competitor_id"/>
+            <filter name="my_company_filter" string="AMG Price" domain="[('source', '=', 'AMG price')]"/>
+            <group expand="1" string="Group By">
+                <group>
+                    <filter name="group_by_product" string="Product" context="{'group_by':'product_id'}"/>
+                    <filter name="group_by_competitor" string="Competitor" context="{'group_by':'competitor_id'}"/>
+                </group>
+            </group>
+        </search>
+    </field>
+</record>
+
     <record id="action_price_comparison_report" model="ir.actions.act_window">
         <field name="name">AMG Price vs Competitor</field>
         <field name="res_model">price.comparison.report</field>
-        <field name="view_mode">graph</field>
+        <field name="view_mode">tree,graph,pivot</field>
+        <field name="search_view_id" ref="view_price_comparison_search"/>
         <field name="context">{}</field>
     </record>
 
+    <!-- Menu Item -->
     <menuitem id="menu_price_comparison_report"
               name="AMG Price vs Competitor"
               parent="market_intelligence.market_intelligence_menu_root"
