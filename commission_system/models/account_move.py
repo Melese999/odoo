@@ -23,7 +23,8 @@ class AccountMove(models.Model):
     agent_id = fields.Many2one(
         'res.partner',
         string="Agent",
-        help="The agent responsible for this invoice"
+        help="The agent responsible for this invoice",
+        tracking=True
     )
 
     bank_reference = fields.Char(
@@ -211,3 +212,19 @@ class AccountMove(models.Model):
                 move.amount_untaxed_signed = -total_untaxed_recalculated * sign
                 move.amount_tax_signed = -total_tax_recalculated * sign
                 move.amount_total_signed = -(total_untaxed_recalculated + total_tax_recalculated) * sign
+    def write(self, vals):
+        if self.env.context.get('skip_agent_sync'):
+            return super().write(vals)
+        agent_changed = 'agent_id' in vals
+        res = super().write(vals)
+        if agent_changed:
+            new_agent_id = vals['agent_id']
+            for invoice in self:
+                if invoice.commission_record_ids:
+                    invoice.commission_record_ids.with_context(skip_agent_sync=True).write({
+                        'agent_id': new_agent_id
+                    })
+                sale_orders = invoice.commission_record_ids.mapped('sales_order_id')
+                if sale_orders:
+                    sale_orders.with_context(skip_agent_sync=True).write({'agent_id': new_agent_id})
+        return res

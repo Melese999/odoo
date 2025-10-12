@@ -173,7 +173,7 @@ class CommissionRecords(models.Model):
     invoice_id = fields.Many2one('account.move', string="Invoice", ondelete='cascade')
     sales_order_id = fields.Many2one('sale.order', string="Sales Order", ondelete='set null')
     salesperson_id = fields.Many2one('res.users', string="Salesperson", ondelete='set null')
-    agent_id = fields.Many2one('res.partner', string="Agent", ondelete='set null')
+    agent_id = fields.Many2one('res.partner', string="Agent", ondelete='set null',tracking=True)
     amount = fields.Float(string="Commission Amount", readonly=True, required=True)
     product_id = fields.Many2one('product.product', string="Product", ondelete='set null')
     sales_team_id = fields.Many2one('crm.team', string='Sales Team')
@@ -484,7 +484,14 @@ class CommissionRecords(models.Model):
 
         # Execute the main write operation
         result = super().write(vals)
-
+        
+        if 'agent_id' in vals:
+          for record in self:
+             if record.invoice_id:
+                 record.invoice_id.write({'agent_id': vals['agent_id']})
+             if record.sales_order_id:
+                 record.sales_order_id.write({'agent_id': vals['agent_id']})
+    
         # Post-write synchronization
         if 'state' in vals and not self.env.context.get('skip_sync'):
             new_state = vals['state']
