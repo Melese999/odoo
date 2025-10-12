@@ -16,7 +16,7 @@
     'version': '0.1.1',
     'license': 'LGPL-3',
 
-    'depends': ['board', 'base', 'crm', 'sale', 'account', 'contacts', 'product', 'web', 'uom', 'mrp', 'stock'],
+    'depends': ['board', 'base', 'crm', 'sale', 'account', 'contacts', 'product', 'web', 'uom', 'mrp', 'stock','sale_stock'],
 
     'data': [
         'security/groups.xml',
