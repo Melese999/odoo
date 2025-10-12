@@ -119,4 +119,17 @@
 
         </field>
         </record>
+
+        <record id="sale_order_form_stat_buttons_all_users" model="ir.ui.view">
+            <field name="name">sale.order.form.stat.buttons.all.users</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Make Delivery button available to all -->
+                <xpath expr="//button[@name='action_view_delivery']" position="attributes">
+                    <attribute name="groups">base.group_user</attribute>
+                </xpath>
+            </field>
+        </record>
 </odoo>
