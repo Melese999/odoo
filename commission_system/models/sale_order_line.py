@@ -133,7 +133,9 @@ class SaleOrderLine(models.Model):
         compute='_compute_sketch_attachments',
         help="All sketches linked to this sale order line."
     )
-
+    def duplicate(self):
+        if self:
+            self.copy(default={'order_id': self.order_id.id})
     def _compute_sketch_attachments(self):
         for line in self:
             line.sketch_attachment_ids = self.env['ir.attachment'].search([
@@ -270,5 +272,3 @@ class SaleOrderLine(models.Model):
 
     def unlink(self):
         return super().unlink()
-
-
