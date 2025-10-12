@@ -33,6 +33,7 @@
         'views/report_templates.xml',
         'views/reports.xml',
         'views/sale_order_views.xml',
+        'views/sale_order_line_views.xml',
         'views/product_template_extend.xml',
         'views/mrp_production_view.xml',
         'views/mrp_production_views.xml',
