@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu for KPI Management -->
+    <menuitem
+        id="kpi_management_menu_root"
+        name="KPI Management"
+        parent="crm.crm_menu_root"
+        sequence="25"/>
+
+    <!-- Menu Item for KPI Targets -->
+    <menuitem
+        id="kpi_target_menu"
+        name="KPI Targets"
+        parent="kpi_management_menu_root"
+        action="kpi_target_action"
+        sequence="10"/>
+
+    <!-- Menu Item for KPI Definitions (under Configuration) -->
+    <menuitem
+        id="kpi_definition_menu"
+        name="KPI Definitions"
+        parent="crm.crm_menu_config"
+        action="kpi_definition_action"
+        sequence="99"/>
+</odoo>
