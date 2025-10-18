@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="kpi_definition_view_form" model="ir.ui.view">
+        <field name="name">kpi.definition.form</field>
+        <field name="model">kpi.definition</field>
+        <field name="arch" type="xml">
+            <form string="KPI Definition">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g., Leads Generated"/></h1>
+                    </div>
+                    <group>
+                        <group string="General">
+                            <field name="description" placeholder="Describe what this KPI measures..."/>
+                        </group>
+                        <group string="Primary Model Configuration">
+                            <field name="target_model_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="target_model_name" invisible="1"/>
+                            <field name="user_field_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="date_field_id" options="{'no_create': True, 'no_open': True}"/>
+                        </group>
+                    </group>
+
+                    <group string="Computation Method">
+                        <field name="computation_method" widget="radio"/>
+                        <field name="sum_field_id"
+                               options="{'no_create': True, 'no_open': True}"
+                               invisible="computation_method != 'sum_field'"/>
+                        <field name="related_model_id"
+                               options="{'no_create': True, 'no_open': True}"
+                               invisible="computation_method != 'count_related_records'"/>
+                        <field name="relation_field_id"
+                               options="{'no_create': True, 'no_open': True}"
+                               invisible="computation_method != 'count_related_records'"
+                               domain="[('model_id', '=', related_model_id), ('ttype', '=', 'many2one'), ('relation', '=', target_model_name)]"
+                        />
+                        <field name="filter_domain"
+                               invisible="computation_method != 'count_related_records'"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree and Action views remain the same -->
+    <record id="kpi_definition_view_tree" model="ir.ui.view">
+        <field name="name">kpi.definition.tree</field>
+        <field name="model">kpi.definition</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Definitions">
+                <field name="name"/>
+                <field name="computation_method"/>
+                <field name="target_model_id" string="Primary Model"/>
+                <field name="related_model_id" optional="show"/>
+                <field name="sum_field_id" optional="show"/>
+                <field name="filter_domain" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kpi_definition_action" model="ir.actions.act_window">
+        <field name="name">KPI Definitions</field>
+        <field name="res_model">kpi.definition</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

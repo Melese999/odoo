@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_kpi_history_tree" model="ir.ui.view">
+        <field name="name">kpi.history.tree</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <tree string="KPI History" default_order="activity_date desc">
+                <field name="activity_date" string="Date"/>
+                <field name="target_id" string="KPI Target"/>
+                <field name="source_document" string="Source Document"/>
+                <field name="description" string="Description"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+   <!-- <record id="view_kpi_history_form" model="ir.ui.view">
+        <field name="name">kpi.history.form</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <form string="KPI Activity History">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="target_id" string="KPI Target" required="1"/>
+                            <field name="activity_date" string="Activity Date"/>
+                            <field name="source_document" string="Source Document"
+                                   options="{'no_open': False, 'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="source_document_model" string="Source Model" readonly="1"/>
+                            <field name="source_document_id" string="Source ID" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description" string="Description" nolabel="1"
+                               placeholder="Activity description..."
+                               style="height: 100px;"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>-->
+
+    <!-- Search View -->
+    <record id="view_kpi_history_search" model="ir.ui.view">
+        <field name="name">kpi.history.search</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <search string="Search KPI History">
+                <field name="target_id" string="KPI Target"/>
+                <field name="source_document" string="Source Document"/>
+                <field name="activity_date" string="Activity Date"/>
+                <filter string="Today" name="today" domain="[('activity_date', '>=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="This Week" name="this_week" domain="[('activity_date', '>=', context_today().strftime('%Y-%m-%d 00:00:00') - datetime.timedelta(days=context_today().weekday()))]"/>
+                <filter string="This Month" name="this_month" domain="[('activity_date', '>=', context_today().strftime('%Y-%m-01 00:00:00'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="KPI Target" name="group_by_target" context="{'group_by': 'target_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'activity_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action to open KPI History -->
+     <record id="action_kpi_history" model="ir.actions.act_window">
+        <field name="name">KPI Activity History</field>
+        <field name="res_model">kpi.history</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_kpi_history_tree"/>
+        <field name="search_view_id" ref="view_kpi_history_search"/>
+        <field name="domain">[('target_id', '!=', False)]</field>
+        <field name="context">{'search_default_group_by_target': 1, 'create': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No KPI-related activities have been logged yet.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item for KPI History -->
+    <menuitem
+        id="menu_kpi_history"
+        name="KPI History"
+        parent="kpi_management_menu_root"
+        action="action_kpi_history"
+        sequence="20"/>
+</odoo>

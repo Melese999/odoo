@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Enhanced Search View for Filtering -->
+    <record id="kpi_target_view_search" model="ir.ui.view">
+        <field name="name">kpi.target.search</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <search string="KPI Target Search">
+                <field name="name" string="Target"/>
+                <field name="user_id"/>
+                <field name="kpi_id"/>
+                <separator/>
+                <filter string="My Targets" name="my_targets" domain="[('user_id', '=', uid)]"/>
+                <filter string="Active Targets" name="active" domain="[('date_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="KPI" name="group_by_kpi" context="{'group_by': 'kpi_id'}"/>
+                    <filter string="Start Date (Month)" name="group_by_date" context="{'group_by': 'date_start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 2. Pivot View for Analysis (CORRECTED) -->
+    <record id="kpi_target_view_pivot" model="ir.ui.view">
+        <field name="name">kpi.target.pivot</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <!-- The invalid 'disable_grouping' attribute has been removed -->
+            <pivot string="KPI Analysis">
+                <field name="user_id" type="row"/>
+                <field name="kpi_id" type="col"/>
+                <field name="target_value" type="measure"/>
+                <field name="actual_value" type="measure"/>
+                <field name="achievement_percentage" type="measure" avg="Average Achievement"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- 3. Graph View for Visualization -->
+    <record id="kpi_target_view_graph" model="ir.ui.view">
+        <field name="name">kpi.target.graph</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <graph string="KPI Analysis" type="bar">
+                <field name="user_id"/>
+                <field name="target_value" type="measure"/>
+                <field name="actual_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+</odoo>

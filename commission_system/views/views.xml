@@ -577,7 +577,11 @@
                                 class="btn-primary"
                                 invisible="state != 'draft'"
                                 context="{'agent_id': agent_id}"/>
-
+                        <button name="action_reopen"
+                                type="object"
+                                string="Roll back"
+                                class="btn-primary"
+                                invisible="state == 'draft'"/>  
                         <button name="print_report"
                                 string="Print Bill"
                                 type="object"

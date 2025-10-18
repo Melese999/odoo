@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This file can be used to pre-load default holiday schedules if needed. -->
+    <!-- For example, you could create a record for "Standard US Holidays". -->
+    <!-- Leaving it empty is also perfectly fine. -->
+</odoo>
