@@ -1,0 +1,14 @@
+<odoo>
+  <record id="view_order_form_inherit_crv" model="ir.ui.view">
+    <field name="name">sale.order.form.crv</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='partner_id']" position="after">
+        <field name="is_credit"/>
+        <field name="credit_approver_id" placeholder="Select Credit Approver"
+                       domain="[('is_credit_approver', '=', True), ('active', '=', True)]"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

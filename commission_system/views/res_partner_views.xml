@@ -56,6 +56,11 @@
                         </div>
                     </group>
                 </group>
+                <group string="Credit Approver">
+                    <group>
+                        <field name="is_credit_approver"/>
+                    </group>
+                </group>
             </xpath>
         </field>
     </record>

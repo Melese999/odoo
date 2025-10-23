@@ -7,13 +7,22 @@
         parent="crm.crm_menu_root"
         sequence="25"/>
 
-    <!-- Menu Item for KPI Targets -->
+    <!-- Menu Item for KPI Targets - RESTRICTED TO MANAGERS -->
     <menuitem
         id="kpi_target_menu"
         name="KPI Targets"
         parent="kpi_management_menu_root"
         action="kpi_target_action"
-        sequence="10"/>
+        sequence="10"
+        groups="sales_team.group_sale_manager"/>
+
+    <!-- Menu Item for KPI History -->
+    <menuitem
+        id="menu_kpi_history"
+        name="KPI History"
+        parent="kpi_management_menu_root"
+        action="action_kpi_history"
+        sequence="20"/>
 
     <!-- Menu Item for KPI Definitions (under Configuration) -->
     <menuitem

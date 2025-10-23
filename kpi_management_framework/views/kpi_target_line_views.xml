@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This tree view is used inside the kpi.target form -->
+    <record id="kpi_target_line_view_tree" model="ir.ui.view">
+        <field name="name">kpi.target.line.tree</field>
+        <field name="model">kpi.target.line</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Lines" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="kpi_definition_id" required="1"/>
+                <field name="target_value"/>
+                <field name="actual_value" readonly="1"/>
+                <field name="achievement_percentage" widget="progressbar" readonly="1"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

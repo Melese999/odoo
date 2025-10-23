@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_kpi_definition_user,kpi.definition.user,model_kpi_definition,base.group_user,1,1,1,1
 access_kpi_target_user,kpi.target.user,model_kpi_target,base.group_user,1,1,1,1
 access_kpi_history_user,kpi.history.user,model_kpi_history,base.group_user,1,1,1,1
+access_kpi_target_line_user,kpi.target.line.user,model_kpi_target_line,base.group_user,1,1,1,1

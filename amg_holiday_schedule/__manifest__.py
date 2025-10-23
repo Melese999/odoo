@@ -6,9 +6,10 @@
     'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
-        'data/holiday_schedule_data.xml',
         'views/holiday_schedule_views.xml',
     ],
     'installable': True,
-    'license':'LGPL-3'
+    'application': False,
+    'auto_install': False,
+    'license': 'LGPL-3'
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 1. Enhanced Search View for Filtering -->
+    <!-- Add this missing search view for kpi.target -->
     <record id="kpi_target_view_search" model="ir.ui.view">
         <field name="name">kpi.target.search</field>
         <field name="model">kpi.target</field>
@@ -21,32 +21,68 @@
         </field>
     </record>
 
-    <!-- 2. Pivot View for Analysis (CORRECTED) -->
-    <record id="kpi_target_view_pivot" model="ir.ui.view">
-        <field name="name">kpi.target.pivot</field>
-        <field name="model">kpi.target</field>
+    <!-- 1. Search View for KPI Target Lines -->
+    <record id="kpi_target_line_view_search" model="ir.ui.view">
+        <field name="name">kpi.target.line.search</field>
+        <field name="model">kpi.target.line</field>
         <field name="arch" type="xml">
-            <!-- The invalid 'disable_grouping' attribute has been removed -->
+            <search string="KPI Line Search">
+                <field name="kpi_definition_id"/>
+                <field name="user_id"/>
+                <separator/>
+                <filter string="My KPIs" name="my_kpis" domain="[('user_id', '=', uid)]"/>
+                <filter string="Active Targets" name="active" domain="[('date_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="KPI" name="group_by_kpi" context="{'group_by': 'kpi_definition_id'}"/>
+                    <filter string="Period (Start Date)" name="group_by_date" context="{'group_by': 'date_start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 2. Pivot View for KPI Target Lines -->
+    <record id="kpi_target_line_view_pivot" model="ir.ui.view">
+        <field name="name">kpi.target.line.pivot</field>
+        <field name="model">kpi.target.line</field>
+        <field name="arch" type="xml">
             <pivot string="KPI Analysis">
                 <field name="user_id" type="row"/>
-                <field name="kpi_id" type="col"/>
+                <field name="kpi_definition_id" type="col"/>
                 <field name="target_value" type="measure"/>
                 <field name="actual_value" type="measure"/>
-                <field name="achievement_percentage" type="measure" avg="Average Achievement"/>
+                <field name="achievement_percentage" type="measure" avg="Avg. Achievement"/>
             </pivot>
         </field>
     </record>
 
-    <!-- 3. Graph View for Visualization -->
-    <record id="kpi_target_view_graph" model="ir.ui.view">
-        <field name="name">kpi.target.graph</field>
-        <field name="model">kpi.target</field>
+    <!-- 3. Graph View for KPI Target Lines -->
+    <record id="kpi_target_line_view_graph" model="ir.ui.view">
+        <field name="name">kpi.target.line.graph</field>
+        <field name="model">kpi.target.line</field>
         <field name="arch" type="xml">
             <graph string="KPI Analysis" type="bar">
-                <field name="user_id"/>
-                <field name="target_value" type="measure"/>
+                <field name="kpi_definition_id"/>
                 <field name="actual_value" type="measure"/>
+                <field name="target_value" type="measure"/>
             </graph>
         </field>
     </record>
+
+    <!-- We need a separate action for these line-based views -->
+    <record id="kpi_target_line_reporting_action" model="ir.actions.act_window">
+        <field name="name">KPI Line Analysis</field>
+        <field name="res_model">kpi.target.line</field>
+        <field name="view_mode">pivot,graph,tree</field>
+        <field name="search_view_id" ref="kpi_target_line_view_search"/>
+        <field name="context">{'search_default_group_by_kpi': 1, 'create': False, 'edit': False}</field>
+    </record>
+
+    <!-- New menu for the line analysis -->
+    <menuitem
+        id="kpi_line_reporting_menu"
+        name="KPI Detailed Analysis"
+        parent="crm.crm_menu_report"
+        action="kpi_target_line_reporting_action"
+        sequence="51"/>
 </odoo>

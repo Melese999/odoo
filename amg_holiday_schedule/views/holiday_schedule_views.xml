@@ -17,11 +17,18 @@
                     </group>
                     <notebook>
                         <page string="Holidays" name="holidays">
-                            <field name="line_ids">
-                                <tree editable="bottom">
-                                    <field name="date"/>
-                                    <field name="name"/>
+                            <field name="line_ids" context="{'default_schedule_id': id}">
+                                <tree editable="bottom" string="Holidays">
+                                    <field name="holiday_date" required="1"/>
+                                    <field name="name" required="1"/>
+                                    <button name="unlink" type="object" string="Delete" class="oe_delete_link"/>
                                 </tree>
+                                <form>
+                                    <group>
+                                        <field name="holiday_date" required="1"/>
+                                        <field name="name" required="1"/>
+                                    </group>
+                                </form>
                             </field>
                         </page>
                     </notebook>
@@ -43,11 +50,29 @@
         </field>
     </record>
 
+    <!-- Search View for Holiday Schedule -->
+    <record id="holiday_schedule_view_search" model="ir.ui.view">
+        <field name="name">holiday.schedule.search</field>
+        <field name="model">holiday.schedule</field>
+        <field name="arch" type="xml">
+            <search string="Search Holiday Schedules">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Company" name="group_by_company" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Window Action for Holiday Schedule -->
     <record id="holiday_schedule_action" model="ir.actions.act_window">
         <field name="name">Holiday Schedules</field>
         <field name="res_model">holiday.schedule</field>
         <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="holiday_schedule_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new Holiday Schedule.
@@ -58,7 +83,7 @@
         </field>
     </record>
 
-    <!-- Menu Item (placing it under CRM Configuration for easy access) -->
+    <!-- Menu Item -->
     <menuitem
         id="holiday_schedule_menu"
         name="Holiday Schedules"

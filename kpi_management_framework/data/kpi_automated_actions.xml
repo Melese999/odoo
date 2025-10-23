@@ -1,26 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <data>
-        <!-- Automated Action for Lead Creation & Update -->
+    <data noupdate="1">
+        <!-- Automated Action for Lead Changes -->
         <record id="action_server_update_kpi_on_lead_change" model="ir.actions.server">
-            <field name="name">KPI: Update targets on lead change</field>
+            <field name="name">KPI: Update on lead change</field>
             <field name="model_id" ref="crm.model_crm_lead"/>
             <field name="state">code</field>
             <field name="code">
-                if record.user_id:
-                env['kpi.target']._update_targets_for_user(record.user_id.id, 'crm.lead')
+if record.user_id:
+    env['kpi.target']._update_targets_for_user(record.user_id.id, 'crm.lead')
             </field>
         </record>
 
-        <!-- Automated Action for Phone Call Creation & Update -->
+        <!-- Automated Action for Phone Call Changes -->
         <record id="action_server_update_kpi_on_phonecall_change" model="ir.actions.server">
-            <field name="name">KPI: Update targets on new phonecall</field>
+            <field name="name">KPI: Update on phonecall change</field>
             <field name="model_id" ref="crm_phonecall.model_crm_phonecall"/>
             <field name="state">code</field>
             <field name="code">
-                if record.user_id:
-                env['kpi.target']._update_targets_for_user(record.user_id.id, 'crm.phonecall')
+if record.user_id:
+    # Check if data quality fields changed
+    changed_fields = []
+    if 'name_confirmed' in record._fields and record.name_confirmed:
+        changed_fields.append('name_confirmed')
+    if 'address_confirmed' in record._fields and record.address_confirmed:
+        changed_fields.append('address_confirmed')
+    if 'phone_confirmed' in record._fields and record.phone_confirmed:
+        changed_fields.append('phone_confirmed')
+
+    if changed_fields:
+        env['kpi.target']._update_targets_for_user(record.user_id.id, 'crm.phonecall')
             </field>
         </record>
     </data>

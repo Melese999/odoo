@@ -13,14 +13,75 @@
             <field name="numbercall">-1</field>
             <field name="active" eval="True"/>
         </record>
-        <!-- NEW: Default KPI Definition for Lead Creation -->
+
+        <!-- Default KPI Definition for Lead Creation -->
         <record id="kpi_def_lead_created" model="kpi.definition">
             <field name="name">Lead Created</field>
             <field name="description">Counts the number of new leads created by a user.</field>
             <field name="target_model_id" ref="crm.model_crm_lead"/>
             <field name="user_field_id" ref="crm.field_crm_lead__user_id"/>
-            <field name="date_field_id" ref="base.field_res_partner__create_date"/> <!-- Generic create_date -->
+            <field name="date_field_id" ref="base.field_res_partner__create_date"/>
             <field name="computation_method">count_records</field>
+            <field name="kpi_type">single</field>
+        </record>
+
+        <!-- NEW: Data Quality KPI Definitions -->
+        <record id="kpi_def_name_confirmations" model="kpi.definition">
+            <field name="name">Name Confirmations</field>
+            <field name="description">Counts the number of calls where name was confirmed by telemarketer.</field>
+            <field name="target_model_id" ref="crm.model_crm_lead"/>
+            <field name="user_field_id" ref="crm.field_crm_lead__user_id"/>
+            <field name="date_field_id" ref="base.field_res_partner__create_date"/>
+            <field name="computation_method">data_quality_confirmations</field>
+            <field name="kpi_type">single</field>
+            <field name="confirmation_type">name_confirmed</field>
+            <field name="call_model_type">both</field>
+        </record>
+
+        <record id="kpi_def_address_confirmations" model="kpi.definition">
+            <field name="name">Address Confirmations</field>
+            <field name="description">Counts the number of calls where address was confirmed by telemarketer.</field>
+            <field name="target_model_id" ref="crm.model_crm_lead"/>
+            <field name="user_field_id" ref="crm.field_crm_lead__user_id"/>
+            <field name="date_field_id" ref="base.field_res_partner__create_date"/>
+            <field name="computation_method">data_quality_confirmations</field>
+            <field name="kpi_type">single</field>
+            <field name="confirmation_type">address_confirmed</field>
+            <field name="call_model_type">both</field>
+        </record>
+
+        <record id="kpi_def_phone_confirmations" model="kpi.definition">
+            <field name="name">Phone Confirmations</field>
+            <field name="description">Counts the number of calls where phone was confirmed by telemarketer.</field>
+            <field name="target_model_id" ref="crm.model_crm_lead"/>
+            <field name="user_field_id" ref="crm.field_crm_lead__user_id"/>
+            <field name="date_field_id" ref="base.field_res_partner__create_date"/>
+            <field name="computation_method">data_quality_confirmations</field>
+            <field name="kpi_type">single</field>
+            <field name="confirmation_type">phone_confirmed</field>
+            <field name="call_model_type">both</field>
+        </record>
+
+        <record id="kpi_def_all_confirmations" model="kpi.definition">
+            <field name="name">Complete Data Quality Confirmations</field>
+            <field name="description">Counts the number of calls where name, address, and phone were all confirmed by telemarketer.</field>
+            <field name="target_model_id" ref="crm.model_crm_lead"/>
+            <field name="user_field_id" ref="crm.field_crm_lead__user_id"/>
+            <field name="date_field_id" ref="base.field_res_partner__create_date"/>
+            <field name="computation_method">data_quality_confirmations</field>
+            <field name="kpi_type">single</field>
+            <field name="confirmation_type">all_confirmations</field>
+            <field name="call_model_type">both</field>
+        </record>
+
+        <!-- NEW: Composite KPI Definitions -->
+        <record id="kpi_def_composite_leads_quality" model="kpi.definition">
+            <field name="name">Leads &amp; Data Quality</field>
+            <field name="description">Composite KPI tracking both lead generation and data quality confirmations.</field>
+            <field name="kpi_type">composite</field>
+            <field name="computation_method">composite_kpi</field>
+            <field name="lead_kpi_definition_id" ref="kpi_management_framework.kpi_def_lead_created"/>
+            <field name="data_quality_kpi_definition_id" ref="kpi_management_framework.kpi_def_all_confirmations"/>
         </record>
 
     </data>

@@ -5,6 +5,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     is_agent = fields.Boolean(string="Is Agent", default=False)
+    is_credit_approver = fields.Boolean(string="Is Credit Approver", default=False)
     bank_account_id = fields.Many2one(
         'res.partner.bank',
         string="Primary Bank Account",
