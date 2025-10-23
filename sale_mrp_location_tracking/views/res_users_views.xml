@@ -1,0 +1,13 @@
+<!-- sale_mrp_location_tracking/views/res_users_views.xml -->
+<odoo>
+    <record id="view_users_form_inherit_prod_loc" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.production.location</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='action_id']" position="after">
+                <field name="production_location_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

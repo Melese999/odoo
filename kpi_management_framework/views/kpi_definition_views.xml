@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="kpi_definition_view_form" model="ir.ui.view">
         <field name="name">kpi.definition.form</field>
         <field name="model">kpi.definition</field>
@@ -13,8 +14,9 @@
                     <group>
                         <group string="General">
                             <field name="description" placeholder="Describe what this KPI measures..."/>
+                            <field name="kpi_type" widget="radio"/>
                         </group>
-                        <group string="Primary Model Configuration">
+                        <group string="Primary Model Configuration" invisible="kpi_type == 'composite'">
                             <field name="target_model_id" options="{'no_create': True, 'no_open': True}"/>
                             <field name="target_model_name" invisible="1"/>
                             <field name="user_field_id" options="{'no_create': True, 'no_open': True}"/>
@@ -22,8 +24,20 @@
                         </group>
                     </group>
 
-                    <group string="Computation Method">
+                    <!-- Composite KPI Configuration -->
+                    <group string="Composite KPI Configuration" invisible="kpi_type != 'composite'">
+                        <field name="lead_kpi_definition_id"
+                               domain="[('computation_method', 'in', ('count_records', 'sum_field', 'count_related_records'))]"
+                               required="kpi_type == 'composite'"/>
+                        <field name="data_quality_kpi_definition_id"
+                               domain="[('computation_method', '=', 'data_quality_confirmations')]"
+                               required="kpi_type == 'composite'"/>
+                    </group>
+
+                    <group string="Computation Method" invisible="kpi_type == 'composite'">
                         <field name="computation_method" widget="radio"/>
+
+                        <!-- Standard computation fields -->
                         <field name="sum_field_id"
                                options="{'no_create': True, 'no_open': True}"
                                invisible="computation_method != 'sum_field'"/>
@@ -37,20 +51,29 @@
                         />
                         <field name="filter_domain"
                                invisible="computation_method != 'count_related_records'"/>
+
+                        <!-- Data Quality Confirmation fields -->
+                        <group string="Data Quality Settings" invisible="computation_method != 'data_quality_confirmations'">
+                            <field name="confirmation_type" required="1" invisible="computation_method != 'data_quality_confirmations'"/>
+                            <field name="call_model_type" required="1" invisible="computation_method != 'data_quality_confirmations'"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Tree and Action views remain the same -->
+    <!-- Update tree view to show new fields -->
     <record id="kpi_definition_view_tree" model="ir.ui.view">
         <field name="name">kpi.definition.tree</field>
         <field name="model">kpi.definition</field>
         <field name="arch" type="xml">
             <tree string="KPI Definitions">
                 <field name="name"/>
+                <field name="kpi_type"/>
                 <field name="computation_method"/>
+                <field name="confirmation_type" optional="show"/>
+                <field name="call_model_type" optional="show"/>
                 <field name="target_model_id" string="Primary Model"/>
                 <field name="related_model_id" optional="show"/>
                 <field name="sum_field_id" optional="show"/>

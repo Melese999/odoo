@@ -9,26 +9,26 @@
         KPI definitions and the assignment of targets to users and teams.
     """,
     'depends': [
-        'crm',      # Essential for integrating with leads, opportunities, etc.
-        'mail',     # For chatter and activity mixins
-        'amg_holiday_schedule',  # For holiday calendar integration
+        'crm',
+        'mail',
+        'amg_holiday_schedule',
         'crm_phonecall',
         'crm_telemarketing',
         'base_automation',
     ],
     'data': [
         'security/ir.model.access.csv',
-        'security/security.xml', # Add this new file
         'data/kpi_data.xml',
         'data/kpi_automated_actions.xml',
         'views/kpi_definition_views.xml',
-        'views/kpi_target_views.xml',
-        'views/kpi_history_views.xml', # Corrected filename
-        'views/kpi_menus.xml',
+        'views/kpi_target_views.xml',  # This defines kpi_target_action
+        'views/kpi_target_line_views.xml',
+        'views/kpi_history_views.xml',
+        'views/kpi_menus.xml',         # This uses kpi_target_action
         'views/kpi_reporting_views.xml',
         'views/kpi_dashboard_views.xml',
+        'security/security.xml',       # Load security last
     ],
-    'post_init_hook': '_link_automation_triggers_hook',
     'application': True,
     'installable': True,
     'auto_install': False,

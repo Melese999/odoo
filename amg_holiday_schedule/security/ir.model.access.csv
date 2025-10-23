@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_holiday_schedule_user,holiday.schedule.user,model_holiday_schedule,base.group_user,1,1,1,1
-access_holiday_schedule_line_user,holiday.schedule.line.user,model_holiday_schedule_line,base.group_user,1,1,1,1
+access_holiday_schedule_user,holiday.schedule.user,model_holiday_schedule,base.group_user,1,0,0,0
+access_holiday_schedule_manager,holiday.schedule.manager,model_holiday_schedule,base.group_system,1,1,1,1
+access_holiday_schedule_line_user,holiday.schedule.line.user,model_holiday_schedule_line,base.group_user,1,0,0,0
+access_holiday_schedule_line_manager,holiday.schedule.line.manager,model_holiday_schedule_line,base.group_system,1,1,1,1

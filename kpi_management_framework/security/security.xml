@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-
         <!-- SECURITY GROUPS -->
         <!-- We will use Odoo's built-in groups: -->
         <!-- base.group_user: Regular User -->
         <!-- sales_team.group_sale_manager: Sales Manager / Administrator -->
-
 
         <!-- ====================================================== -->
         <!-- 1. LEAD VISIBILITY RULES                             -->
@@ -78,17 +76,24 @@
         </record>
 
         <!-- ====================================================== -->
-        <!-- 4. MENU VISIBILITY - HIDE TARGETS FROM REGULAR USERS -->
+        <!-- 4. KPI TARGET LINE VISIBILITY RULES                  -->
         <!-- ====================================================== -->
 
-        <!-- Re-define the KPI Targets menu to add a group restriction -->
-        <menuitem
-            id="kpi_management_framework.kpi_target_menu"
-            name="KPI Targets"
-            parent="kpi_management_framework.kpi_management_menu_root"
-            action="kpi_management_framework.kpi_target_action"
-            sequence="10"
-            groups="sales_team.group_sale_manager"/>
+        <!-- Rule for regular users to see only their own KPI target lines -->
+        <record id="kpi_target_line_see_own_rule" model="ir.rule">
+            <field name="name">KPI Target Lines: See own</field>
+            <field name="model_id" ref="model_kpi_target_line"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+        </record>
+
+        <!-- Rule for managers to see all KPI target lines -->
+        <record id="kpi_target_line_see_all_manager_rule" model="ir.rule">
+            <field name="name">KPI Target Lines: Manager sees all</field>
+            <field name="model_id" ref="model_kpi_target_line"/>
+            <field name="groups" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
 
     </data>
 </odoo>
