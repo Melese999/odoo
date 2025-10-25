@@ -1,61 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
+    <!-- Form View for KPI Definition -->
     <record id="kpi_definition_view_form" model="ir.ui.view">
         <field name="name">kpi.definition.form</field>
         <field name="model">kpi.definition</field>
         <field name="arch" type="xml">
             <form string="KPI Definition">
+                <header>
+                    <button name="action_view_assigned_targets"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-line-chart">
+                        <field name="assigned_target_count" widget="statinfo" string="Assigned Targets"/>
+                    </button>
+                </header>
+
                 <sheet>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
-                        <h1><field name="name" placeholder="e.g., Leads Generated"/></h1>
+                        <h1>
+                            <field name="name" placeholder="e.g., Leads Registered"/>
+                        </h1>
                     </div>
+
                     <group>
-                        <group string="General">
-                            <field name="description" placeholder="Describe what this KPI measures..."/>
-                            <field name="kpi_type" widget="radio"/>
+                        <group string="General Information">
+                            <field name="description" placeholder="Describe what this KPI measures"/>
+                            <field name="kpi_type" widget="radio" required="1"/>
                         </group>
-                        <group string="Primary Model Configuration" invisible="kpi_type == 'composite'">
-                            <field name="target_model_id" options="{'no_create': True, 'no_open': True}"/>
-                            <field name="target_model_name" invisible="1"/>
-                            <field name="user_field_id" options="{'no_create': True, 'no_open': True}"/>
-                            <field name="date_field_id" options="{'no_create': True, 'no_open': True}"/>
-                        </group>
-                    </group>
 
-                    <!-- Composite KPI Configuration -->
-                    <group string="Composite KPI Configuration" invisible="kpi_type != 'composite'">
-                        <field name="lead_kpi_definition_id"
-                               domain="[('computation_method', 'in', ('count_records', 'sum_field', 'count_related_records'))]"
-                               required="kpi_type == 'composite'"/>
-                        <field name="data_quality_kpi_definition_id"
-                               domain="[('computation_method', '=', 'data_quality_confirmations')]"
-                               required="kpi_type == 'composite'"/>
-                    </group>
-
-                    <group string="Computation Method" invisible="kpi_type == 'composite'">
-                        <field name="computation_method" widget="radio"/>
-
-                        <!-- Standard computation fields -->
-                        <field name="sum_field_id"
-                               options="{'no_create': True, 'no_open': True}"
-                               invisible="computation_method != 'sum_field'"/>
-                        <field name="related_model_id"
-                               options="{'no_create': True, 'no_open': True}"
-                               invisible="computation_method != 'count_related_records'"/>
-                        <field name="relation_field_id"
-                               options="{'no_create': True, 'no_open': True}"
-                               invisible="computation_method != 'count_related_records'"
-                               domain="[('model_id', '=', related_model_id), ('ttype', '=', 'many2one'), ('relation', '=', target_model_name)]"
-                        />
-                        <field name="filter_domain"
-                               invisible="computation_method != 'count_related_records'"/>
-
-                        <!-- Data Quality Confirmation fields -->
-                        <group string="Data Quality Settings" invisible="computation_method != 'data_quality_confirmations'">
-                            <field name="confirmation_type" required="1" invisible="computation_method != 'data_quality_confirmations'"/>
-                            <field name="call_model_type" required="1" invisible="computation_method != 'data_quality_confirmations'"/>
+                        <group string="Data Quality Configuration">
+                            <field name="confirmation_fields"
+                                   string="Confirmation Type"
+                                   placeholder="Select confirmation type for data quality KPI"/>
                         </group>
                     </group>
                 </sheet>
@@ -63,28 +40,55 @@
         </field>
     </record>
 
-    <!-- Update tree view to show new fields -->
+    <!-- Tree View for KPI Definition -->
     <record id="kpi_definition_view_tree" model="ir.ui.view">
         <field name="name">kpi.definition.tree</field>
         <field name="model">kpi.definition</field>
         <field name="arch" type="xml">
             <tree string="KPI Definitions">
                 <field name="name"/>
-                <field name="kpi_type"/>
-                <field name="computation_method"/>
-                <field name="confirmation_type" optional="show"/>
-                <field name="call_model_type" optional="show"/>
-                <field name="target_model_id" string="Primary Model"/>
-                <field name="related_model_id" optional="show"/>
-                <field name="sum_field_id" optional="show"/>
-                <field name="filter_domain" optional="show"/>
+                <field name="kpi_type" widget="radio" options="{'horizontal': true}"/>
+                <field name="confirmation_fields" string="Confirmation Type"/>
+                <field name="assigned_target_count" string="Assigned Targets"/>
             </tree>
         </field>
     </record>
 
+    <!-- Search View -->
+    <record id="kpi_definition_view_search" model="ir.ui.view">
+        <field name="name">kpi.definition.search</field>
+        <field name="model">kpi.definition</field>
+        <field name="arch" type="xml">
+            <search string="Search KPI Definitions">
+                <field name="name"/>
+                <field name="kpi_type"/>
+                <filter string="Data Quality KPIs" name="data_quality" domain="[('kpi_type', '=', 'data_quality')]"/>
+                <filter string="Leads KPIs" name="leads_kpis" domain="[('kpi_type', '=', 'leads_registered')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
     <record id="kpi_definition_action" model="ir.actions.act_window">
         <field name="name">KPI Definitions</field>
         <field name="res_model">kpi.definition</field>
         <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="kpi_definition_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define and manage KPI types used across your CRM and Telemarketing systems.
+            </p>
+            <p>
+                Create Data Quality or Lead-based KPIs, specify confirmation types, and link them to KPI Targets for employee evaluation.
+            </p>
+        </field>
     </record>
+
+    <!-- Menu item under CRM Configuration -->
+    <menuitem
+            id="kpi_definition_menu"
+            name="KPI Definitions"
+            parent="crm.crm_menu_config"
+            action="kpi_definition_action"
+            sequence="99"/>
 </odoo>

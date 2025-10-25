@@ -282,26 +282,32 @@ class SaleOrder(models.Model):
                         _logger.warning("No manufacturing order found for line %s", line.id)
 
  
+    def action_confirm(self):
         """
-        Overrides the standard action to create an invoice from a sales order.
-        Adds a security check to restrict non-manager salespersons from creating
-        invoices for their own sales orders.
+        Override to include a security check preventing a regular salesperson
+        from confirming their own sales order, and to update manufacturing dimensions.
         """
         # Checks if the user is a manager (to allow them to bypass the restriction)
         is_manager = self.env.user.has_group('sales_team.group_sale_manager')
 
+        # 1. SECURITY CHECK for Confirmation
         for order in self:
             is_own_document = order.user_id == self.env.user
 
-            # Deny invoice creation if it's their own document AND they are not a manager
+            # Deny confirmation if it's their own document AND they are not a manager
             if is_own_document and not is_manager:
                 raise UserError(_(
-                    "You are not allowed to create an invoice for your own sales order. "
-                    "Please ask a manager to handle the invoicing process."
+                    "You are not allowed to confirm your own sales order. Please ask a manager "
+                    "to review and confirm this quotation."
                 ))
 
-        # If the check passes, proceed with the original Odoo invoice creation logic.
-        return super(SaleOrder, self).action_create_invoice()
+        # 2. STANDARD ODOO CONFIRMATION & EXISTING LOGIC
+        result = super(SaleOrder, self).action_confirm()
+
+        # 3. CUSTOM LOGIC
+        self._update_manufacturing_dimensions()
+
+        return result
     # -----------------------------
 # Invoice Bank Payment
 # -----------------------------

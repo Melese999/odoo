@@ -1,88 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Add this missing search view for kpi.target -->
-    <record id="kpi_target_view_search" model="ir.ui.view">
-        <field name="name">kpi.target.search</field>
-        <field name="model">kpi.target</field>
-        <field name="arch" type="xml">
-            <search string="KPI Target Search">
-                <field name="name" string="Target"/>
-                <field name="user_id"/>
-                <field name="kpi_id"/>
-                <separator/>
-                <filter string="My Targets" name="my_targets" domain="[('user_id', '=', uid)]"/>
-                <filter string="Active Targets" name="active" domain="[('date_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
-                    <filter string="KPI" name="group_by_kpi" context="{'group_by': 'kpi_id'}"/>
-                    <filter string="Start Date (Month)" name="group_by_date" context="{'group_by': 'date_start:month'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
-
-    <!-- 1. Search View for KPI Target Lines -->
-    <record id="kpi_target_line_view_search" model="ir.ui.view">
-        <field name="name">kpi.target.line.search</field>
+    <record id="view_kpi_reporting_tree" model="ir.ui.view">
+        <field name="name">kpi.reporting.tree</field>
         <field name="model">kpi.target.line</field>
         <field name="arch" type="xml">
-            <search string="KPI Line Search">
+            <tree string="KPI Reporting">
+                <field name="target_id"/>
+                <field name="user_id"/>
                 <field name="kpi_definition_id"/>
-                <field name="user_id"/>
-                <separator/>
-                <filter string="My KPIs" name="my_kpis" domain="[('user_id', '=', uid)]"/>
-                <filter string="Active Targets" name="active" domain="[('date_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
-                    <filter string="KPI" name="group_by_kpi" context="{'group_by': 'kpi_definition_id'}"/>
-                    <filter string="Period (Start Date)" name="group_by_date" context="{'group_by': 'date_start:month'}"/>
-                </group>
-            </search>
+                <field name="target_value"/>
+                <field name="actual_value"/>
+                <field name="achievement_percentage" widget="progressbar"/>
+                <field name="state"/>
+            </tree>
         </field>
     </record>
 
-    <!-- 2. Pivot View for KPI Target Lines -->
-    <record id="kpi_target_line_view_pivot" model="ir.ui.view">
-        <field name="name">kpi.target.line.pivot</field>
+    <record id="view_kpi_reporting_pivot" model="ir.ui.view">
+        <field name="name">kpi.reporting.pivot</field>
         <field name="model">kpi.target.line</field>
         <field name="arch" type="xml">
-            <pivot string="KPI Analysis">
+            <pivot string="KPI Performance">
                 <field name="user_id" type="row"/>
                 <field name="kpi_definition_id" type="col"/>
-                <field name="target_value" type="measure"/>
-                <field name="actual_value" type="measure"/>
-                <field name="achievement_percentage" type="measure" avg="Avg. Achievement"/>
+                <field name="achievement_percentage" type="measure"/>
             </pivot>
         </field>
     </record>
 
-    <!-- 3. Graph View for KPI Target Lines -->
-    <record id="kpi_target_line_view_graph" model="ir.ui.view">
-        <field name="name">kpi.target.line.graph</field>
+    <record id="view_kpi_reporting_search" model="ir.ui.view">
+        <field name="name">kpi.reporting.search</field>
         <field name="model">kpi.target.line</field>
         <field name="arch" type="xml">
-            <graph string="KPI Analysis" type="bar">
+            <search string="Search KPI Reporting">
+                <field name="user_id"/>
                 <field name="kpi_definition_id"/>
-                <field name="actual_value" type="measure"/>
-                <field name="target_value" type="measure"/>
-            </graph>
+                <field name="target_id" string="KPI Target Document"/>
+
+                <filter string="My Lines" name="my_lines" domain="[('user_id', '=', uid)]"/>
+                <filter string="Active" name="active" domain="[('date_end', '&gt;=', context_today())]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="KPI Definition" name="group_by_kpi" context="{'group_by': 'kpi_definition_id'}"/>
+                    <filter string="Target Document" name="group_by_target" context="{'group_by': 'target_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
-    <!-- We need a separate action for these line-based views -->
-    <record id="kpi_target_line_reporting_action" model="ir.actions.act_window">
-        <field name="name">KPI Line Analysis</field>
+    <record id="action_kpi_reporting" model="ir.actions.act_window">
+        <field name="name">KPI Reporting</field>
         <field name="res_model">kpi.target.line</field>
-        <field name="view_mode">pivot,graph,tree</field>
-        <field name="search_view_id" ref="kpi_target_line_view_search"/>
-        <field name="context">{'search_default_group_by_kpi': 1, 'create': False, 'edit': False}</field>
+        <field name="view_mode">tree,pivot,form</field>
+        <field name="view_ids" eval="[
+            (5,0,0),
+            (0,0,{'view_mode':'tree','view_id':ref('kpi_management_framework.view_kpi_reporting_tree')}),
+            (0,0,{'view_mode':'pivot','view_id':ref('kpi_management_framework.view_kpi_reporting_pivot')}),
+        ]"/>
+
+        <field name="search_view_id" ref="kpi_management_framework.view_kpi_reporting_search"/>
+
+        <field name="context">{'search_default_group_by_user':1}</field>
     </record>
 
-    <!-- New menu for the line analysis -->
-    <menuitem
-        id="kpi_line_reporting_menu"
-        name="KPI Detailed Analysis"
-        parent="crm.crm_menu_report"
-        action="kpi_target_line_reporting_action"
-        sequence="51"/>
+    <menuitem id="menu_kpi_reporting"
+              name="KPI Reporting"
+              parent="crm.crm_menu_report"
+              action="action_kpi_reporting"
+              sequence="60"/>
 </odoo>

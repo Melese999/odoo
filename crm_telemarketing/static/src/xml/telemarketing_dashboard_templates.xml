@@ -1,79 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-
     <t t-name="crm_telemarketing.TelemarketingDashboard">
-        <div class="o_telemarketing_dashboard p-4 bg-light">
-            <h2 class="mb-4">Telemarketing Dashboard</h2>
+        <div class="o_telemarketing_dashboard p-4 bg-light" style="overflow:auto; max-height:92vh;">
 
-            <!-- KPI Cards -->
-            <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card shadow-sm text-center h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-muted">Total Calls</h5>
-                            <p class="h2 text-primary fw-bold"><t t-esc="state.kpis.total_calls"/></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card shadow-sm text-center h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-muted">Completed Calls</h5>
-                            <p class="h2 text-success fw-bold"><t t-esc="state.kpis.done_calls"/></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card shadow-sm text-center h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-muted">Completion Rate</h5>
-                            <p class="h2 text-info fw-bold"><t t-esc="state.kpis.completion_rate"/>%</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="card shadow-sm text-center h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-muted">Avg. Duration (min)</h5>
-                            <p class="h2 text-warning fw-bold"><t t-esc="state.kpis.avg_duration"/></p>
-                        </div>
-                    </div>
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-primary mb-0">📊 Telemarketing Dashboard</h2>
+                <div class="d-flex gap-2">
+                    <input type="date" t-model="state.filter.start_date" class="form-control form-control-sm" placeholder="Start Date"/>
+                    <input type="date" t-model="state.filter.end_date" class="form-control form-control-sm" placeholder="End Date"/>
+                    <button type="button" class="btn btn-primary btn-sm px-3" t-on-click="applyFilter">
+                        <i class="fa fa-sync-alt me-1"></i> Apply
+                    </button>
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Pivot Table: "Calls by User - Direction" -->
-                <div class="col-lg-12 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header fw-bold">Calls by User and Direction</div>
-                        <div class="card-body table-responsive">
-                            <table class="table table-sm table-hover o_section_and_total_row_hover">
-                                <thead class="table-light">
+            <!-- KPI Cards -->
+            <div class="row g-3 mb-4">
+                <t t-foreach="['total_leads','converted_leads','conversion_rate','total_calls','avg_duration','total_competitors']" t-as="kpi" t-key="kpi">
+                    <div class="col-xl-2 col-md-4 col-sm-6">
+                        <div class="card border-0 shadow-sm h-100 text-center rounded-4" style="border-left: 4px solid black ;transition:all 0.3s; cursor: pointer;">
+                            <div class="card-body py-4">
+                                <h6 class="fw-bold mb-2 text-uppercase text-muted">
+                                    <t t-esc="kpi.replace('_',' ')"/>
+                                </h6>
+                                <h3 class="fw-bold text-primary mb-0">
+                                    <t t-esc="state.kpis[kpi]"/>
+                                    <t t-if="kpi=='conversion_rate'">%</t>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+
+
+
+            <!-- Main Content -->
+            <div class="row gy-4">
+
+                <!-- Salesperson KPI Summary -->
+                <div class="col-lg-12">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold text-dark mb-0">🏅 Salesperson KPI Summary</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive" style="max-height:400px; overflow:auto;">
+                                <table class="table align-middle table-hover table-striped mb-0">
+                                    <thead class="table-light text-center sticky-top" style="top:0;">
+                                        <tr class="fw-semibold text-dark">
+                                            <th>Salesperson</th>
+                                            <th>Total Leads</th>
+                                            <th>Converted</th>
+                                            <th>Conv. %</th>
+                                            <th colspan="3" class="border-start">Leads Registered KPI</th>
+                                            <th colspan="3" class="border-start">Data Quality KPI</th>
+                                        </tr>
+                                        <tr class="text-muted small">
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th>Target</th>
+                                            <th>Actual</th>
+                                            <th>Achv.</th>
+                                            <th>Target</th>
+                                            <th>Actual</th>
+                                            <th>Achv.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="state.salesperson_data" t-as="sp" t-key="sp.salesperson">
+                                            <tr>
+                                                <td class="fw-semibold">
+                                                    <t t-esc="sp.salesperson"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <t t-esc="sp.total_leads"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <t t-esc="sp.converted_leads"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <t t-esc="sp.conversion_rate"/>
+%</td>
+
+                                                <!-- Leads Registered KPI -->
+                                                <td class="text-center text-primary fw-semibold">
+                                                    <t t-esc="sp.leads_registered_target"/>
+                                                </td>
+                                                <td class="text-center text-success fw-semibold">
+                                                    <t t-esc="sp.leads_registered_actual"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="progress" style="height:6px;">
+                                                        <div class="progress-bar bg-primary" role="progressbar" t-att-style="'width:' + sp.leads_registered_percent + '%;'"></div>
+                                                    </div>
+                                                    <small>
+                                                        <t t-esc="sp.leads_registered_percent"/>
+%</small>
+                                                </td>
+
+                                                <!-- Data Quality KPI -->
+                                                <td class="text-center text-primary fw-semibold">
+                                                    <t t-esc="sp.data_quality_target"/>
+                                                </td>
+                                                <td class="text-center text-success fw-semibold">
+                                                    <t t-esc="sp.data_quality_actual"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="progress" style="height:6px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" t-att-style="'width:' + sp.data_quality_percent + '%;'"></div>
+                                                    </div>
+                                                    <small>
+                                                        <t t-esc="sp.data_quality_percent"/>
+%</small>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calls Pivot Table -->
+                <div class="col-lg-12">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h5 class="fw-bold text-dark mb-0">📞 Calls by User and Direction</h5>
+                        </div>
+                        <div class="card-body table-responsive" style="max-height:400px; overflow:auto;">
+                            <table class="table table-sm table-striped table-hover align-middle">
+                                <thead class="table-light sticky-top text-center" style="top:0;">
                                     <tr>
-                                        <th class="border-end">User</th>
-                                        <th colspan="3" class="text-center border-end">Inbound</th>
-                                        <th colspan="3" class="text-center">Outbound</th>
-                                    </tr>
-                                    <tr>
-                                        <th class="border-end"></th>
-                                        <th class="text-center">Total</th>
-                                        <th class="text-center">Done</th>
-                                        <th class="text-center border-end">Pending</th>
-                                        <th class="text-center">Total</th>
-                                        <th class="text-center">Done</th>
-                                        <th class="text-center">Pending</th>
+                                        <th>User</th>
+                                        <th class="border-start">Inbound</th>
+                                        <th class="border-start">Outbound</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="Object.keys(state.pivot_table.rows)" t-as="user" t-key="user">
                                         <tr>
-                                            <td class="fw-bold border-end"><t t-esc="user"/></td>
-                                            <td class="text-center"><t t-esc="state.pivot_table.rows[user].inbound_total || 0"/></td>
-                                            <td class="text-center text-success"><t t-esc="state.pivot_table.rows[user].inbound_done || 0"/></td>
-                                            <td class="text-center text-warning border-end"><t t-esc="state.pivot_table.rows[user].inbound_pending || 0"/></td>
-                                            <td class="text-center"><t t-esc="state.pivot_table.rows[user].outbound_total || 0"/></td>
-                                            <td class="text-center text-success"><t t-esc="state.pivot_table.rows[user].outbound_done || 0"/></td>
-                                            <td class="text-center text-warning"><t t-esc="state.pivot_table.rows[user].outbound_pending || 0"/></td>
+                                            <td class="fw-semibold">
+                                                <t t-esc="user"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="state.pivot_table.rows[user].inbound_total || 0"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-esc="state.pivot_table.rows[user].outbound_total || 0"/>
+                                            </td>
                                         </tr>
                                     </t>
                                 </tbody>
@@ -82,18 +162,19 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart: "Inbound vs Outbound by Day" -->
-                <div class="col-lg-12 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header fw-bold">Inbound vs Outbound by Day</div>
-                        <div class="card-body">
-                            <canvas t-ref="bar_chart" height="100"/>
+                <!-- Chart Section -->
+                <div class="col-lg-12">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h5 class="fw-bold text-dark mb-0">📈 Inbound vs Outbound by Day</h5>
+                        </div>
+                        <div class="card-body" style="overflow-x:auto;">
+                            <canvas t-ref="bar_chart" height="100"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </t>
-
 </templates>

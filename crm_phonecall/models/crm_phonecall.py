@@ -72,6 +72,70 @@ class CrmPhonecall(models.Model):
         [("in", "In"), ("out", "Out")], default="out", required=True
     )
 
+
+    # --- Telemarketing Data Quality Fields ---
+    name_confirmed = fields.Boolean(string="Name Confirmed")
+    address_confirmed = fields.Boolean(string="Address Confirmed")
+    phone_confirmed = fields.Boolean(string="Phone Confirmed")
+    service_satisfaction_confirmed = fields.Boolean(string="Service Satisfaction Confirmed")
+    product_information_confirmed = fields.Boolean(string="Product Information Confirmed")
+
+    overall_score = fields.Float(
+        string="Overall Score",
+        compute="_compute_overall_score",
+        store=True,
+    )
+
+    confirmation_id = fields.Many2one(
+        "telemarketing.confirmation",
+        string="Telemarketing Confirmation",
+        readonly=True,
+    )
+
+    # --- Compute overall score ---
+    @api.depends(
+        "name_confirmed",
+        "address_confirmed",
+        "phone_confirmed",
+        "service_satisfaction_confirmed",
+        "product_information_confirmed",
+    )
+    def _compute_overall_score(self):
+        """Calculate data quality score based on confirmed fields."""
+        fields_to_check = [
+            "name_confirmed",
+            "address_confirmed",
+            "phone_confirmed",
+            "service_satisfaction_confirmed",
+            "product_information_confirmed",
+        ]
+        for rec in self:
+            confirmed_count = sum(1 for f in fields_to_check if getattr(rec, f))
+            rec.overall_score = (confirmed_count / len(fields_to_check)) * 100 if fields_to_check else 0
+
+    # --- Auto-create telemarketing.confirmation when phonecall is created ---
+    @api.model
+    def create(self, vals):
+        record = super().create(vals)
+
+        if record.opportunity_id:
+            confirmation_vals = {
+                "lead_id": record.opportunity_id.id,
+                "telemarketer_id": record.opportunity_id.user_id.id,
+                "phonecall_id": record.id,
+                "name_confirmed": record.name_confirmed,
+                "address_confirmed": record.address_confirmed,
+                "phone_confirmed": record.phone_confirmed,
+                "service_satisfaction_confirmed": record.service_satisfaction_confirmed,
+                "product_information_confirmed": record.product_information_confirmed,
+            }
+
+            # Create the confirmation record (this triggers KPI + sequence + scoring logic)
+            confirmation = self.env["telemarketing.confirmation"].create(confirmation_vals)
+            record.confirmation_id = confirmation.id
+
+        return record
+
     @api.onchange("partner_id")
     def _onchange_partner_id(self):
         """Contact number details should be change based on partner."""

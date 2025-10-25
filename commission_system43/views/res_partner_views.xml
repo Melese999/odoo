@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<odoo>
+    <record id="view_partner_form_inherit_commission_agent" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.commission.agent</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            Add is_agent field inside the "Sales & Purchases" tab
+            <xpath expr="//page[@name='sales_purchases']" position="inside">
+                <group>
+                    <field name="is_agent"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>-->
+<!--<odoo>
+    <record id="view_partner_form_inherit_commission_agent" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.commission.agent</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+           Add is_agent and bank account fields inside the "Sales & Purchases" tab
+            <xpath expr="//page[@name='sales_purchases']" position="inside">
+                <group string="Commission Agent">
+                    <field name="is_agent"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>-->
+<odoo>
+    <record id="view_partner_form_inherit_commission_agent" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.commission.agent</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales_purchases']" position="inside">
+                <group string="Commission Agent">
+                    <group>
+                        <field name="is_agent"/>
+                    </group>
+
+                    <!-- Bank details group - only visible for agents -->
+                    <group invisible="not is_agent">
+                        <field name="bank_account_id" widget="selection"/>
+                        <field name="bank_name" readonly="1"/>
+                        <field name="iban" readonly="1"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_bank_accounts"
+                                    type="object"
+                                    class="btn btn-primary ml-auto"
+                                    icon="fa-university"
+                                    string="All Bank Accounts"
+                                    style="float:right;"/>
+                        </div>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

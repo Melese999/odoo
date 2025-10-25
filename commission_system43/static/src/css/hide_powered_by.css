@@ -1,0 +1,4 @@
+/* Hide "Powered by Odoo" on the login page */
+.o_database_list .text-center.small.mt-4.pt-3.border-top a[href*="odoo.com"] {
+    display: none !important;
+}

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="kpi_target_view_form" model="ir.ui.view">
+        <field name="name">kpi.target.form</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <form string="KPI Assignment">
+                <header>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_activities"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-tasks">
+                            <field name="activity_count" widget="statinfo" string="Activities"/>
+                        </button>
+                        <button name="action_view_data_quality"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-check-circle">
+                            <field name="data_quality_count" widget="statinfo" string="Data Quality"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Planning">
+                            <field name="user_id"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="working_days" readonly="1"/>
+                        </group>
+                        <group string="Performance">
+                            <field name="overall_achievement" widget="progressbar"/>
+                            <field name="overall_achievement_leads" string="Leads Ach." widget="progressbar"/>
+                            <field name="overall_achievement_data_quality" string="DQ Ach." widget="progressbar"/>
+                            <field name="last_computed_date" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="KPI Targets" name="kpi_targets">
+                            <field name="target_line_ids" context="{'default_target_id': id}">
+                                <tree editable="bottom" decoration-success="achievement_percentage >= 100">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="kpi_definition_id"/>
+
+                                    <field name="kpi_type"/>
+
+                                    <field name="date_start" optional="show"/>
+                                    <field name="date_end" optional="show"/>
+
+                                    <field name="target_value"
+                                           string="Target Value"
+                                           invisible="[('kpi_type', '=', 'data_quality')]"
+                                           readonly="[('kpi_type', '=', 'data_quality')]"/>
+
+                                    <field name="target_value_percentage"
+                                           string="Target (%)"
+                                           widget="percentage"
+                                           invisible="[('kpi_type', '!=', 'data_quality')]"
+                                           readonly="[('kpi_type', '!=', 'data_quality')]"/>
+
+                                    <field name="actual_value" string="Actual" readonly="1"/>
+                                    <field name="achievement_percentage" widget="progressbar" string="Achievement (%)" readonly="1"/>
+                                    <field name="state" invisible="1"/>
+                                </tree>
+                            </field>
+                            
+                        </page>
+                        <page string="KPI History" name="history">
+                            <field name="history_ids" readonly="1">
+                                <tree>
+                                    <field name="activity_date"/>
+                                    <field name="kpi_definition_id"/>
+                                    <field name="source_document"/>
+                                    <field name="description"/>
+                                    <field name="display_data_quality_type" string="Quality Type"/>
+                                    <field name="data_quality_score" string="Score" widget="progressbar"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Other Information" name="other">
+                            <group>
+                                <field name="message_ids" widget="mail_thread"/>
+                                <field name="activity_ids" widget="mail_activity"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="kpi_target_view_tree" model="ir.ui.view">
+        <field name="name">kpi.target.tree</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Targets" decoration-success="overall_achievement >= 100">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="state"/>
+                <field name="overall_achievement" widget="progressbar"/>
+                <field name="activity_count" string="Activities"/>
+                <field name="data_quality_count" string="Data Quality"/>
+                <field name="last_computed_date" string="Last Computed" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kpi_target_view_search" model="ir.ui.view">
+        <field name="name">kpi.target.search</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <search string="Search KPI Targets">
+                <field name="name"/>
+                <field name="user_id"/>
+                <filter string="My Targets" name="my_targets" domain="[('user_id', '=', uid)]"/>
+                <filter string="Active Targets" name="active" domain="[('date_end', '>=', context_today()), ('state', '=', 'active')]"/>
+                <filter string="Done Targets" name="done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="kpi_target_action" model="ir.actions.act_window">
+        <field name="name">KPI Targets</field>
+        <field name="res_model">kpi.target</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="kpi_target_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new KPI Target to assign performance goals to a user for a specific period.
+            </p>
+        </field>
+    </record>
+</odoo>

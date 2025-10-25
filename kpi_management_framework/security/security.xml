@@ -1,97 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <!-- SECURITY GROUPS -->
-        <!-- We will use Odoo's built-in groups: -->
-        <!-- base.group_user: Regular User -->
-        <!-- sales_team.group_sale_manager: Sales Manager / Administrator -->
 
-        <!-- ====================================================== -->
-        <!-- 1. LEAD VISIBILITY RULES                             -->
-        <!-- ====================================================== -->
-
-        <!-- Rule for regular users to see only their own leads or unassigned leads -->
-        <record id="crm_lead_see_own_rule" model="ir.rule">
-            <field name="name">Leads/Opportunities: See own and unassigned</field>
-            <field name="model_id" ref="crm.model_crm_lead"/>
-            <!-- This rule applies to all logged-in users -->
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <!-- A user can see a lead if they are the salesperson OR if no salesperson is assigned yet -->
-            <field name="domain_force">['|', ('user_id', '=', user.id), ('user_id', '=', False)]</field>
-            <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
-            <field name="perm_create" eval="True"/>
-            <field name="perm_unlink" eval="True"/>
+        <!-- ========================= -->
+        <!--  TELEMARKETER GROUPS     -->
+        <!-- ========================= -->
+        <record id="group_telemarketer" model="res.groups">
+            <field name="name">Telemarketer</field>
+            <field name="category_id" ref="base.module_category_sales_crm"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
-        <!-- Rule for managers to see all leads. This overrides the rule above for them. -->
-        <record id="crm_lead_see_all_manager_rule" model="ir.rule">
-            <field name="name">Leads/Opportunities: Manager sees all</field>
-            <field name="model_id" ref="crm.model_crm_lead"/>
-            <!-- This rule applies ONLY to Sales Managers -->
-            <field name="groups" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
-            <!-- The domain (1,'=',1) is a placeholder for "no filter" -->
+        <record id="group_telemarketer_full" model="res.groups">
+            <field name="name">Telemarketer - Full Access</field>
+            <field name="category_id" ref="base.module_category_sales_crm"/>
+            <field name="implied_ids" eval="[
+                (4, ref('base.group_user')),
+                (4, ref('sales_team.group_sale_salesman'))
+            ]"/>
+        </record>
+
+        <!-- ========================= -->
+        <!--  TELEMARKETING RULES      -->
+        <!-- ========================= -->
+
+        <!-- Regular users: See only own records -->
+        <record id="telemarketing_confirmation_user_rule" model="ir.rule">
+            <field name="name">Telemarketing Confirmations: Own Records Only</field>
+            <field name="model_id" ref="kpi_management_framework.model_telemarketing_confirmation"/>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="domain_force">[('telemarketer_id', '=', user.id)]</field>
+        </record>
+
+        <!-- Telemarketers: See only their own records -->
+        <record id="telemarketing_confirmation_telemarketer_rule" model="ir.rule">
+            <field name="name">Telemarketing Confirmations: Telemarketer Sees Own</field>
+            <field name="model_id" ref="kpi_management_framework.model_telemarketing_confirmation"/>
+            <field name="groups" eval="[(4, ref('kpi_management_framework.group_telemarketer'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
         </record>
 
-        <!-- ====================================================== -->
-        <!-- 2. KPI TARGET VISIBILITY RULES                         -->
-        <!-- ====================================================== -->
-
-        <!-- Rule for regular users to see only their own KPI targets -->
-        <record id="kpi_target_see_own_rule" model="ir.rule">
-            <field name="name">KPI Targets: See own</field>
-            <field name="model_id" ref="model_kpi_target"/>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('user_id', '=', user.id)]</field>
-        </record>
-
-        <!-- Rule for managers to see all KPI targets -->
-        <record id="kpi_target_see_all_manager_rule" model="ir.rule">
-            <field name="name">KPI Targets: Manager sees all</field>
-            <field name="model_id" ref="model_kpi_target"/>
+        <!-- Managers: See all -->
+        <record id="telemarketing_confirmation_manager_rule" model="ir.rule">
+            <field name="name">Telemarketing Confirmations: Manager Sees All</field>
+            <field name="model_id" ref="kpi_management_framework.model_telemarketing_confirmation"/>
             <field name="groups" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
         </record>
 
-        <!-- ====================================================== -->
-        <!-- 3. KPI HISTORY VISIBILITY RULES                      -->
-        <!-- ====================================================== -->
-
-        <!-- Rule for regular users to see only the history related to their own KPI targets -->
-        <record id="kpi_history_see_own_rule" model="ir.rule">
-            <field name="name">KPI History: See own</field>
-            <field name="model_id" ref="model_kpi_history"/>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <!-- This domain checks the user_id on the parent kpi.target record -->
-            <field name="domain_force">[('target_id.user_id', '=', user.id)]</field>
-        </record>
-
-        <!-- Rule for managers to see all KPI history -->
-        <record id="kpi_history_see_all_manager_rule" model="ir.rule">
-            <field name="name">KPI History: Manager sees all</field>
-            <field name="model_id" ref="model_kpi_history"/>
-            <field name="groups" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
-            <field name="domain_force">[(1, '=', 1)]</field>
-        </record>
-
-        <!-- ====================================================== -->
-        <!-- 4. KPI TARGET LINE VISIBILITY RULES                  -->
-        <!-- ====================================================== -->
-
-        <!-- Rule for regular users to see only their own KPI target lines -->
-        <record id="kpi_target_line_see_own_rule" model="ir.rule">
-            <field name="name">KPI Target Lines: See own</field>
-            <field name="model_id" ref="model_kpi_target_line"/>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('user_id', '=', user.id)]</field>
-        </record>
-
-        <!-- Rule for managers to see all KPI target lines -->
-        <record id="kpi_target_line_see_all_manager_rule" model="ir.rule">
-            <field name="name">KPI Target Lines: Manager sees all</field>
-            <field name="model_id" ref="model_kpi_target_line"/>
-            <field name="groups" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
+        <!-- Admin/System: See all -->
+        <record id="telemarketing_confirmation_admin_rule" model="ir.rule">
+            <field name="name">Telemarketing Confirmations: Admin Sees All</field>
+            <field name="model_id" ref="kpi_management_framework.model_telemarketing_confirmation"/>
+            <field name="groups" eval="[(4, ref('base.group_system'))]"/>
             <field name="domain_force">[(1, '=', 1)]</field>
         </record>
 

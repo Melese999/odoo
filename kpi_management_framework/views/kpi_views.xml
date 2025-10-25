@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================= -->
+    <!-- KPI HISTORY VIEWS -->
+    <!-- ========================= -->
+
+    <record id="view_kpi_history_tree" model="ir.ui.view">
+        <field name="name">kpi.history.tree</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Activity History">
+                <field name="target_id"/>
+                <field name="source_document_model"/>
+                <field name="source_document_id"/>
+                <field name="activity_date"/>
+                <field name="description"/>
+                <field name="data_quality_score"/>
+                <field name="data_quality_type"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kpi_history_form" model="ir.ui.view">
+        <field name="name">kpi.history.form</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <form string="KPI Activity History">
+                <sheet>
+                    <group>
+                        <field name="target_id"/>
+                        <field name="source_document_model"/>
+                        <field name="source_document_id"/>
+                        <field name="activity_date"/>
+                        <field name="description"/>
+                        <field name="data_quality_score"/>
+                        <field name="data_quality_type"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_kpi_history" model="ir.actions.act_window">
+        <field name="name">KPI Activity History</field>
+        <field name="res_model">kpi.history</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'create': False, 'edit': False}</field>
+    </record>
+
+<!--    <menuitem id="menu_kpi_history"-->
+<!--              name="KPI History"-->
+<!--              parent="kpi_management_menu_root"-->
+<!--              action="action_kpi_history"-->
+<!--              sequence="20"/>-->
+
+    <!-- ========================= -->
+    <!-- KPI DASHBOARD VIEWS -->
+    <!-- ========================= -->
+
+    <record id="view_kpi_dashboard_kanban" model="ir.ui.view">
+        <field name="name">kpi.dashboard.kanban</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="user_id">
+                <field name="user_id"/>
+                <field name="overall_achievement"/>
+                <field name="target_line_ids"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click" t-att-data-id="record.id.raw_value">
+                            <div class="o_kanban_record_top">
+                                <strong><field name="name"/></strong>
+                                <small><field name="user_id"/></small>
+                            </div>
+                            <t t-foreach="record.target_line_ids.raw_value" t-as="line">
+                                <div class="mb-2">
+                                    <small t-esc="line.kpi_definition_id[1]"/>:
+                                    <small>
+                                        <t t-esc="line.actual_value"/>
+                                        /
+                                        <t t-esc="line.target_value"/>
+                                        <t t-if="line.kpi_definition_id[0] == 'data_quality'">%</t>
+                                    </small>
+                                    <div class="progress" style="height:6px;">
+                                        <div class="progress-bar"
+                                             role="progressbar"
+                                             t-attf-class="progress-bar-{{ line.achievement_percentage >= 100 ? 'success' : (line.achievement_percentage >= 70 ? 'warning' : 'danger') }}"
+                                             t-attf-style="width: {{ Math.min(line.achievement_percentage, 100) }}%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                            <div class="o_kanban_record_bottom">
+                                <small>Overall: <t t-esc="parseInt(record.overall_achievement)"/>%</small>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="kpi_dashboard_action" model="ir.actions.act_window">
+        <field name="name">KPI Dashboard</field>
+        <field name="res_model">kpi.target</field>
+        <field name="view_mode">kanban,graph,pivot,tree,form</field>
+        <field name="help" type="html">
+            <p>No active KPI targets found.</p>
+        </field>
+    </record>
+
+    <menuitem id="kpi_dashboard_menu"
+              name="KPI Dashboard"
+              parent="crm.crm_menu_report"
+              action="kpi_dashboard_action"
+              sequence="50"/>
+
+    <!-- ========================= -->
+    <!-- KPI REPORTING VIEWS -->
+    <!-- ========================= -->
+
+    <record id="view_kpi_reporting_tree" model="ir.ui.view">
+        <field name="name">kpi.reporting.tree</field>
+        <field name="model">kpi.target.line</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Reporting"
+                  decoration-danger="achievement_percentage &lt; 70"
+                  decoration-warning="achievement_percentage &gt;= 70 and achievement_percentage &lt; 100"
+                  decoration-success="achievement_percentage &gt;= 100">
+                <field name="target_id"/>
+                <field name="user_id"/>
+                <field name="kpi_definition_id"/>
+                <field name="target_value"/>
+                <field name="actual_value"/>
+                <field name="achievement_percentage"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kpi_reporting_action" model="ir.actions.act_window">
+        <field name="name">KPI Reporting</field>
+        <field name="res_model">kpi.target.line</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p>No KPI target lines available.</p>
+        </field>
+    </record>
+
+    <menuitem id="kpi_reporting_menu"
+              name="KPI Reporting"
+              parent="crm.crm_menu_report"
+              action="kpi_reporting_action"
+              sequence="55"/>
+
+</odoo>

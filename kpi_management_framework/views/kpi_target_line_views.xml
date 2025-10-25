@@ -1,17 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- This tree view is used inside the kpi.target form -->
-    <record id="kpi_target_line_view_tree" model="ir.ui.view">
+    <record id="view_kpi_target_line_form" model="ir.ui.view">
+        <field name="name">kpi.target.line.form</field>
+        <field name="model">kpi.target.line</field>
+        <field name="arch" type="xml">
+            <form string="KPI Target Line">
+                <sheet>
+                    <group>
+                        <field name="kpi_definition_id" options="{'no_create': False}"/>
+                        <field name="user_id"/>
+                        <field name="state" readonly="1"/>
+                    </group>
+
+                    <separator string="KPI Values" colspan="2"/>
+
+                    <!-- Conditional fields based on KPI type -->
+                    <group>
+                        <!-- For Data Quality KPIs - Show percentage widget with proper factor -->
+                        <field name="target_value"
+                               string="Target Value (%)"
+                               required="[('kpi_definition_id.kpi_type', '=', 'data_quality')]"
+                                       invisible="[('kpi_definition_id.kpi_type', '!=', 'data_quality')]"
+                                        placeholder="e.g., 75.0"/>
+
+                        <!-- For Leads KPIs - Show regular float -->
+                        <field name="target_value"
+                               string="Target Value"
+                               required="[('kpi_definition_id.kpi_type', '=', 'leads_registered')]"
+                               invisible="[('kpi_definition_id.kpi_type', '!=', 'leads_registered')]"
+                               placeholder="e.g., 100"/>
+
+                        <!-- Actual Value -->
+                        <field name="actual_value" readonly="1"/>
+
+                        <!-- Achievement Rate -->
+                        <field name="achievement_percentage" readonly="1" widget="progressbar"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree view showing formatted values -->
+    <record id="view_kpi_target_line_tree" model="ir.ui.view">
         <field name="name">kpi.target.line.tree</field>
         <field name="model">kpi.target.line</field>
         <field name="arch" type="xml">
-            <tree string="KPI Lines" editable="bottom">
-                <field name="sequence" widget="handle"/>
-                <field name="kpi_definition_id" required="1"/>
-                <field name="target_value"/>
-                <field name="actual_value" readonly="1"/>
-                <field name="achievement_percentage" widget="progressbar" readonly="1"/>
+            <tree string="KPI Target Lines" decoration-success="achievement_percentage &gt;= 100">
+                <field name="user_id"/>
+                <field name="kpi_definition_id"/>
+
+                <!-- Conditional target value display -->
+                <field name="target_value"
+                       string="Target"
+                       invisible="[('kpi_definition_id.kpi_type', '!=', 'data_quality')]"/>
+
+                <field name="target_value"
+                       string="Target"
+                       invisible="[('kpi_definition_id.kpi_type', '!=', 'leads_registered')]"/>
+
+                <field name="actual_value" string="Actual"/>
+                <field name="achievement_percentage" string="Achievement %" widget="progressbar"/>
+                <field name="state"/>
             </tree>
         </field>
+    </record>
+
+    <!-- Menu and Action -->
+    <record id="action_kpi_target_line" model="ir.actions.act_window">
+        <field name="name">KPI Target Lines</field>
+        <field name="res_model">kpi.target.line</field>
+        <field name="view_mode">tree,form</field>
     </record>
 </odoo>

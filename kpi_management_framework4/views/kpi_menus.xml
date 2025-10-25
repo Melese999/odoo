@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+            id="kpi_management_menu_root"
+            name="KPI Management"
+            parent="crm.crm_menu_root"
+            sequence="25"/>
+
+    <menuitem
+            id="kpi_target_menu"
+            name="KPI Targets"
+            parent="kpi_management_menu_root"
+            action="kpi_target_action"
+            sequence="10"
+            groups="sales_team.group_sale_manager"/>
+
+    <menuitem
+            id="menu_kpi_history"
+            name="KPI History"
+            parent="kpi_management_menu_root"
+            action="action_kpi_history"
+            sequence="20"/>
+
+    <menuitem id="menu_kpi_target_line_root"
+              name="KPI Target Lines"
+              parent="kpi_management_menu_root"
+              action="action_kpi_target_line"  sequence="25"/>
+
+    <menuitem
+            id="kpi_definition_menu"
+            name="KPI Definitions"
+            parent="crm.crm_menu_config"
+            action="kpi_definition_action"
+            sequence="99"/>
+
+</odoo>

@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_res_config_settings_telemarketing" model="ir.ui.view">
+        <field name="name">res.config.settings.telemarketing</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.view_res_config_settings"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Telemarketing Configuration" string="Telemarketing Configuration">
+                    <h2>Telemarketing Confirmation Settings</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="telemarketing_prefix"/>
+                                <field name="telemarketing_prefix" placeholder="e.g. CONF"/>
+                                <p class="text-muted">Used as prefix in generated confirmation IDs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

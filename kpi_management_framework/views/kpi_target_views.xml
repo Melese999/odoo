@@ -13,7 +13,6 @@
                         <button name="action_view_activities" type="object" class="oe_stat_button" icon="fa-tasks">
                             <field name="activity_count" widget="statinfo" string="Activities"/>
                         </button>
-                        <!-- ADD DATA QUALITY BUTTON -->
                         <button name="action_view_data_quality" type="object" class="oe_stat_button" icon="fa-check-circle">
                             <field name="data_quality_count" widget="statinfo" string="Data Quality"/>
                         </button>
@@ -23,12 +22,10 @@
                         <h1><field name="name" readonly="1"/></h1>
                     </div>
 
-                    <!-- Top section as per your mockup -->
                     <h2>Target Planning</h2>
                     <group>
                         <group>
                             <field name="user_id"/>
-                            <field name="kpi_id" string="Primary KPI" options="{'no_create': True}"/>
                             <field name="holiday_schedule_id"/>
                             <field name="working_days" readonly="1"/>
                         </group>
@@ -38,32 +35,34 @@
                         </group>
                     </group>
 
-                    <!-- KPI Lines section -->
                     <h2>Performance Status</h2>
                     <field name="target_line_ids" nolabel="1">
                         <tree editable="bottom">
                             <field name="sequence" widget="handle"/>
                             <field name="kpi_definition_id" required="1" options="{'no_create': True}"/>
-                            <field name="target_value"/>
-                            <field name="actual_value" readonly="1"/>
+                            <field name="target_value" string="Target Value" required="1" placeholder="e.g. 100%"/>
+                            <field name="actual_value" string="Actual Value" readonly="1"/>
+                            <field name="target_value" string="Target (Edit)" invisible="1"/>
                             <field name="achievement_percentage" widget="progressbar" readonly="1"/>
                         </tree>
                     </field>
 
-                    <!-- Overall Achievement -->
-                    <group class="mt-4">
-                        <label for="overall_achievement" string="Overall Achievement"/>
-                        <field name="overall_achievement" widget="progressbar" readonly="1"/>
+                    <group string="Performance Summary" class="mt-4">
+                        <field name="overall_achievement_leads" string="Leads Achievement" widget="progressbar"/>
+                        <field name="overall_achievement_data_quality" string="Data Quality Achievement" widget="progressbar"/>
+                        <field name="overall_achievement" string="Total Overall Achievement" widget="progressbar"/>
                     </group>
 
-                    <!-- Activities section -->
+
                     <h2 class="mt-4">Activity Tracked</h2>
                     <field name="history_ids" nolabel="1" readonly="1">
                         <tree>
                             <field name="activity_date"/>
                             <field name="source_document"/>
                             <field name="description"/>
-                            <field name="data_quality_type" string="Quality Type"/>
+                            <field name="display_data_quality_type" string="Quality Type"/>
+
+                            <field name="data_quality_score" string="Quality Score" widget="progressbar"/>
                         </tree>
                     </field>
                 </sheet>
@@ -75,15 +74,51 @@
             </form>
         </field>
     </record>
+
+    <record id="kpi_target_view_tree" model="ir.ui.view">
+        <field name="name">kpi.target.tree</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Targets">
+                <field name="name" string="Target Name"/>
+                <field name="user_id" string="Assigned To"/>
+                <field name="date_start" string="Start Date"/>
+                <field name="date_end" string="End Date"/>
+                <field name="overall_achievement" string="Overall %" widget="progressbar"/>
+                <field name="overall_achievement_leads" string="Leads %" widget="progressbar"/>
+                <field name="overall_achievement_data_quality" string="Data Quality %" widget="progressbar"/>
+                <field name="activity_count" string="Activities"/>
+                <field name="data_quality_count" string="Data Quality"/>
+                <field name="last_computed_date" string="Last Computed" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="kpi_target_view_search" model="ir.ui.view">
+        <field name="name">kpi.target.search</field>
+        <field name="model">kpi.target</field>
+        <field name="arch" type="xml">
+            <search string="Search KPI Targets">
+                <field name="name"/>
+                <field name="user_id"/>
+                <filter string="My Targets" name="my_targets" domain="[('user_id', '=', uid)]"/>
+                <filter string="Active Targets" name="active" domain="[('date_end', '&gt;=', context_today())]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Assigned To" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="kpi_target_action" model="ir.actions.act_window">
         <field name="name">KPI Targets</field>
         <field name="res_model">kpi.target</field>
         <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="kpi_target_view_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p class="o_view_nocentent_smiling_face">
                 Assign a new KPI Target to a user.
             </p>
         </field>
     </record>
-
 </odoo>

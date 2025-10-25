@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_phonecall_view_form_inherit_kpi" model="ir.ui.view">
+        <field name="name">crm.phonecall.form.kpi.inherit</field>
+        <field name="model">crm.phonecall</field>
+        <field name="inherit_id" ref="crm_phonecall.crm_case_phone_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_confirm_all_fields"
+                        string="Confirm All"
+                        type="object"
+                        class="btn-secondary"/>
+            </xpath>
+
+            <xpath expr="//sheet/group" position="after">
+                <group string="Telemarketing Confirmation" name="telemarketing_confirmation" colspan="2">
+
+                    <group string="Data Quality Checks">
+                        <field name="name_confirmed"/>
+                        <field name="address_confirmed"/>
+                        <field name="phone_confirmed"/>
+                        <field name="service_satisfaction_confirmed"/>
+                        <field name="product_information_confirmed"/>
+                    </group>
+
+                    <group string="Overall Score">
+                        <field name="overall_score" widget="progressbar" options="{'edit': false}"/>
+                    </group>
+
+                    </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

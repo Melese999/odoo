@@ -1,23 +1,50 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Action to open KPI History list view -->
+    <!-- KPI History Tree View -->
+    <record id="view_kpi_history_tree" model="ir.ui.view">
+        <field name="name">kpi.history.tree</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Activity History">
+                <field name="target_id" string="KPI Target"/>
+                <field name="source_document" string="Source Document"/>
+                <field name="activity_date" string="Activity Date"/>
+                <field name="description" string="Description"/>
+                <field name="display_data_quality_type" string="Quality Type"/>
+                <field name="data_quality_score" string="Quality Score" widget="progressbar"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- KPI History Form View -->
+    <record id="view_kpi_history_form" model="ir.ui.view">
+        <field name="name">kpi.history.form</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <form string="KPI Activity History">
+                <sheet>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="target_id" string="KPI Target"/>
+                            <field name="source_document" string="Source Document" readonly="1"/>
+                            <field name="activity_date" string="Activity Date"/>
+                        </group>
+                        <group string="Details">
+                            <field name="description" string="Description"/>
+                            <field name="display_data_quality_type" string="Quality Type"/>
+                            <field name="data_quality_score" string="Quality Scores" widget="progressbar"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- KPI History Action -->
     <record id="action_kpi_history" model="ir.actions.act_window">
         <field name="name">KPI Activity History</field>
         <field name="res_model">kpi.history</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'create': False, 'edit': False}</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No KPI-related activities have been logged yet.
-            </p>
-        </field>
+        <field name="context">{'search_default_group_by_kpi_target': 1}</field>
     </record>
-
-    <!-- Menu Item for KPI History -->
-    <menuitem
-        id="menu_kpi_history"
-        name="KPI History"
-        parent="kpi_management_framework.kpi_management_menu_root"
-        action="action_kpi_history"
-        sequence="20"/>
 </odoo>

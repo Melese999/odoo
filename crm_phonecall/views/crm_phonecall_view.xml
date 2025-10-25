@@ -176,7 +176,20 @@
                             <field name="direction" widget="radio" />
                         </group>
                     </group>
+                        <!-- ✅ Added Telemarketing Confirmation Fields -->
+                    <group string="Data Quality Confirmations">
+                        <field name="name_confirmed"/>
+                        <field name="address_confirmed"/>
+                        <field name="phone_confirmed"/>
+                        <field name="service_satisfaction_confirmed"/>
+                        <field name="product_information_confirmed"/>
+                    </group>
+
+                    <group string="Overall Score">
+                        <field name="overall_score" widget="progressbar" options="{'edit': false}"/>
+                    </group>
                     <field name="description" placeholder="Description..." />
+                    
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" />

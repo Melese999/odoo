@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_kpi_history_tree" model="ir.ui.view">
+        <field name="name">kpi.history.tree</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <tree string="KPI Activity History" default_order="activity_date desc">
+                <field name="target_id" string="KPI Target"/>
+                <field name="source_document" string="Source Document"/>
+                <field name="activity_date" string="Activity Date"/>
+                <field name="description" string="Description"/>
+                <field name="display_data_quality_type" string="Quality Type"/>
+                <field name="data_quality_score" string="Quality Score" widget="progressbar"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_kpi_history_form" model="ir.ui.view">
+        <field name="name">kpi.history.form</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <form string="KPI Activity History">
+                <sheet>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="target_id" string="KPI Target" readonly="1"/>
+                            <field name="target_line_id" string="KPI Line" readonly="1"/>
+                            <field name="kpi_definition_id" string="KPI Definition" readonly="1"/>
+                            <field name="activity_date" string="Activity Date" readonly="1"/>
+                        </group>
+                        <group string="Source Document">
+                            <field name="source_document" string="Source Document" readonly="1"/>
+                            <field name="source_document_model" invisible="1"/>
+                            <field name="source_document_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="description" string="Description" readonly="1"/>
+                    <group string="Data Quality" invisible="[('data_quality_type', '=', False)]">
+                        <group>
+                            <field name="display_data_quality_type" string="Quality Type" readonly="1"/>
+                            <field name="data_quality_score" string="Quality Score" widget="progressbar" readonly="1"/>
+                            <field name="data_quality_type" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kpi_history_search" model="ir.ui.view">
+        <field name="name">kpi.history.search</field>
+        <field name="model">kpi.history</field>
+        <field name="arch" type="xml">
+            <search string="Search KPI History">
+                <field name="target_id"/>
+                <field name="kpi_definition_id"/>
+                <field name="source_document"/>
+                <field name="data_quality_type"/>
+                <group expand="0" string="Group By">
+                    <filter string="KPI Target" name="group_by_kpi_target" context="{'group_by': 'target_id'}"/>
+                    <filter string="Activity Date" name="group_by_date" context="{'group_by': 'activity_date:day'}"/>
+                    <filter string="Quality Type" name="group_by_data_quality_type" context="{'group_by': 'data_quality_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_kpi_history" model="ir.actions.act_window">
+        <field name="name">KPI Activity History</field>
+        <field name="res_model">kpi.history</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_kpi_history_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                This is the log of all activities that contribute to the KPI Target calculations.
+            </p>
+        </field>
+    </record>
+</odoo>

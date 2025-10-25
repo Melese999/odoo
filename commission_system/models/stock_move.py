@@ -17,19 +17,21 @@ class StockMove(models.Model):
         """Override to ensure dimensional data is passed to MO"""
         # First, ensure we have dimensional data from sale line if available
         for move in self:
-            if move.sale_line_id and not any([move.length, move.weight, move.pitch]):
-                move.write({
-                    'length': move.sale_line_id.length,
-                    'weight': move.sale_line_id.weight,
-                    'pitch': move.sale_line_id.pitch,
-                    'total_length': move.sale_line_id.total_length,
-                    'total_weight': move.sale_line_id.total_weight,
-                })
-                _logger.info("Copied dimensional data from sale line %s to move %s",
-                             move.sale_line_id.id, move.id)
+            print(move)
+            # if move.sale_line_id and not any([move.length, move.weight, move.pitch]):
+            #     move.write({
+            #         'length': move.sale_line_id.length,
+            #         'weight': move.sale_line_id.weight,
+            #         'pitch': move.sale_line_id.pitch,
+            #         'total_length': move.sale_line_id.total_length,
+            #         'total_weight': move.sale_line_id.total_weight,
+            #     })
+            #     _logger.info("Copied dimensional data from sale line %s to move %s",
+            #                  move.sale_line_id.id, move.id)
 
         result = super(StockMove, self)._action_confirm(merge=merge, merge_into=merge_into)
 
+        return result
         # Now ensure manufacturing orders have the dimensional data
         for move in self:
             if move.production_id and move.sale_line_id:
