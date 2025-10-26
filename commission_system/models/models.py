@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, tools, _
 from odoo import http
+import uuid
 from odoo.http import request
 from werkzeug.utils import redirect
 from datetime import datetime, timedelta
@@ -163,7 +164,6 @@ class CommissionAssignment(models.Model):
 
 class CommissionRecords(models.Model):
     _name = 'commission_system.records'
-    # _inherit = ['base.audit.mixin', 'mail.thread']
     _inherit = ['mail.thread', 'mail.activity.mixin', 'base.audit.mixin']
     _description = 'Commission System Records'
     _order = 'name desc'
@@ -173,7 +173,7 @@ class CommissionRecords(models.Model):
     invoice_id = fields.Many2one('account.move', string="Invoice", ondelete='cascade')
     sales_order_id = fields.Many2one('sale.order', string="Sales Order", ondelete='set null')
     salesperson_id = fields.Many2one('res.users', string="Salesperson", ondelete='set null')
-    agent_id = fields.Many2one('res.partner', string="Agent", ondelete='set null',tracking=True)
+    agent_id = fields.Many2one('res.partner', string="Agent", ondelete='set null', tracking=True)
     amount = fields.Float(string="Commission Amount", readonly=True, required=True)
     product_id = fields.Many2one('product.product', string="Product", ondelete='set null')
     sales_team_id = fields.Many2one('crm.team', string='Sales Team')
@@ -192,7 +192,8 @@ class CommissionRecords(models.Model):
             ('billed', 'Billed'),
             ('confirmed', 'Confirmed'),
             ('audited', 'Audited'),
-            ('paid', 'Paid')
+            ('paid', 'Paid'),
+            ('completed', 'Completed')
         ],
         string='Status', default='draft', tracking=True
     )
@@ -318,26 +319,10 @@ class CommissionRecords(models.Model):
         for rec in self:
             rec.agent_name = rec.invoice_id.agent_id.name if rec.invoice_id and rec.invoice_id.agent_id else ''
 
-    '''@api.model
-    def create_commission(self, rule, entity, entity_type, amount):
-        """Create a commission record based on rule and entity"""
-        if amount < 0:
-            raise UserError("Commission amount cannot be negative.")
-
-        calculated_amount = (
-            rule.rate if rule.rate_type == 'fixed' else amount * (rule.rate / 100)
-        )
-        return self.create({
-            'name': f'{entity_type.capitalize()} - {entity.name}',
-            'rule_id': rule.id,
-            f'{entity_type}_id': entity.id,
-            'amount': calculated_amount,
-        })'''
-
     def unlink(self):
         """Prevent deletion of records in certain states or linked to bills"""
         for rec in self:
-            if rec.state in ['billed', 'confirmed','audited', 'paid']:
+            if rec.state in ['billed', 'confirmed', 'audited', 'paid', 'completed']:
                 raise UserError(_(
                     "Cannot delete commission record in %s state."
                 ) % rec.state)
@@ -373,7 +358,6 @@ class CommissionRecords(models.Model):
             group_audit = self.env.ref('commission_system.group_commission_audit')
             group_pay = self.env.ref('commission_system.group_commission_pay')
 
-
             # Prepare field updates including clearing confirmed/paid fields when reverting
             tracking_updates = {}
             for record in self:
@@ -382,6 +366,10 @@ class CommissionRecords(models.Model):
                 # Skip if state isn't changing
                 if current_state == new_state:
                     continue
+
+                # Add validation for completed state
+                if new_state == 'completed' and current_state != 'paid':
+                    raise UserError(_("Only paid commission records can be marked as completed."))
 
                 if new_state == 'checked' and user not in group_check.users:
                     raise UserError(_("You are not allowed to check commissions."))
@@ -395,15 +383,17 @@ class CommissionRecords(models.Model):
 
                 if new_state == 'paid' and user not in group_pay.users:
                     raise UserError(_("You are not allowed to pay bill commissions."))
+
                 # Validate transition
                 allowed_transitions = {
                     'draft': ['checked'],
                     'checked': ['approved', 'draft'],
                     'approved': ['billed', 'checked'],
                     'billed': ['confirmed', 'approved', 'billed'],
-                    'confirmed': ['billed', 'confirmed','audited'],
-                    'audited': ['confirmed','audited','paid'],
-                    'paid': ['audited']
+                    'confirmed': ['billed', 'confirmed', 'audited'],
+                    'audited': ['confirmed', 'audited', 'paid'],
+                    'paid': ['completed', 'audited'],  # Allow transition to completed
+                    'completed': []  # Final state
                 }
 
                 # Special case for checked->confirmed in approved worksheets
@@ -420,7 +410,12 @@ class CommissionRecords(models.Model):
                                         })
 
                 # Field updates - both setting and clearing
-                if new_state == 'checked':
+                if new_state == 'completed':
+                    tracking_updates[record.id] = {
+                        # No specific user tracking for completed state
+                        # as it's automatically set via bill summary
+                    }
+                elif new_state == 'checked':
                     tracking_updates[record.id] = {
                         'checked_by': self.env.user.id,
                         'checked_date': fields.Datetime.now(),
@@ -428,8 +423,8 @@ class CommissionRecords(models.Model):
                         'approved_date': False,
                         'confirmed_by': False,  # Clear if reverting
                         'confirmed_date': False,
-                        'audited_by': False, 
-                        'audited_date':False,
+                        'audited_by': False,
+                        'audited_date': False,
                         'paid_by': False,
                         'paid_date': False
                     }
@@ -439,8 +434,8 @@ class CommissionRecords(models.Model):
                         'approved_date': fields.Datetime.now(),
                         'confirmed_by': False,  # Clear if reverting
                         'confirmed_date': False,
-                        'audited_by': False, 
-                        'audited_date':False,
+                        'audited_by': False,
+                        'audited_date': False,
                         'paid_by': False,
                         'paid_date': False
                     }
@@ -448,8 +443,8 @@ class CommissionRecords(models.Model):
                     tracking_updates[record.id] = {
                         'confirmed_by': self.env.user.id,
                         'confirmed_date': fields.Datetime.now(),
-                        'audited_by': False, 
-                        'audited_date':False
+                        'audited_by': False,
+                        'audited_date': False
                     }
                 elif new_state == 'audited':
                     tracking_updates[record.id] = {
@@ -484,14 +479,14 @@ class CommissionRecords(models.Model):
 
         # Execute the main write operation
         result = super().write(vals)
-        
+
         if 'agent_id' in vals:
-          for record in self:
-             if record.invoice_id:
-                 record.invoice_id.write({'agent_id': vals['agent_id']})
-             if record.sales_order_id:
-                 record.sales_order_id.write({'agent_id': vals['agent_id']})
-    
+            for record in self:
+                if record.invoice_id:
+                    record.invoice_id.write({'agent_id': vals['agent_id']})
+                if record.sales_order_id:
+                    record.sales_order_id.write({'agent_id': vals['agent_id']})
+
         # Post-write synchronization
         if 'state' in vals and not self.env.context.get('skip_sync'):
             new_state = vals['state']
@@ -502,7 +497,8 @@ class CommissionRecords(models.Model):
                 bills.with_context(skip_sync=True).write({
                     'state': new_state,
                     # Clear confirmation fields when reverting
-                    **({'confirmed_by': False, 'date_confirmed': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
+                    **({'confirmed_by': False, 'date_confirmed': False, 'audited_by': False,
+                        'audited_date': False} if new_state == 'billed' else {})
                 })
 
             # 2. Sync with worksheet (if exists)
@@ -513,7 +509,8 @@ class CommissionRecords(models.Model):
                 worksheets.with_context(skip_sync=True).write({
                     'state': new_state,
                     # Clear confirmation fields when reverting
-                    **({'confirmed_by': False, 'confirmed_date': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
+                    **({'confirmed_by': False, 'confirmed_date': False, 'audited_by': False,
+                        'audited_date': False} if new_state == 'billed' else {})
                 })
 
                 # Sync worksheet lines
@@ -523,7 +520,8 @@ class CommissionRecords(models.Model):
                     ).with_context(skip_sync=True).write({
                         'state': new_state,
                         # Clear confirmation fields when reverting
-                        **({'confirmed_by': False, 'confirmed_date': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
+                        **({'confirmed_by': False, 'confirmed_date': False, 'audited_by': False,
+                            'audited_date': False} if new_state == 'billed' else {})
                     })
 
             # 3. Auto-assign to worksheet if needed
@@ -596,7 +594,8 @@ class CommissionRecords(models.Model):
     def reset_to_approved_if_bill_deleted(self):
         """Reset state to approved when linked bill is deleted"""
         for rec in self:
-            if rec.state in ['billed', 'confirmed','audited'] and (not rec.bill_id or rec.bill_id.state != 'paid'):
+            if rec.state in ['billed', 'confirmed', 'audited', 'paid', 'completed'] and (
+                    not rec.bill_id or rec.bill_id.state != 'paid'):
                 rec.write({
                     'state': 'approved',
                     'bill_id': False
@@ -606,32 +605,35 @@ class CommissionRecords(models.Model):
     @api.constrains('state')
     def _check_state_transition(self):
         allowed = {
-            'draft': ['approved'],
+            'draft': ['checked'],
+            'checked': ['approved', 'draft'],
             'approved': ['billed'],
             'billed': ['confirmed'],
             'confirmed': ['audited'],
-            'audited':['paid'],
-            'paid': []
+            'audited': ['paid'],
+            'paid': ['completed'],
+            'completed': []
         }
         for record in self:
             if record.state not in allowed:
                 continue
             next_states = allowed[record.state]
-            if record.state != 'paid' and not next_states:
+            if record.state != 'completed' and not next_states:
                 raise ValidationError(_(
                     "Records in %s state cannot be modified"
                 ) % record.state)
 
-    # In commission_system.records model
     def _validate_state_transition(self, new_state):
         """Allow reverting from confirmed to billed"""
         allowed_transitions = {
-            'draft': ['approved'],
-            'approved': ['billed'],
-            'billed': ['confirmed', 'billed'],
-            'confirmed': ['audited', 'confirmed', 'billed'],  # Explicit revert
-            'confirmed': ['paid', 'confirmed', 'audited'],  # Explicit revert
-            'paid': ['paid', 'audited']
+            'draft': ['checked'],
+            'checked': ['approved', 'draft'],
+            'approved': ['billed', 'checked'],
+            'billed': ['confirmed', 'approved', 'billed'],
+            'confirmed': ['audited', 'confirmed', 'billed'],
+            'audited': ['paid', 'confirmed', 'audited'],
+            'paid': ['completed', 'audited'],  # Allow transition to completed
+            'completed': []  # Final state
         }
         for record in self:
             if record.state not in allowed_transitions:
@@ -644,22 +646,6 @@ class CommissionRecords(models.Model):
                                     'current': record.state,
                                     'new': new_state
                                 })
-
-    def _auto_assign_to_worksheet(self):
-        """Auto-assign record to appropriate worksheet"""
-        for record in self.filtered(lambda r: not r.worksheet_id and r.state == 'approved'):
-            worksheet = self.env['commission_system.worksheet'].search([
-                ('agent_id', '=', record.agent_id.id),
-                ('state', '=', 'approved'),
-                ('start_date', '<=', record.invoice_date),
-                ('end_date', '>=', record.invoice_date)
-            ], limit=1)
-
-            if worksheet:
-                record.write({
-                    'worksheet_id': worksheet.id,
-                    'state': 'approved'
-                })
 
     def _check_state_consistency(self):
         """Verify record state matches related documents"""
@@ -705,7 +691,8 @@ class CommissionRecords(models.Model):
             worksheets.with_context(skip_record_update=True).write({
                 'state': new_state,
                 # Ensure worksheet also clears confirmed/paid fields when reverting
-                **({'confirmed_by': False, 'confirmed_date': False,'audited_by': False, 'audited_date': False} if new_state == 'billed' else {})
+                **({'confirmed_by': False, 'confirmed_date': False, 'audited_by': False,
+                    'audited_date': False} if new_state == 'billed' else {})
             })
 
         # 2. Sync with bill
@@ -1601,6 +1588,7 @@ class CommissionLine(models.Model):
         ('confirmed', 'Confirmed'),
         ('audited', 'audited'),
         ('paid', 'Paid'),
+        ('completed', 'Completed')
     ], default='draft', string='Status')
     total_commission = fields.Monetary(string='Total Commission')
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
@@ -1632,12 +1620,14 @@ class CommissionBill(models.Model):
     CONFIRMED = 'confirmed'
     AUDITED = 'audited'
     PAID = 'paid'
+    COMPLETED = 'completed'
     STATES = [
         (DRAFT, 'Draft'),
         (BILLED, 'Billed'),
         (CONFIRMED, 'Confirmed'),
-        (AUDITED,'Audited'),
+        (AUDITED, 'Audited'),
         (PAID, 'Paid'),
+        (COMPLETED, 'Completed'),
     ]
 
     # Fields
@@ -1670,6 +1660,9 @@ class CommissionBill(models.Model):
     paid_by = fields.Many2one('res.users', string='Paid By', readonly=True)
     month = fields.Char(string="Month")
 
+    # New summary field
+    summary_id = fields.Many2one('commission_system.bill.summary', string='Bill Summary', readonly=True)
+
     bank_name = fields.Char(string='Bank Name', related='agent_id.bank_name', readonly=True)
     iban = fields.Char(string='IBAN', related='agent_id.iban', readonly=True)
     bank_account_id = fields.Many2one(
@@ -1678,6 +1671,15 @@ class CommissionBill(models.Model):
         related='agent_id.bank_account_id',
         readonly=True
     )
+
+    # Add confirmed_by field for consistency
+    confirmed_by = fields.Many2one('res.users', string='Confirmed By', readonly=True)
+
+    # SQL Constraints
+    _sql_constraints = [
+        ('date_check', 'CHECK(start_date <= end_date)', 'Start date must be before end date.'),
+        ('name_unique', 'UNIQUE(name)', 'Bill number must be unique.'),
+    ]
 
     @api.depends('agent_id')
     def _compute_sales_info(self):
@@ -1691,14 +1693,22 @@ class CommissionBill(models.Model):
             bill.total_commission = sum(bill.commission_records.mapped('amount')) + sum(
                 bill.line_ids.mapped('amount'))
 
-    @api.depends('agent_id', 'total_commission')
+    @api.depends('agent_id', 'total_commission', 'start_date')
     def _compute_tax(self):
         for bill in self:
+            if not bill.agent_id or not bill.total_commission:
+                bill.total_tax = 0.0
+                bill.tax_paid = 0.0
+                bill.incremental_tax = 0.0
+                continue
+
+            # Use date range instead of month field
             domain = [
-                ('state', 'in', ['billed', 'confirmed','audited', 'paid']),
+                ('state', 'in', [self.BILLED, self.CONFIRMED, self.AUDITED, self.PAID, self.COMPLETED]),
                 ('agent_id', '=', bill.agent_id.id),
-                ('month', '=', bill.month),
+                ('start_date', '<', bill.start_date),  # Previous periods
             ]
+
             if bill.id:
                 domain.append(('id', '!=', bill.id))
 
@@ -1707,14 +1717,9 @@ class CommissionBill(models.Model):
             previous_total = sum(prev_bills.mapped('total_commission'))
             previous_tax_paid = sum(prev_bills.mapped('incremental_tax'))
 
-
-            # Total commission to date
             cumulative_total = previous_total + bill.total_commission
-
-            # Apply tax logic to cumulative total
             cumulative_tax = bill._calculate_marginal_tax(cumulative_total)
 
-            # Set bill's tax fields
             bill.total_tax = cumulative_tax
             bill.tax_paid = previous_tax_paid
             bill.incremental_tax = cumulative_tax - previous_tax_paid
@@ -1728,75 +1733,6 @@ class CommissionBill(models.Model):
     def _compute_net_commission(self):
         for bill in self:
             bill.net_commission = bill.total_commission - bill.incremental_tax
-
-    '''def reset_for_new_period(self):
-        """Reset fields when starting a new commission period."""
-        for record in self:
-            record.tax_paid = 0.0
-            record.total_commission = 0.0
-            record.total_tax = 0.0,
-            record.incremental_tax = 0.0,
-            record.net_commission = 0.0,
-            record.commission_records.write({'active': False})'''
-
-    '''def reset_for_new_period(self):
-        """Reset fields when starting a new commission period."""
-        for record in self:
-            record.tax_paid = 0.0
-            record.total_commission = 0.0
-            record.total_tax = 0.0  # Corrected
-            record.incremental_tax = 0.0  # Corrected
-            record.net_commission = 0.0  # Corrected
-            # This part requires careful consideration.
-            # Setting all commission_records to active=False might not be desired for a monthly reset.
-            # It sounds more like deactivating records that were processed in the previous period.
-            # If the goal is truly to reset the bill, and not deactivate historical records,
-            # then 'record.commission_records.write({'active': False})' might need to be removed
-            # or replaced with a more nuanced logic.
-            record.commission_records.write({'active': False})'''
-
-    def reset_for_new_period(self):
-        """
-        Reset fields and detach previously linked commission records
-        when starting a new commission period for this bill.
-        """
-        for record in self:
-            # 1. Reset financial totals on the bill itself
-            record.tax_paid = 0.0
-            record.total_commission = 0.0
-            record.total_tax = 0.0
-            record.incremental_tax = 0.0
-            record.net_commission = 0.0
-
-            # 2. Detach and potentially reset state of associated commission records
-            #    This is crucial to prevent old records from being re-summed.
-            #    Consider what state these detached records should go into (e.g., 'approved' or 'done_processed')
-            #    If they are considered fully processed for the old bill, 'approved' might allow them
-            #    to be picked up again by a future auto-bill if dates match, or they could go to a 'processed' state.
-            if record.commission_records:
-                record.commission_records.write({
-                    'bill_id': False,
-                    # Decide on the appropriate state after being detached from a completed bill.
-                    # 'approved' means they are ready to be picked up again (potentially in error).
-                    # A new state like 'processed' or 'billed_completed' might be better.
-                    # For now, let's assume 'approved' based on your action_reopen logic for BILLED state.
-                    'state': 'approved'
-                })
-
-            # 3. Detach and potentially reset state of associated commission lines
-            if record.line_ids:
-                record.line_ids.write({
-                    'bill_id': False,
-                    'state': 'approved'  # Same logic as records for state
-                })
-
-            # You might also want to reset the bill's state to DRAFT,
-            # and potentially update its start_date/end_date for the new period.
-            # However, this specific reset is generally intended for a new bill entirely,
-            # not for repurposing an old one monthly.
-            # If you are repurposing, you'd also need to update its name, dates, etc.
-            # For a simple "reset and make available for new period records", setting to DRAFT is logical.
-            record.state = self.DRAFT
 
     # === Tax Bracket Logic ===
     def _calculate_marginal_tax(self, amount):
@@ -1882,8 +1818,9 @@ class CommissionBill(models.Model):
             state_mapping = {
                 self.BILLED: 'billed',
                 self.CONFIRMED: 'confirmed',
-                self.audited_by: 'audited',
+                self.AUDITED: 'audited',
                 self.PAID: 'paid',
+                self.COMPLETED: 'completed',
                 self.DRAFT: 'approved'
             }
 
@@ -1920,8 +1857,9 @@ class CommissionBill(models.Model):
         return {
             self.BILLED: 'billed',
             self.CONFIRMED: 'confirmed',
-            self.CONFIRMED: 'confirmed',
+            self.AUDITED: 'audited',
             self.PAID: 'paid',
+            self.COMPLETED: 'completed',
             self.DRAFT: 'approved'
         }.get(self.state, False)
 
@@ -2106,7 +2044,7 @@ class CommissionBill(models.Model):
 
         return True
 
-    def action_Audit(self):
+    def action_audit(self):
         """
         Audit the commission bill and synchronize all related documents
         - Validates all prerequisites
@@ -2178,17 +2116,22 @@ class CommissionBill(models.Model):
                 ) % str(e))
 
         return True
+
     def action_pay(self):
+        """Pay the bill and trigger summary generation for monthly paid bills"""
         for bill in self:
             if bill.state != self.AUDITED:
                 raise UserError(_("Only audited bills can be paid"))
 
+            # Update bill to paid state
             bill.write({
                 'state': self.PAID,
                 'paid_by': self.env.user.id,
                 'date_paid': fields.Datetime.now(),
                 'tax_paid': bill.total_tax
             })
+
+            # Sync commission records first
             bill._sync_records_to_bill_state()
 
             bill.message_post(body=_(
@@ -2199,46 +2142,285 @@ class CommissionBill(models.Model):
                                        'records': len(bill.commission_records)
                                    })
 
-    def action_reopen(self):
-        """Improved reopen method with complete field resetting"""
+        # IMPORTANT: Trigger summary generation after ALL bills are processed
+        # Use a delayed job or direct call to ensure it runs after commit
+        self.env.cr.commit()  # Ensure paid state is saved
+
+        # Call summary generation for all paid bills without summary
+        paid_bills = self.search([
+            ('state', '=', self.PAID),
+            ('summary_id', '=', False)
+        ])
+
+        if paid_bills:
+            _logger.info("Triggering summary generation for %d paid bills", len(paid_bills))
+            paid_bills._generate_monthly_summary()
+
+    def action_force_complete(self):
+        """Manually force bills to completed state and create summary"""
         for bill in self:
-            if bill.state == self.AUDITED:
+            if bill.state != self.PAID:
+                raise UserError(_("Only paid bills can be completed"))
+
+            if bill.summary_id:
+                raise UserError(_("Bill is already linked to a summary"))
+
+            # Get the month range for this bill
+            month_start = bill.start_date.replace(day=1)
+            next_month = month_start.replace(month=month_start.month % 12 + 1,
+                                             year=month_start.year + (month_start.month // 12))
+            month_end = next_month - timedelta(days=1)
+
+            # Find all paid bills in the same month for the same agent
+            domain = [
+                ('agent_id', '=', bill.agent_id.id),
+                ('state', '=', self.PAID),
+                ('summary_id', '=', False),
+                ('start_date', '>=', month_start),
+                ('start_date', '<=', month_end),
+            ]
+
+            paid_bills = self.search(domain)
+
+            if paid_bills:
+                # Create the summary
+                summary = self._create_monthly_summary(paid_bills, month_start, month_end)
+                if summary:
+                    # Link bills to summary
+                    paid_bills.write({'summary_id': summary.id})
+
+                    # Update state to completed
+                    paid_bills.write({'state': self.COMPLETED})
+
+                    # Update commission records and lines
+                    for paid_bill in paid_bills:
+                        if paid_bill.commission_records:
+                            paid_bill.commission_records.write({'state': 'completed'})
+                        if paid_bill.line_ids:
+                            paid_bill.line_ids.write({'state': 'completed'})
+
+                    summary._compute_totals()
+
+                    bill.message_post(body=_(
+                        "Bill forcefully completed and added to summary %s"
+                    ) % summary.name)
+
+            else:
+                raise UserError(_("No paid bills found for summary generation"))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Force Completion'),
+                'message': _('Bills have been forcefully completed and summary created.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def _generate_monthly_summary(self):
+        """Generate monthly summary when bills are paid and update states to completed"""
+        _logger.info("=== STARTING MONTHLY SUMMARY GENERATION ===")
+
+        # Group bills by agent and month
+        bills_by_agent_month = {}
+
+        # Find all paid bills without summary
+        paid_bills = self.search([
+            ('state', '=', self.PAID),
+            ('summary_id', '=', False)
+        ])
+
+        _logger.info("Found %d paid bills without summary", len(paid_bills))
+
+        if not paid_bills:
+            _logger.info("No paid bills found for summary generation")
+            return
+
+        # Group bills by agent and month
+        for bill in paid_bills:
+            month_start = bill.start_date.replace(day=1)
+            key = (bill.agent_id.id, month_start)
+
+            if key not in bills_by_agent_month:
+                bills_by_agent_month[key] = []
+
+            bills_by_agent_month[key].append(bill)
+
+        _logger.info("Grouped into %d agent-month combinations", len(bills_by_agent_month))
+
+        # Process each group
+        for (agent_id, month_start), bills in bills_by_agent_month.items():
+            next_month = month_start.replace(month=month_start.month % 12 + 1,
+                                             year=month_start.year + (month_start.month // 12))
+            month_end = next_month - timedelta(days=1)
+
+            _logger.info("Processing agent %s, month %s to %s with %d bills",
+                         bills[0].agent_id.name, month_start, month_end, len(bills))
+
+            # Create the summary
+            summary = self._create_monthly_summary(bills, month_start, month_end)
+            if not summary:
+                _logger.error("Failed to create summary for agent %s, month %s",
+                              bills[0].agent_id.name, month_start)
+                continue
+
+            _logger.info("Created summary: %s (ID: %s)", summary.name, summary.id)
+
+            # The state update now happens in the summary's _auto_assign_bills method
+            # which is called automatically after summary creation
+
+        _logger.info("=== MONTHLY SUMMARY GENERATION COMPLETE ===")
+
+    def _create_monthly_summary(self, bills, month_start, month_end):
+        """Create a monthly bill summary - enhanced version"""
+        try:
+            _logger.info("Creating summary for %d bills, period %s to %s",
+                         len(bills), month_start, month_end)
+
+            # Generate base name using the first bill's agent
+            agent = bills[0].agent_id if bills else None
+            if not agent:
+                _logger.error("No agent found for bills")
+                return False
+
+            agent_name = agent.name if agent else "Multiple"
+
+            start_str = month_start.strftime('%Y-%m-%d')
+            end_str = month_end.strftime('%Y-%m-%d')
+            base_name = f"Bill-Summary-{agent_name}-{start_str}-{end_str}"
+
+            # Check for existing summaries with same name
+            existing_count = self.env['commission_system.bill.summary'].search_count([
+                ('name', '=like', f"{base_name}%")
+            ])
+
+            if existing_count:
+                summary_name = f"{base_name}-{existing_count + 1}"
+            else:
+                summary_name = base_name
+
+            _logger.info("Creating summary with name: %s", summary_name)
+
+            # Create the summary
+            summary = self.env['commission_system.bill.summary'].create({
+                'name': summary_name,
+                'date_range': f"{start_str} to {end_str}",
+                'start_date': month_start,
+                'end_date': month_end,
+                'generated_by': self.env.user.id,
+            })
+
+            _logger.info("Summary created successfully: %s (ID: %s)", summary.name, summary.id)
+            return summary
+
+        except Exception as e:
+            _logger.error("Failed to create monthly summary: %s", str(e))
+            _logger.error("Traceback:", exc_info=True)
+            return False
+
+    def debug_check_bill_state(self):
+        """Debug method to check bill states and summary linking"""
+        _logger.info("=== DEBUG BILL STATES ===")
+        for bill in self:
+            _logger.info("Bill: %s (ID: %s), State: %s, Summary: %s, Agent: %s",
+                         bill.name, bill.id, bill.state,
+                         bill.summary_id.name if bill.summary_id else 'None',
+                         bill.agent_id.name)
+
+            # Check commission records
+            if bill.commission_records:
+                states = bill.commission_records.mapped('state')
+                state_count = {}
+                for state in states:
+                    state_count[state] = state_count.get(state, 0) + 1
+                _logger.info("  Commission Records: %s", state_count)
+
+            # Check commission lines
+            if bill.line_ids:
+                states = bill.line_ids.mapped('state')
+                state_count = {}
+                for state in states:
+                    state_count[state] = state_count.get(state, 0) + 1
+                _logger.info("  Commission Lines: %s", state_count)
+
+    def action_complete(self):
+        """Manually mark bill and records as completed (for edge cases)"""
+        for bill in self:
+            if bill.state != self.PAID:
+                raise UserError(_("Only paid bills can be marked as completed"))
+
+            bill.write({
+                'state': self.COMPLETED
+            })
+
+            # Update commission records
+            if bill.commission_records:
                 bill.commission_records.write({
-                    'audited_by': False,
-                    'audited_date': False,
-                    'state': 'confirmed'
+                    'state': 'completed'
                 })
 
-                if bill.line_ids:
-                    bill.line_ids.write({
-                        'audited_by': False,
-                        'audited_date': False,
-                        'state': 'confirmed'
-                    })
+            # Update commission lines
+            if bill.line_ids:
+                bill.line_ids.write({
+                    'state': 'completed'
+                })
 
+            bill.message_post(body=_(
+                "Bill and all related records marked as completed by %s"
+            ) % self.env.user.name)
+
+        return True
+
+    # Add a method to debug bill linking
+    def debug_check_summary_linking(self):
+        """Debug method to check bill-summary linking"""
+        _logger.info("=== DEBUG BILL SUMMARY LINKING ===")
+
+        # Check all completed bills
+        completed_bills = self.search([('state', '=', 'completed')])
+        _logger.info("Total completed bills: %d", len(completed_bills))
+
+        for bill in completed_bills:
+            _logger.info("Bill: %s (ID: %d), Summary: %s (ID: %s)",
+                         bill.name, bill.id,
+                         bill.summary_id.name if bill.summary_id else 'None',
+                         bill.summary_id.id if bill.summary_id else 'None')
+
+        # Check all summaries
+        summaries = self.env['commission_system.bill.summary'].search([])
+        _logger.info("Total summaries: %d", len(summaries))
+
+        for summary in summaries:
+            _logger.info("Summary: %s (ID: %d), Bills: %d",
+                         summary.name, summary.id, len(summary.bill_ids))
+            for bill in summary.bill_ids:
+                _logger.info("  - Bill: %s (ID: %d)", bill.name, bill.id)
+
+    def debug_check_summary_records(self):
+        """Debug method to check commission records in summary"""
+        for summary in self:
+            _logger.info(f"=== DEBUG SUMMARY: {summary.name} ===")
+            _logger.info(f"Total Bills: {len(summary.bill_ids)}")
+
+            total_records = 0
+            for bill in summary.bill_ids:
+                record_count = len(bill.commission_records)
+                total_records += record_count
+                _logger.info(f"Bill {bill.name}: {record_count} commission records")
+
+            _logger.info(f"Total Commission Records: {total_records}")
+            _logger.info(f"Computed Records: {len(summary.commission_record_ids)}")
+
+    def action_reopen(self):
+        """Improved reopen method with complete field resetting - updated for COMPLETED state"""
+        for bill in self:
+            if bill.state == self.COMPLETED:
+                # Remove from summary first
                 bill.write({
-                    'state': self.CONFIRMED,
-                    'audited_by': False,
-                    'audited_date': False
-                })
-            if bill.state == self.CONFIRMED:
-                bill.commission_records.write({
-                    'confirmed_by': False,
-                    'confirmed_date': False,
-                    'state': 'billed'
-                })
-
-                if bill.line_ids:
-                    bill.line_ids.write({
-                        'confirmed_by': False,
-                        'confirmed_date': False,
-                        'state': 'billed'
-                    })
-
-                bill.write({
-                    'state': self.BILLED,
-                    'confirmed_by': False,
-                    'date_confirmed': False
+                    'summary_id': False,
+                    'state': self.PAID
                 })
 
             elif bill.state == self.PAID:
@@ -2269,6 +2451,46 @@ class CommissionBill(models.Model):
                     'date_paid': False
                 })
 
+            elif bill.state == self.AUDITED:
+                bill.commission_records.write({
+                    'audited_by': False,
+                    'audited_date': False,
+                    'state': 'confirmed'
+                })
+
+                if bill.line_ids:
+                    bill.line_ids.write({
+                        'audited_by': False,
+                        'audited_date': False,
+                        'state': 'confirmed'
+                    })
+
+                bill.write({
+                    'state': self.CONFIRMED,
+                    'audited_by': False,
+                    'audited_date': False
+                })
+
+            elif bill.state == self.CONFIRMED:
+                bill.commission_records.write({
+                    'confirmed_by': False,
+                    'confirmed_date': False,
+                    'state': 'billed'
+                })
+
+                if bill.line_ids:
+                    bill.line_ids.write({
+                        'confirmed_by': False,
+                        'confirmed_date': False,
+                        'state': 'billed'
+                    })
+
+                bill.write({
+                    'state': self.BILLED,
+                    'confirmed_by': False,
+                    'date_confirmed': False
+                })
+
             elif bill.state == self.BILLED:
                 bill.commission_records.write({
                     'state': 'approved',
@@ -2292,8 +2514,10 @@ class CommissionBill(models.Model):
             ) % {
                                        'old_state': bill._fields['state'].convert_to_export(bill.state, bill),
                                        'new_state': self._fields['state'].convert_to_export(
+                                           self.PAID if bill.state == self.COMPLETED else
+                                           self.AUDITED if bill.state == self.PAID else
+                                           self.CONFIRMED if bill.state == self.AUDITED else
                                            self.BILLED if bill.state == self.CONFIRMED else
-                                           self.CONFIRMED if bill.state == self.AUDITED else self.AUDITED if bill.state == self.PAID else
                                            self.DRAFT,
                                            bill
                                        ),
@@ -2310,7 +2534,8 @@ class CommissionBill(models.Model):
             self.BILLED: [self.CONFIRMED, self.DRAFT],
             self.CONFIRMED: [self.AUDITED, self.BILLED],
             self.AUDITED: [self.PAID, self.CONFIRMED],
-            self.PAID: [self.AUDITED]
+            self.PAID: [self.COMPLETED, self.AUDITED],  # Allow transition to completed
+            self.COMPLETED: []  # Final state, no transitions out
         }
 
         for bill in self:
@@ -2358,9 +2583,9 @@ class CommissionBill(models.Model):
     def unlink(self):
         """Override unlink to properly handle commission record states when bills are deleted"""
         for bill in self:
-            # Prevent deletion of paid bills
-            if bill.state == self.PAID:
-                raise UserError(_("Cannot delete a paid commission bill. Please void it instead."))
+            # Prevent deletion of paid or completed bills
+            if bill.state in [self.PAID, self.COMPLETED]:
+                raise UserError(_("Cannot delete a paid or completed commission bill. Please void it instead."))
 
             # Reset associated commission records first
             if bill.commission_records:
@@ -2382,7 +2607,7 @@ class CommissionBill(models.Model):
         """Find bills with overlapping date ranges for merging"""
         domain = [
             ('agent_id', '=', agent_id),
-            ('state', 'in', [self.BILLED, self.CONFIRMED,self.AUDITED]),
+            ('state', 'in', [self.BILLED, self.CONFIRMED, self.AUDITED]),
             '|',
             '&', ('start_date', '<=', end_date), ('end_date', '>=', end_date),
             '&', ('start_date', '<=', start_date), ('end_date', '>=', start_date)
@@ -2475,8 +2700,9 @@ class CommissionBill(models.Model):
         state_mapping = {
             self.BILLED: 'billed',
             self.CONFIRMED: 'confirmed',
-            self.AUDITED : 'audited',
+            self.AUDITED: 'audited',
             self.PAID: 'paid',
+            self.COMPLETED: 'completed',
             self.DRAFT: 'approved'
         }
 
@@ -2576,6 +2802,137 @@ class CommissionBill(models.Model):
         for bill in self:
             bill.display_name = f"Commission_Bill_{bill.name}_{bill.start_date}_{bill.end_date}"
 
+    def action_generate_monthly_summary(self):
+        """Manual action to generate monthly summary for paid bills"""
+        for bill in self:
+            if bill.state != self.PAID:
+                raise UserError(_("Only paid bills can be included in monthly summaries"))
+
+            bill._generate_monthly_summary()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Summary Generation'),
+                'message': _('Monthly summary generation initiated for paid bills.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    # === CONSTRAINTS ===
+    @api.constrains('start_date', 'end_date')
+    def _check_dates(self):
+        for bill in self:
+            if bill.start_date > bill.end_date:
+                raise ValidationError(_("Start date must be before end date."))
+            if bill.end_date > fields.Date.today():
+                raise ValidationError(_("End date cannot be in the future."))
+
+    @api.constrains('agent_id')
+    def _check_agent_commissionable(self):
+        for bill in self:
+            if bill.agent_id and not bill.agent_id.is_agent:
+                raise ValidationError(_("Selected partner is not configured as an agent."))
+
+    def action_view_summary(self):
+        """View the bill summary associated with this bill"""
+        self.ensure_one()
+        if not self.summary_id:
+            raise UserError(_("This bill is not associated with any summary."))
+        return {
+            'name': _('Bill Summary'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'commission_system.bill.summary',
+            'view_mode': 'form',
+            'res_id': self.summary_id.id,
+            'context': {'create': False},
+        }
+
+    def debug_bill_summary_creation(self):
+        """Debug method to check bill summary creation process"""
+        _logger.info("=== DEBUG BILL SUMMARY CREATION ===")
+
+        paid_bills = self.search([('state', '=', 'paid')])
+        _logger.info("Found %d paid bills without summary", len(paid_bills))
+
+        for bill in paid_bills:
+            _logger.info("Bill: %s (ID: %s), Agent: %s, Start Date: %s",
+                         bill.name, bill.id, bill.agent_id.name, bill.start_date)
+
+            # Check if bill should be in a summary
+            month_start = bill.start_date.replace(day=1)
+            next_month = month_start.replace(month=month_start.month % 12 + 1,
+                                             year=month_start.year + (month_start.month // 12))
+            month_end = next_month - timedelta(days=1)
+
+            domain = [
+                ('agent_id', '=', bill.agent_id.id),
+                ('state', '=', 'paid'),
+                ('summary_id', '=', False),
+                ('start_date', '>=', month_start),
+                ('start_date', '<=', month_end),
+            ]
+
+            matching_bills = self.search(domain)
+            _logger.info("  Would create summary with %d bills for period %s to %s",
+                         len(matching_bills), month_start, month_end)
+
+        # Check existing summaries
+        summaries = self.env['commission_system.bill.summary'].search([])
+        _logger.info("=== EXISTING SUMMARIES ===")
+        for summary in summaries:
+            _logger.info("Summary: %s (ID: %s), Bills: %d",
+                         summary.name, summary.id, len(summary.bill_ids))
+            for bill in summary.bill_ids:
+                _logger.info("  - Bill: %s, State: %s", bill.name, bill.state)
+
+    def action_fix_completed_state(self):
+        """Manually fix bills that have summaries but are not in completed state"""
+        _logger.info("=== FIXING COMPLETED STATE ===")
+
+        # Find bills that have summaries but are not completed
+        bills_to_fix = self.search([
+            ('summary_id', '!=', False),
+            ('state', '!=', self.COMPLETED)
+        ])
+
+        _logger.info("Found %d bills with summaries but wrong state", len(bills_to_fix))
+
+        fixed_count = 0
+        for bill in bills_to_fix:
+            _logger.info("Fixing bill: %s (Current state: %s, Summary: %s)",
+                         bill.name, bill.state, bill.summary_id.name)
+
+            # Update bill state to completed
+            bill.write({
+                'state': self.COMPLETED
+            })
+
+            # Update commission records
+            if bill.commission_records:
+                bill.commission_records.write({'state': 'completed'})
+
+            # Update commission lines
+            if bill.line_ids:
+                bill.line_ids.write({'state': 'completed'})
+
+            fixed_count += 1
+            _logger.info("Fixed bill %s", bill.name)
+
+        _logger.info("Fixed %d bills", fixed_count)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('State Fix Complete'),
+                'message': _('Fixed %d bills with incorrect states') % fixed_count,
+                'type': 'success',
+                'sticky': False,
+            }
+        }
 
 class CommissionBillReport(models.AbstractModel):
     _name = 'report.commission_system.report_commission_bill'
@@ -2841,3 +3198,337 @@ class CommissionTaxBracket(models.Model):
                 raise ValidationError("The lower bound must be less than the upper bound.")
 
 
+class CommissionBillSummary(models.Model):
+    _name = 'commission_system.bill.summary'
+    _description = 'Commission Bill Summary'
+    _order = 'create_date desc'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    name = fields.Char(string='Summary Name', required=True, readonly=True, default=lambda self: _('New'))
+
+    # CHANGE 1: Update date_range field
+    date_range = fields.Char(string='Date Range', compute='_compute_date_range', store=True)  # CHANGED LINE
+    start_date = fields.Date(string='Start Date', required=True)
+    end_date = fields.Date(string='End Date', required=True)
+    bill_ids = fields.One2many('commission_system.bill', 'summary_id', string='Bills', readonly=True)
+
+    # REMOVE commission record fields - we don't need them in summary
+    total_commission = fields.Float(string='Total Commission', compute='_compute_totals', store=True, digits='Account')
+    total_tax = fields.Float(string='Total Tax', compute='_compute_totals', store=True, digits='Account')
+    total_net_commission = fields.Float(string='Total Net Commission', compute='_compute_totals', store=True,
+                                        digits='Account')
+    bill_count = fields.Integer(string='Number of Bills', compute='_compute_totals', store=True)
+    generated_by = fields.Many2one('res.users', string='Generated By', readonly=True,
+                                   default=lambda self: self.env.user)
+    generated_date = fields.Datetime(string='Generated Date', readonly=True, default=fields.Datetime.now)
+
+    # CHANGE 2: Fix the compute method dependencies
+    @api.depends('bill_ids', 'bill_ids.total_commission', 'bill_ids.total_tax',
+                 'bill_ids.net_commission')  # CHANGED LINE
+    def _compute_totals(self):
+        """Compute totals from all bills in the summary"""
+        for summary in self:
+            bills = summary.bill_ids
+            summary.total_commission = sum(bills.mapped('total_commission'))
+            summary.total_tax = sum(bills.mapped('total_tax'))
+            summary.total_net_commission = sum(bills.mapped('net_commission'))
+            summary.bill_count = len(bills)  # This should now work correctly
+
+    # CHANGE 3: Add new compute method for date_range
+    @api.depends('start_date', 'end_date')  # NEW METHOD
+    def _compute_date_range(self):
+        for summary in self:
+            if summary.start_date and summary.end_date:
+                summary.date_range = f"{summary.start_date} to {summary.end_date}"
+            else:
+                summary.date_range = False
+
+    # CHANGE 4: Add auto-assign bills method
+    def _auto_assign_bills(self):
+        """Automatically find and assign bills to this summary based on date range AND update their state"""
+        for summary in self:
+            _logger.info("=== Auto-assigning bills for summary: %s ===", summary.name)
+
+            # Find bills that match the summary date range and are paid
+            domain = [
+                ('state', '=', 'paid'),  # Only paid bills
+                ('summary_id', '=', False),  # Not already assigned to a summary
+                ('start_date', '>=', summary.start_date),
+                ('start_date', '<=', summary.end_date),
+            ]
+
+            bills_to_link = self.env['commission_system.bill'].search(domain)
+            _logger.info("Found %d bills to link", len(bills_to_link))
+
+            if bills_to_link:
+                # CRITICAL: Update bills - link to summary AND change state in one operation
+                bills_to_link.write({
+                    'summary_id': summary.id,
+                    'state': 'completed'  # This is the key line that's missing
+                })
+
+                _logger.info("Auto-assigned %d bills to summary %s and updated state to completed",
+                             len(bills_to_link), summary.name)
+
+                # Also update all commission records to 'completed' state
+                record_count = 0
+                line_count = 0
+                for bill in bills_to_link:
+                    # Update commission records
+                    if bill.commission_records:
+                        bill.commission_records.write({
+                            'state': 'completed'
+                        })
+                        record_count += len(bill.commission_records)
+
+                    # Update commission lines
+                    if bill.line_ids:
+                        bill.line_ids.write({
+                            'state': 'completed'
+                        })
+                        line_count += len(bill.line_ids)
+
+                _logger.info("Updated %d commission records and %d commission lines to completed state",
+                             record_count, line_count)
+
+                # Force recompute of totals
+                summary._compute_totals()
+
+    @api.model
+    def create(self, vals):
+        """Override create to generate unique name if not provided"""
+        if vals.get('name', _('New')) == _('New'):
+            # Generate name based on date range
+            if vals.get('start_date') and vals.get('end_date'):
+                start_date = fields.Date.from_string(vals.get('start_date'))
+                end_date = fields.Date.from_string(vals.get('end_date'))
+                date_range = f"{start_date.strftime('%Y-%m-%d')}-{end_date.strftime('%Y-%m-%d')}"
+                base_name = f"Bill-Summary-{date_range}"
+
+                # Check for duplicates
+                existing_count = self.search_count([('name', '=like', f"{base_name}%")])
+                if existing_count:
+                    vals['name'] = f"{base_name}-{existing_count + 1}"
+                else:
+                    vals['name'] = base_name
+            else:
+                # Fallback name
+                vals['name'] = f"Bill-Summary-{fields.Datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+        summary = super().create(vals)
+
+        # Auto-assign bills after creation AND update their state
+        summary._auto_assign_bills()  # This now includes state update
+
+        summary.message_post(body=_(
+            "Bill summary created for period %s. Assigned %d bills and updated them to completed state."
+        ) % (summary.date_range, len(summary.bill_ids)))
+        return summary
+
+
+    def action_view_bills(self):
+        """View all bills included in this summary"""
+        self.ensure_one()
+        return {
+            'name': _('Bills in Summary - %s') % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'commission_system.bill',
+            'view_mode': 'tree,form',
+            'domain': [('summary_id', '=', self.id)],
+            'context': {'create': False},
+            'target': 'current',
+        }
+
+    # CHANGE 6: Add manual assign action
+    def action_assign_bills(self):  # NEW METHOD
+        """Manual action to assign bills to this summary"""
+        self.ensure_one()
+        self._auto_assign_bills()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Bills Assigned'),
+                'message': _('Assigned %d bills to summary %s') % (len(self.bill_ids), self.name),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    # CHANGE 7: Add debug method
+    def action_debug_summary(self):  # NEW METHOD
+        """Debug method to check summary state"""
+        self.ensure_one()
+        _logger.info("=== Debug Summary %s ===", self.name)
+        _logger.info("Bills count: %d", len(self.bill_ids))
+        _logger.info("Bill IDs: %s", self.bill_ids.ids)
+
+        # Check for bills that should be assigned
+        domain = [
+            ('state', '=', 'completed'),
+            ('summary_id', '=', False),
+            ('start_date', '>=', self.start_date),
+            ('start_date', '<=', self.end_date),
+        ]
+        available_bills = self.env['commission_system.bill'].search(domain)
+        _logger.info("Available bills to assign: %d", len(available_bills))
+        _logger.info("Available bill IDs: %s", available_bills.ids)
+
+    def unlink(self):
+        """Prevent deletion if bills are linked"""
+        for summary in self:
+            if summary.bill_ids:
+                raise UserError(
+                    _("Cannot delete a summary that has bills linked to it. Please unlink the bills first."))
+        return super().unlink()
+
+    def action_fix_bill_linking(self):
+        """Manual action to fix bill linking for existing summaries"""
+        for summary in self:
+            # Find all completed bills for this summary's date range and agent
+            if summary.bill_ids:
+                _logger.info("Summary %s already has %d bills", summary.name, len(summary.bill_ids))
+                continue
+
+            # Find bills that should be in this summary
+            domain = [
+                ('state', '=', 'completed'),
+                ('summary_id', '=', False),
+                ('start_date', '>=', summary.start_date),
+                ('start_date', '<=', summary.end_date),
+            ]
+
+            # If we have bills in summary, use the same agent
+            if summary.bill_ids:
+                agent_id = summary.bill_ids[0].agent_id.id
+                domain.append(('agent_id', '=', agent_id))
+
+            bills_to_link = self.env['commission_system.bill'].search(domain)
+
+            if bills_to_link:
+                bills_to_link.write({'summary_id': summary.id})
+                summary._compute_totals()
+                _logger.info("Linked %d bills to summary %s", len(bills_to_link), summary.name)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Bill Linking Fixed'),
+                'message': _('Bill linking has been updated for all summaries.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_create_test_bill(self):
+        """Create a test bill for debugging"""
+        self.ensure_one()
+
+        Bill = self.env['commission_system.bill']
+
+        # Create a test bill that should match our criteria
+        test_bill = Bill.create({
+            'name': f"TEST-BILL-{fields.Datetime.now().strftime('%Y%m%d-%H%M%S')}",
+            'start_date': self.start_date,  # Use the same date as summary
+            'state': 'completed',
+            'total_commission': 100.0,
+            'total_tax': 10.0,
+            'net_commission': 90.0,
+            # Don't set summary_id - let it be auto-assigned
+        })
+
+        _logger.info("Created test bill: %s (ID: %s)", test_bill.name, test_bill.id)
+
+        # Now try to auto-assign
+        self._auto_assign_bills()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Test Bill Created'),
+                'message': _('Created test bill and attempted auto-assignment. Check logs.'),
+                'type': 'info',
+                'sticky': True,
+            }
+        }
+
+    def action_test_connection(self):
+        """Simple test method to verify the model works"""
+        self.ensure_one()
+        _logger.info("=== TEST METHOD CALLED ===")
+        _logger.info("Summary: %s (ID: %s)", self.name, self.id)
+        _logger.info("Bills count: %d", len(self.bill_ids))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Test Successful'),
+                'message': _('Test method called successfully. Bills count: %d') % len(self.bill_ids),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_manual_assign(self):
+        """Manual action to assign bills"""
+        self.ensure_one()
+        self._auto_assign_bills()
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Bills Assigned'),
+                'message': _('Assigned bills to summary. Total bills: %d') % len(self.bill_ids),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_update_bill_states(self):
+        """Manually update all bills in this summary to completed state"""
+        for summary in self:
+            if not summary.bill_ids:
+                _logger.info("No bills in summary %s", summary.name)
+                continue
+
+            _logger.info("Updating %d bills in summary %s to completed state",
+                         len(summary.bill_ids), summary.name)
+
+            # Update bill states to completed
+            summary.bill_ids.write({
+                'state': 'completed'
+            })
+
+            # Update commission records and lines
+            record_count = 0
+            line_count = 0
+            for bill in summary.bill_ids:
+                if bill.commission_records:
+                    bill.commission_records.write({'state': 'completed'})
+                    record_count += len(bill.commission_records)
+                if bill.line_ids:
+                    bill.line_ids.write({'state': 'completed'})
+                    line_count += len(bill.line_ids)
+
+            _logger.info("Updated %d bills, %d records, %d lines to completed state",
+                         len(summary.bill_ids), record_count, line_count)
+
+            summary.message_post(body=_(
+                "Manually updated %d bills and their commission records (%d records, %d lines) to completed state."
+            ) % (len(summary.bill_ids), record_count, line_count))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('State Update Complete'),
+                'message': _('Updated all bills in summary to completed state.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }

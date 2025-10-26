@@ -1,0 +1,1151 @@
+<odoo>
+    <data>
+
+        <!-- Tree View -->
+        <record id="view_commission_tax_bracket_tree" model="ir.ui.view">
+            <field name="name">commission.tax.bracket.tree</field>
+            <field name="model">commission_system.tax_bracket</field>
+            <field name="arch" type="xml">
+                <tree string="Commission Tax Brackets">
+                    <field name="lower_bound" string="Lower Bound" widget="float" options="{'precision': 2}"/>
+                    <field name="upper_bound" string="Upper Bound" widget="float" options="{'precision': 2}"/>
+                    <field name="rate" string="Tax Rate (%)" widget="float" options="{'precision': 2}"/>
+                    <field name="deduction" string="Deduction Amount" widget="float" options="{'precision': 2}"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_commission_tax_bracket_form" model="ir.ui.view">
+            <field name="name">commission.tax.bracket.form</field>
+            <field name="model">commission_system.tax_bracket</field>
+            <field name="arch" type="xml">
+                <form string="Commission Tax Bracket">
+                    <sheet>
+                        <group>
+                            <group string="Tax Bracket Details">
+                                <field name="lower_bound" string="Lower Bound"/>
+                                <field name="upper_bound" string="Upper Bound"/>
+                            </group>
+                            <group string="Tax Calculation">
+                                <field name="rate" string="Tax Rate (%)"/>
+                                <field name="deduction" string="Deduction Amount"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_commission_tax_bracket_search" model="ir.ui.view">
+            <field name="name">commission.tax.bracket.search</field>
+            <field name="model">commission_system.tax_bracket</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="lower_bound"/>
+                    <field name="upper_bound"/>
+                    <field name="rate"/>
+                    <field name="deduction"/>
+                    <filter string="Low Tax Rate" name="low_tax_rate" domain="[('rate', '&lt;', 10)]"/>
+                    <filter string="High Tax Rate" name="high_tax_rate" domain="[('rate', '&gt;', 10)]"/>
+                    <filter string="No Deduction" name="no_deduction" domain="[('deduction', '=', 0)]"/>
+                </search>
+            </field>
+        </record>
+
+
+        <!-- Action to Open the Tree and Form Views -->
+        <record id="action_commission_tax_bracket" model="ir.actions.act_window">
+            <field name="name">Commission Tax Brackets</field>
+            <field name="res_model">commission_system.tax_bracket</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_commissionsystem_root" name="Commission System" web_icon="commission_system.static/description/icon.png" sequence="10"/>
+        <menuitem id="menu_commission_system_settings" parent="menu_commissionsystem_root" name="Settings"/>
+        <!-- Menu Item to Access the Action -->
+        <menuitem id="menu_commission_tax_bracket" parent="menu_commission_system_settings" name="Tax Setting"
+                  action="action_commission_tax_bracket"/>
+
+        <record model="ir.ui.view" id="commission_system_rules_tree">
+            <field name="name">commission_system.rules.tree</field>
+            <field name="model">commission_system.rules</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="rate_type"/>
+                    <field name="product_id"/>
+                    <field name="category_id"/>
+                    <field name="rate"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="commission_system_rules_form">
+            <field name="name">commission_system.rules.form</field>
+            <field name="model">commission_system.rules</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <form string="Commission Rule">
+                    <sheet>
+                        <group>
+                            <group string="Rule Configuration">
+                                <field name="name" required="1"/>
+                                <field name="type" widget="radio" options='{"horizontal": true}'/>
+                                <field name="rate_type" widget="radio" options='{"horizontal": true}'/>
+                            </group>
+                            <group string="Application Scope">
+                                <field name="product_id" options="{'no_open': True}"/>
+                                <field name="category_id" options="{'no_open': True}"/>
+                                <field name="rate"/>
+                            </group>
+                        </group>
+
+                        <!-- Notebook for additional details -->
+                        <notebook>
+                            <page string="Conditions">
+                                <group>
+                                    <field name="min_amount" string="Minimum Amount"/>
+                                    <field name="max_amount" string="Maximum Amount"/>
+                                    <field name="start_date" string="Rule Start Date: "/>
+                                    <field name="end_date" string="Rule Expire Date: "/>
+                                </group>
+                            </page>
+                            <page string="Description">
+                                <field name="description" placeholder="Enter rule details..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_commission_rules_search" model="ir.ui.view">
+            <field name="name">commission_system.rules.search</field>
+            <field name="model">commission_system.rules</field>
+            <field name="arch" type="xml">
+                <search>
+                    <!-- Basic search fields -->
+                    <field name="name" string="Rule Name"/>
+                    <field name="product_id" string="Product"/>
+                    <field name="category_id" string="Category"/>
+
+                    <!-- Predefined filters -->
+                    <separator>
+                        <filter string="Active" name="active" domain="[('active','=',True)]"/>
+                        <filter string="Inactive" name="inactive" domain="[('active','=',False)]"/>
+                    </separator>
+
+                    <!-- Filter by commission type -->
+                    <separator>
+                        <filter string="Fixed Rate" name="fixed_rate" domain="[('rate_type','=','fixed')]"/>
+                        <filter string="Percentage Rate" name="percentage_rate"
+                                domain="[('rate_type','=','percentage')]"/>
+                    </separator>
+
+                    <!-- Grouping options -->
+                    <group expand="0" string="Group By">
+                        <filter string="Calculation Type" name="type" context="{'group_by':'type'}"/>
+                        <filter string="Rate Type" name="rate_type" context="{'group_by':'rate_type'}"/>
+                        <filter string="Product" name="product" context="{'group_by':'product_id'}"/>
+                        <filter string="Category" name="category" context="{'group_by':'category_id'}"/>
+                        <filter string="Active Status" name="active_status" context="{'group_by':'active'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="rules_list_action">
+            <field name="name">Commission Rules</field>
+            <field name="res_model">commission_system.rules</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_commissionrules" parent="menu_commission_system_settings" name="Commission Rules"
+                  action="rules_list_action"/>
+
+        <!-- Tree View -->
+        <record model="ir.ui.view" id="commission_system_assignment_tree">
+            <field name="name">commission_system.assignment.tree</field>
+            <field name="model">commission_system.assignment</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <tree>
+                    <!--<field name="salesperson_id"/>-->
+                    <field name="sales_team_id"/>
+                    <field name="agent_id"/>
+                    <field name="rule_id"/>
+                    <field name="state"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_commission_system_assignment_form" model="ir.ui.view">
+            <field name="name">commission_system.assignment.form</field>
+            <field name="model">commission_system.assignment</field>
+            <field name="arch" type="xml">
+                <form string="Commission Assignment">
+                    <header>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="draft,active,archived,cancelled"
+                               options="{'clickable': ['draft', 'active', 'archived', 'cancelled']}"/>
+                    </header>
+                    <sheet>
+                        <group col="2">
+                            <group string="Assignment Details">
+                                <field name="salesperson_id"/>
+                                <field name="sales_team_id" required="1"/>
+                                <field name="agent_id" options="{'no_create': True}"/>
+                                <field name="rule_id"/>
+                            </group>
+
+                            <group string="Duration">
+                                <field name="start_date"/>
+                                <field name="end_date"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_commission_assignment_search" model="ir.ui.view">
+            <field name="name">commission_system.assignment.search</field>
+            <field name="model">commission_system.assignment</field>
+            <field name="arch" type="xml">
+                <search>
+                    <!-- Basic search fields -->
+                    <field name="salesperson_id" string="Salesperson"/>
+                    <field name="sales_team_id" string="Sales Team"/>
+                    <field name="agent_id" string="Agent"/>
+                    <field name="rule_id" string="Commission Rule"/>
+                    <field name="state" string="Status"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+
+                    <separator/>
+
+                    <!-- Filter buttons -->
+                    <filter string="Active Assignments" name="active_assignments" domain="[('state','=','active')]"/>
+                    <filter string="Draft Assignments" name="draft_assignments" domain="[('state','=','draft')]"/>
+                    <filter string="Archived Assignments" name="archived_assignments" domain="[('state','=','archived')]"/>
+                    <separator/>
+
+                    <!-- Date filters -->
+                    <filter string="Today" name="today"
+                            domain="[('create_date','>=',context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="This Month" name="this_month"
+                            domain="[('create_date','>=',context_today().strftime('%Y-%m-01'))]"/>
+                    <filter string="Creation Date" name="date_range" date="create_date"/>
+
+                    <!-- Group By options -->
+                    <group expand="0" string="Group By">
+                        <separator>
+                            <filter string="Sales Team" name="group_sales_team"
+                                    context="{'group_by': 'sales_team_id'}"/>
+                            <filter string="Salesperson" name="group_salesperson"
+                                    context="{'group_by': 'salesperson_id'}"/>
+                            <filter string="Agent" name="group_agent" context="{'group_by': 'agent_id'}"/>
+                            <filter string="Rule" name="group_rule" context="{'group_by': 'rule_id'}"/>
+                            <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                        </separator>
+                        <separator>
+                            <filter string="Date" name="group_month" context="{'group_by': 'create_date:month'}"/>
+                        </separator>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="assignment_action_list">
+            <field name="name">Commission Assignment</field>
+            <field name="res_model">commission_system.assignment</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_commissionassignment" parent="menu_commission_system_settings" name="Commission Assignment"
+                  action="assignment_action_list"/>
+
+        <!--Tree for the Commission Activity Logs -->
+        <record model="ir.ui.view" id="view_user_activity_log_tree">
+            <field name="name">user.activity.log.tree</field>
+            <field name="model">commission_system.user_activity_log</field>
+            <field name="arch" type="xml">
+                <tree string="Commission Activity Logs">
+                    <field name="timestamp"/>
+                    <field name="user_id"/>
+                    <field name="action"/>
+                    <field name="model_name"/>
+                    <field name="record_id"/>
+                    <field name="description"/>
+                    <field name="ip_address"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search View for the Commission Activity Logs -->
+        <record id="view_user_activity_log_search" model="ir.ui.view">
+            <field name="name">user.activity.log.search</field>
+            <field name="model">commission_system.user_activity_log</field>
+            <field name="arch" type="xml">
+                <search string="Activity Logs">
+                    <field name="user_id"/>
+                    <field name="action"/>
+                    <field name="model_name"/>
+                    <field name="ip_address"/>
+
+                    <separator>
+                        <filter name="Action_group" string="Action">
+                            <filter string="Create" name="create" domain="[('action','=','create')]"/>
+                            <filter string="Update" name="update" domain="[('action','=','update')]"/>
+                            <filter string="Delete" name="delete" domain="[('action','=','delete')]"/>
+                            <filter string="Login" name="login" domain="[('action','=','login')]"/>
+                            <filter string="Logout" name="logout" domain="[('action','=','logout')]"/>
+                        </filter>
+                    </separator>
+
+                    <separator>
+                        <!-- Working date filters using context_today() -->
+                        <filter name="filter_today" string="Today"
+                                domain="[('timestamp', '>=', context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                        <filter name="this_week" string="This Week"
+                                domain="[('timestamp','>=', (context_today() + relativedelta(weekday=0, days=-7)).strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                        <filter name="last_30_days" string="Current Month"
+                                domain="[('timestamp','>=', (context_today() - relativedelta(days=30)).strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                        <filter name="last_90_days" string="Last 3 Months"
+                                domain="[('timestamp','>=', (context_today() - relativedelta(days=90)).strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                    </separator>
+
+                    <separator>
+                        <filter name="date_filter" string="Date Range" date="timestamp"/>
+                    </separator>
+
+                    <group expand="1" string="Group By">
+                        <separator>
+                            <filter string="User" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                            <filter string="Model" name="group_by_model" context="{'group_by': 'model_name'}"/>
+                            <filter string="Action" name="group_by_action" context="{'group_by': 'action'}"/>
+                        </separator>
+                        <separator>
+                            <filter string="Date" name="group_by_day" context="{'group_by': 'timestamp:day'}"/>
+                        </separator>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--Action for the Commission Activity Logs -->
+        <record id="action_commission_settings" model="ir.actions.act_window">
+            <field name="name">Commission System Activity Logs</field>
+            <field name="res_model">commission_system.user_activity_log</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="view_user_activity_log_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_create">
+                    View a Commission System Activity Logs.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_commissionsystem_root" name="Commission System" web_icon="commission_system.static/description/icon.png" sequence="10"/>
+        <menuitem id="menu_commission_system_settings" parent="menu_commissionsystem_root" name="Settings"
+                  sequence="40"/>
+        <menuitem id="menu_commission_system_activity_log" parent="menu_commission_system_settings" name="Activity Logs"
+                  action="action_commission_settings" sequence="10"/>
+
+        <!-- Commission Summary Box (Optional: Key Metrics as Cards) -->
+        <record id="view_commission_summary" model="ir.ui.view">
+            <field name="name">commission.system.summary</field>
+            <field name="model">commission_system.report</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <h2>Total Commission Overview</h2>
+                            <!--<div class="oe_button_box">
+                                <button name="action_view_graph" string="Graph View" type="action"/>
+                                <button name="action_view_pivot" string="Pivot View" type="action"/>
+                                <button name="action_view_kanban" string="Kanban View" type="action"/>
+                            </div> -->
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_commission_analytics" model="ir.actions.act_window">
+            <field name="name">Commission Analytics</field>
+            <field name="res_model">commission_system.report</field>
+            <field name="view_mode">graph,pivot</field>
+            <field name="help" type="html">
+                <p>Analyze performance by salesperson, rule effectiveness, and profitability trends.</p>
+            </field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_commissionsystem_root" name="Commission System" sequence="10"/>
+        <menuitem id="menu_reports_analytics" parent="menu_commissionsystem_root" name="Reports &amp; Analytics"
+                  sequence="30"/>
+        <menuitem id="menu_commission_analytics" parent="menu_reports_analytics" name="Analytics"
+                  action="action_commission_analytics" sequence="20"/>
+
+        <!-- Tree -->
+        <record id="commission_system_report_tree" model="ir.ui.view">
+            <field name="name">commission_system.report.tree</field>
+            <field name="model">commission_system.report</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="salesperson_id"/>
+                    <field name="customer_id"/>
+                    <field name="agent_id"/>
+                    <field name="sales_team_id"/>
+                    <field name="rule_id"/>
+                    <field name="product_id"/>
+                    <field name="product_category_id"/>
+                    <field name="invoice_date"/>
+                    <field name="total_sales"/>
+                    <field name="total_commission"/>
+                    <field name="average_commission"/>
+                    <field name="commission_rate"/>
+                    <field name="num_sales"/>
+                    <field name="net_revenue"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Pivot -->
+        <record id="commission_system_report_pivot" model="ir.ui.view">
+            <field name="name">commission_system.report.pivot</field>
+            <field name="model">commission_system.report</field>
+            <field name="arch" type="xml">
+                <pivot string="Commission Analysis">
+                    <field name="total_sales" type="measure"/>
+                    <field name="total_commission" type="measure"/>
+                    <field name="average_commission" type="measure"/>
+                    <field name="commission_rate" type="measure"/>
+                    <field name="num_sales" type="measure"/>
+                    <field name="net_revenue" type="measure"/>
+                    <field name="salesperson_id" type="row"/>
+                    <field name="agent_id" type="row"/>
+                    <field name="customer_id" type="row"/>
+                    <field name="sales_team_id" type="row"/>
+                    <field name="rule_id" type="col"/>
+                    <field name="invoice_date" interval="month"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- Graph -->
+        <record id="commission_system_report_graph" model="ir.ui.view">
+            <field name="name">commission_system.report.graph</field>
+            <field name="model">commission_system.report</field>
+            <field name="arch" type="xml">
+                <graph string="Commission Analysis" type="bar">
+                    <field name="total_commission" type="measure"/>
+                    <field name="commission_rate" type="measure"/>
+                    <field name="agent_id" type="row"/>
+                    <field name="invoice_date" interval="month"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Search -->
+        <record id="commission_system_report_search" model="ir.ui.view">
+            <field name="name">commission_system.report.search</field>
+            <field name="model">commission_system.report</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="customer_id" string="Customer"/>
+                    <!-- Predefined Date Filters -->
+                    <filter name="today" string="Today"
+                            help="Show today's commissions"
+                            context="{'search_default_today':1}"/>
+                    <filter name="this_week" string="This Week"
+                            help="Show this week's commissions"
+                            context="{'search_default_this_week':1}"/>
+                    <filter name="this_month" string="This Month"
+                            help="Show this month's commissions"
+                            context="{'search_default_this_month':1}"/>
+                    <filter name="this_year" string="This Year"
+                            help="Show this year's commissions"
+                            context="{'search_default_this_year':1}"/>
+
+                    <separator/>
+
+
+                    <!-- Custom Date Range Filter -->
+                    <filter name="invoice_date_filter" string="Invoice Date" date="invoice_date"/>
+
+                    <separator/>
+
+                    <!-- Other Filters -->
+                    <filter name="high_commission" string="High Commission"
+                            domain="[('total_commission', '>', 100000)]"/>
+                    <filter name="low_commission" string="Low Commission"
+                            domain="[('total_commission', '&lt;', 1000)]"/>
+                    <filter string="Group by Customer" name="group_by_customer"
+                            context="{'group_by': 'customer_id'}"/>
+
+
+
+                    <separator/>
+
+                    <!-- Group By Options -->
+                    <group string="Group By">
+                        <separator>
+                            <filter string="Date" name="group_by_date" context="{'group_by':'invoice_date:day'}"/>
+                        </separator>
+                        <separator>
+                            <filter string="Salesperson" name="group_by_salesperson"
+                                    context="{'group_by':'salesperson_id'}"/>
+                            <filter string="Agent" name="group_by_agent" context="{'group_by':'agent_id'}"/>
+                            <filter string="Product" name="group_by_product" context="{'group_by':'product_id'}"/>
+                            <filter string="Product Category" name="group_by_category"
+                                    context="{'group_by':'product_category_id'}"/>
+                            <!--<filter string="Customer" context="{'group_by': 'customer_id'}"/>-->
+                        </separator>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Actions -->
+        <record id="action_commission_reports" model="ir.actions.act_window">
+            <field name="name">Commission Reports</field>
+            <field name="res_model">commission_system.report</field>
+            <field name="view_mode">graph,pivot,tree</field>
+            <field name="search_view_id" ref="commission_system_report_search"/>
+            <field name="help" type="html">
+                <p>Use this section to analyze commission data with filters and groupings.</p>
+            </field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_commissionsystem_root" name="Commission System" sequence="10"/>
+        <menuitem id="menu_reports_analytics" parent="menu_commissionsystem_root" name="Reports &amp; Analytics"
+                  sequence="30"/>
+        <menuitem id="menu_commission_reports" parent="menu_reports_analytics" name="Reports"
+                  action="action_commission_reports" sequence="10"/>
+
+
+        <!-- Tree View -->
+        <record id="commission_system_bill_tree" model="ir.ui.view">
+            <field name="name">commission_system.bill.tree</field>
+            <field name="model">commission_system.bill</field>
+            <field name="arch" type="xml">
+                <tree string="Commission Bills">
+                    <field name="name"/>
+                    <!--<field name="salesperson_id"/>-->
+                    <field name="agent_id"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="total_commission"/>
+                    <field name="tax_paid"/>
+                    <field name="incremental_tax"/>
+                    <field name="total_tax"/>
+                    <field name="net_commission"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="commission_system_bill_form" model="ir.ui.view">
+            <field name="name">commission_system.bill.form</field>
+            <field name="model">commission_system.bill</field>
+            <field name="arch" type="xml">
+                <form string="Commission Bill">
+                    <header>
+                        <!-- Statusbar with state buttons -->
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="billed,confirmed,audited,paid"
+                               options="{'clickable': ['billed', 'confirmed','audited', 'paid']}"/>
+
+                        <!-- Button to add commissions (kept as it's not a state transition) -->
+                        <button name="action_add_records"
+                                type="object"
+                                string="Add Commissions"
+                                class="btn-primary"
+                                invisible="state != 'draft'"
+                                context="{'agent_id': agent_id}"/>
+                        <button name="action_reopen"
+                                type="object"
+                                string="Roll back"
+                                class="btn-primary"
+                                invisible="state == 'draft'"/>  
+                        <button name="print_report"
+                                string="Print Bill"
+                                type="object"
+                                class="oe_highlight"
+                                invisible="state != 'paid'"/>
+
+                        <button name="preview_report"
+                                string="Preview"
+                                type="object"
+                                class="btn-secondary"
+                                invisible="state != 'paid'"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Bill Info">
+                                <field name="name" readonly="1"/>
+                                <field name="salesperson_id"/>
+                                <field name="sales_team_id"/>
+                                <field name="agent_id" required="1"/>
+                            </group>
+                            <group string="Bank Details">
+                                <group>
+                                    <field name="bank_name"/>
+                                    <field name="iban"/>
+                                </group>
+                                <group>
+                                    <field name="bank_account_id" widget="selection"/>
+                                </group>
+                            </group>
+                            <group string="Commission Details">
+                                <field name="start_date" required="1"/>
+                                <field name="end_date" required="1"/>
+                                <field name="total_commission"/>
+                                <field name="total_tax"/>
+                                <field name="net_commission"/>
+                                <!--<field name="state" readonly="1"/>-->
+                                <field name="state" invisible="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Commission Records">
+                                <field name="commission_records" readonly="1">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="rule_id"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <!--<field name="amount" widget="monetary" sum="Total"
+                                               options="{'currency_field': 'currency_id'}"/>-->
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Kanban View -->
+        <record id="view_commission_bill_kanban" model="ir.ui.view">
+            <field name="name">commission.bill.kanban</field>
+            <field name="model">commission_system.bill</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state">
+                    <field name="name"/>
+                    <field name="agent_id"/>
+                    <field name="total_commission"/>
+                    <field name="net_commission"/>
+                    <field name="state"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_card">
+                                <div>
+                                    <strong>Agent Name:</strong>
+                                    <t t-esc="record.agent_id.value or 'Unknown'"/>
+                                </div>
+                                <div>
+                                    <strong>Bill Reference:</strong>
+                                    <t t-esc="record.name.value or 'Unknown'"/>
+                                </div>
+                                <div>
+                                    <strong>Total Commission:</strong>
+                                    <t t-esc="record.total_commission.value or '0.00'"/>
+                                </div>
+                                <div>
+                                    <strong>Net Commission:</strong>
+                                    <t t-esc="record.net_commission.value or '0.00'"/>
+                                </div>
+                                <div>
+                                    <strong>Status:</strong>
+                                    <t t-esc="record.state.value or 'Undefined'"/>
+                                </div>
+                                <div class="o_kanban_footer">
+                                    <field name="state" widget="statusbar" statusbar_visible="billed,confirmed,audited,paid"
+                                           help="Click to move through Billed → Confirmed → Audited → Paid status"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="view_commission_bill_search" model="ir.ui.view">
+            <field name="name">commission_system.bill.search</field>
+            <field name="model">commission_system.bill</field>
+            <field name="arch" type="xml">
+                <search string="Search Commission Bills">
+                    <separator>
+                        <!-- Quick Status Filters -->
+                        <filter name="filter_billed" string="Billed" domain="[('state', '=', 'billed')]"
+                                help="Bills in draft state"/>
+                        <filter name="filter_confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"
+                                help="Bills that are confirmed"/>
+                        <filter name="filter_audited" string="Audited" domain="[('state', '=', 'audited')]"
+                                help="Bills that are Audited"/>
+                        <filter name="filter_paid" string="Paid" domain="[('state', '=', 'paid')]"
+                                help="Bills that are marked as paid"/>
+                    </separator>
+
+                    <separator>
+                        <!-- Date Filters -->
+                        <!-- Today -->
+                        <filter name="filter_today" string="Today"
+                                domain="[('start_date', '=', context_today())]"/>
+
+                        <!-- This Week (fallback version using relative date range) -->
+                        <filter name="filter_this_week" string="This Week"
+                                domain="[('start_date', '&gt;=', (context_today() - relativedelta(days=7)))]"/>
+
+                        <filter name="last_30_days" string="Last 30 Days"
+                                domain="[('start_date', '>=', (context_today() - relativedelta(days=30)))]"/>
+                    </separator>
+
+                    <!-- Group By -->
+                    <group expand="1" string="Group By">
+                        <filter name="group_agent" string="Agent" context="{'group_by': 'agent_id'}"/>
+                        <filter name="group_salesperson" string="Salesperson" context="{'group_by': 'salesperson_id'}"/>
+                        <filter name="group_sales_team" string="Sales Team" context="{'group_by': 'sales_team_id'}"/>
+                        <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                        <filter name="group_date" string="Start Date" context="{'group_by': 'start_date'}"/>
+                    </group>
+
+                    <!-- Free-form Search Fields -->
+                    <field name="name" string="Bill Number"/>
+                    <field name="agent_id"/>
+                    <field name="salesperson_id"/>
+                    <field name="sales_team_id"/>
+                    <field name="state"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+
+                    <!-- Range Search (for numeric fields) -->
+                    <field name="total_commission" string="Total Commission"/>
+                    <field name="total_tax" string="Total Tax"/>
+                    <field name="net_commission" string="Net Commission"/>
+
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record model="ir.actions.act_window" id="action_commission_bill">
+            <field name="name">Bills</field>
+            <field name="res_model">commission_system.bill</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_create">
+                    Click to create a new Commission Bill.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_commissionsystem_root" name="Commission System" sequence="10"/>
+        <menuitem id="menu_bills" parent="menu_commissionsystem_root" name="Bills" sequence="20"/>
+        <menuitem id="menu_commission_bills" parent="menu_bills" name="Commission Bills"
+                  action="action_commission_bill" sequence="10"/>
+
+        <record model="ir.ui.view" id="commission_system_lines_tree">
+            <field name="name">commission_system.lines.tree</field>
+            <field name="model">commission_system.records</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="salesperson_id"/>
+                    <field name="sales_order_id"/>
+                    <field name="invoice_id"/>
+                    <field name="rule_id"/>
+                    <!--<field name="customer_id"/>-->
+                    <field name="product_id"/>
+                    <field name="agent_id"/>
+                    <field name="amount"/>
+                    <field name="state"/>
+                    <field name="checked_by"/>
+                    <field name="approved_by"/>
+                    <field name="confirmed_by"/>
+                    <field name="audited_by"/>
+                    <field name="paid_by"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="commission_system_lines_form">
+            <field name="name">commission_system.lines.form</field>
+            <field name="model">commission_system.records</field>
+            <field name="arch" type="xml">
+                <form string="Commission Record">
+                    <header>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="draft,checked,approved"
+                               options="{'clickable': ['draft', 'checked', 'approved']}"/>
+                    </header>
+                    <sheet>
+                        <group col="2">
+                            <group string="Commission Details">
+                                <group>
+                                    <field name="name"/>
+                                    <field name="salesperson_id" required="1"/>
+                                    <field name="agent_id" required="1"/>
+                                </group>
+
+                            </group>
+
+                            <group string="Transaction Details">
+                                <group>
+                                    <field name="sales_order_id"/>
+                                    <field name="invoice_id"/>
+                                    <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"
+                                           decoration-bf="True"/>
+                                </group>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <!--<page string="Invoice Details" name="invoice_details_page">
+                                <group>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                     Monetary fields linked to the currency
+                                    <field name="price_unit" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="total_sale_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="price_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                            </page>-->
+                            <page string="Sales Order Lines" name="sales_order_lines_page">
+                                <field name="sales_order_line_ids" readonly="1">
+                                    <tree string="Sales Order Lines">
+                                        <field name="product_id"/>
+                                        <!--<field name="name"/>-->
+                                        <field name="product_uom_qty"/>
+                                        <field name="length"/>
+                                        <field name="total_length"/>
+                                        <field name="weight"/>
+                                        <field name="total_weight"/>
+                                        <field name="price_unit"/>
+                                        <field name="price_subtotal"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Customer Details" name="customer_details_page">
+                                <tree string="Customer Details">
+                                    <field name="customer_id"/>
+                                    <!--<field name="customer_name"/>
+                                    <field name="customer_email"/>
+                                    <field name="customer_phone"/>-->
+                                </tree>
+                            </page>
+                        </notebook>
+
+                        <group string="System Info">
+                            <field name="create_date" readonly="1"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="commission_system_lines_kanban" model="ir.ui.view">
+            <field name="name">commission_system.line.kanban</field>
+            <field name="model">commission_system.records</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state">
+                    <field name="agent_id"/>
+                    <field name="name"/>
+                    <field name="amount"/>
+                    <field name="state"/>
+                    <field name="agent_name"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                              <div>
+                                    <strong>Agent Name:</strong>
+                                    <t t-esc="record.agent_name.value or 'Unknown'"/>
+                                </div>
+                                <div>
+                                    <strong>Com. Reference:</strong>
+                                    <t t-esc="record.name.value or 'Unknown'"/>
+                                </div>
+                                <div>
+                                    <strong>Amount:</strong>
+                                    <t t-esc="record.amount.value or '0.00'"/>
+                                </div>
+                                <div>
+                                    <strong>State:</strong>
+                                    <t t-esc="record.state.value or 'Undefined'"/>
+                                </div>
+                                <!-- Footer -->
+                                <div class="o_kanban_footer">
+                                    <!-- Status bar with transitions -->
+                                    <field name="state" widget="statusbar" statusbar_visible="draft,checked,approved"
+                                           help="Click to move through Draft → Checked → Approved status"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="commission_system_lines_search" model="ir.ui.view">
+            <field name="name">commission.system.records.search</field>
+            <field name="model">commission_system.records</field>
+            <field name="arch" type="xml">
+                <search string="Commission Records">
+                    <separator>
+                        <!-- Search Fields -->
+                        <field name="name" string="Reference"/>
+                       <!-- <field name="agent_id"/>-->
+                        <field name="salesperson_id"/>
+                        <field name="invoice_id"/>
+                    </separator>
+                    <separator>
+                        <!-- Filters Group -->
+                        <filter name="state_group" string="Status">
+                            <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                            <filter string="Checked" name="checked" domain="[('state','=','checked')]"/>
+                            <filter string="Approved" name="approved" domain="[('state','=','approved')]"/>
+                            <filter string="Billed" name="billed" domain="[('state','=','billed')]"/>
+                            <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                            <filter string="Audited" name="audited" domain="[('state','=','audited')]"/>
+                            <filter string="Paid" name="paid" domain="[('state','=','paid')]"/>
+                            <filter string="Unbilled" name="unbilled" domain="[('bill_id','=',False)]"/>
+                        </filter>
+                    </separator>
+
+                    <separator>
+                        <!-- Date Filters -->
+                        <filter name="invoice_date_filter" string="Invoice Date" date="invoice_date"/>
+                    </separator>
+
+                    <separator>
+                        <!-- Default Filters -->
+                        <filter name="today" string="Today" domain="[('invoice_date','=',context_today())]"/>
+                        <filter name="this_week" string="This Week"
+                                domain="[('invoice_date','>=',(context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                        <filter name="last_30_days" string="Last 30 Days"
+                                domain="[('invoice_date','>=',(context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                    </separator>
+
+                    <!-- Group By -->
+                    <group expand="1" string="Group By">
+                        <filter string="Agent" name="group_by_agent" context="{'group_by': 'agent_id'}"/>
+                        <filter string="Salesperson" name="group_by_salesperson"
+                                context="{'group_by': 'salesperson_id'}"/>
+                        <filter string="State" name="group_by_state" context="{'group_by': 'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="lines_action_list">
+            <field name="name">Commission Lines</field>
+            <field name="res_model">commission_system.records</field>
+            <field name="view_mode">tree,form,kanban</field>
+        </record>
+        <menuitem id="menu_commissionsystem_root" name="Commission System" sequence="10"/>
+        <menuitem id="menu_commission" parent="menu_commissionsystem_root" name="Commission" sequence="10"/>
+        <menuitem id="menu_commissionlines" parent="menu_commission" name="Commission Lines"
+                  action="lines_action_list"/>
+
+        <!-- Tree View -->
+        <record id="commission_system_worksheet_tree" model="ir.ui.view">
+            <field name="name">commission.system.worksheet.tree</field>
+            <field name="model">commission_system.worksheet</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="agent_id"/>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="total_commission" widget="monetary"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="commission_system_worksheet_form" model="ir.ui.view">
+            <field name="name">commission.system.worksheet.form</field>
+            <field name="model">commission_system.worksheet</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="draft,checked,approved"
+                               options="{'clickable': ['draft', 'checked', 'approved']}"/>
+
+
+                        <button name="button_add_commissions" type="object"
+                                string="Add Commissions" class="btn-primary"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="agent_id" options="{'no_create': True}" required="1"/>
+                            <field name="salesperson_id"/>
+                            <field name="sales_team_id"/>
+                            <field name="start_date" required="1"/>
+                            <field name="end_date" required="1"/>
+                            <field name="total_commission" widget="monetary" readonly="1"/>
+                        </group>
+                        <notebook>
+                            <page string="Commission Records">
+                                <field name="commission_records" readonly="1">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="rule_id"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="state"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Kanban view for commission_system.worksheet -->
+        <record id="commission_worksheet_kanban_view" model="ir.ui.view">
+            <field name="name">commission.worksheet.kanban</field>
+            <field name="model">commission_system.worksheet</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state">
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="o_kanban_card"
+                                 t-att-class="{
+                                 'o_kanban_record_draft': record.state.raw_value == 'draft',
+                                 'o_kanban_record_checked': record.state.raw_value == 'checked',
+                                 'o_kanban_record_approved': record.state.raw_value == 'approved'
+                                  }">
+                                <!-- Header -->
+                                <div class="o_kanban_header">
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                    <div>
+                                        <field name="agent_id" widget="many2one" options="{'no_create': True}"/>
+                                    </div>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="o_kanban_body">
+                                    <div>
+                                        <strong>Total Commission:</strong>
+                                        <field name="total_commission" widget="monetary"
+                                               options="{'currency_field': 'currency_id'}"/>
+                                    </div>
+                                    <!-- Display dynamic icons based on state -->
+                                    <div>
+                                        <i class="fa fa-edit text-muted"
+                                           t-if="record.state.raw_value == 'draft'"
+                                           title="Draft stage: You can still edit."></i>
+                                        <i class="fa fa-check-circle text-success"
+                                           t-if="record.state.raw_value == 'checked'"
+                                           title="Confirmed stage: Awaiting payment."></i>
+                                        <i class="fa fa-money text-primary"
+                                           t-if="record.state.raw_value == 'approved'"
+                                           title="Paid stage: Commission fully processed."></i>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="o_kanban_footer">
+                                    <!-- Status bar with transitions -->
+                                    <field name="state" widget="statusbar" statusbar_visible="draft,checked,approved"
+                                           help="Click to move through Draft → Checked → Approved status"/>
+                                </div>
+
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="commission_system_worksheet_search" model="ir.ui.view">
+            <field name="name">commission.system.worksheet.search</field>
+            <field name="model">commission_system.worksheet</field>
+            <field name="arch" type="xml">
+                <search string="Commission Worksheets">
+                    <field name="name" string="Worksheet Name"/>
+                    <field name="agent_id"/>
+                    <field name="salesperson_id"/>
+                    <field name="sales_team_id"/>
+
+                    <filter name="state_group" string="Status">
+                        <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                        <filter string="Checked" name="checked" domain="[('state','=','checked')]"/>
+                        <filter string="Approved" name="approved" domain="[('state','=','approved')]"/>
+                    </filter>
+
+                    <filter name="date_filter" string="Date Range" date="start_date"/>
+                    <filter name="end_date_filter" string="End Date" date="end_date"/>
+
+                    <!-- Simplified date filters without complex calculations -->
+                    <filter name="current_month" string="Current Month"
+                            domain="[('start_date','&lt;=',context_today()),('end_date','&gt;=',context_today())]"/>
+                    <filter name="last_30_days" string="Last Month"
+                            domain="[('start_date','&gt;=',current_date - 30)]"/>
+                    <filter name="last_90_days" string="Last 3 Months"
+                            domain="[('start_date','&gt;=',current_date - 90)]"/>
+
+                    <group expand="1" string="Group By">
+                        <filter string="Agent" name="group_by_agent" context="{'group_by':'agent_id'}"/>
+                        <filter string="Salesperson" name="group_by_salesperson"
+                                context="{'group_by':'salesperson_id'}"/>
+                        <filter string="Status" name="group_by_state" context="{'group_by':'state'}"/>
+                        <filter string="Sales Team" name="group_by_sales_team" context="{'group_by':'sales_team_id'}"/>
+                        <filter string="Month" name="group_by_month" context="{'group_by':'start_date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="worksheet_action_list">
+            <field name="name">Commission Worksheet</field>
+            <field name="res_model">commission_system.worksheet</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_create">
+                    Click to create a new Commission Worksheet.
+                </p>
+            </field>
+        </record>
+        <menuitem id="menu_commissionworksheet" parent="menu_commission" name="Commission Worksheet"
+                  action="worksheet_action_list"/>
+    </data>
+</odoo>

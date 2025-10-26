@@ -9,7 +9,6 @@
                 <xpath expr="//field[@name='payment_reference']" position="after">
                     <field name="agent_id"/>
                     <field name="bank_payment_total"/>
-                    
                     <!-- <field name="bank_account_id"/> -->
                     <!-- <field name="bank_reference"/> -->
                 </xpath>
@@ -30,6 +29,27 @@
             </field>
         </record>
 
+        <record id="view_move_form" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@id='header_right_group']" position="after">
+                    <group name="credit_group" string="Invoice Settings">
+                        <field name="is_credit" readonly="1"/>
+                        <field name="credit_approver_id" readonly="1"/> 
+                    </group>
+                    <group string="Dimensional Details">
+                        <field name="pitch"/>
+                        <field name="effective_width"/>
+                    </group>
+                </xpath>
+
+                <xpath expr="//notebook" position="before">
+                </xpath>
+
+            </field>
+        </record>
 
         <!--<record id="view_account_move_form_simplified_totals" model="ir.ui.view">
             <field name="name">account.move.form.simplified.totals</field>

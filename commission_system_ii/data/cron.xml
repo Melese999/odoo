@@ -1,0 +1,26 @@
+<odoo>
+    <data noupdate="1">
+        <!-- Define the cron job for generating monthly worksheet -->
+        <record id="ir_cron_generate_monthly_worksheets" model="ir.cron">
+            <field name="name">Generate Monthly Worksheets</field>
+            <field name="model_id" ref="model_commission_system_worksheet"/>
+            <field name="state">code</field>
+            <field name="code">model.generate_monthly_worksheets()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">months</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+        </record>
+
+        <!-- Define the cron job for resetting commissions -->
+        <record id="ir_cron_reset_commissions" model="ir.cron">
+            <field name="name">Reset Commissions for New Period</field>
+            <field name="model_id" ref="model_commission_system_bill"/>
+            <field name="state">code</field>
+            <field name="code">model.reset_for_new_period()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">months</field>
+            <field name="nextcall">2025-02-01 00:00:00</field>  <!-- Set the first execution date -->
+        </record>
+    </data>
+</odoo>

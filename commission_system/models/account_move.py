@@ -7,6 +7,38 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    # Define the selectable options for pitch (copied from sale.order)
+    PITCH_SELECTIONS = [
+        ('30', '30 cm'),
+        ('35', '35 cm'),
+        ('40', '40 cm'),
+        ('45', '45 cm'),
+        ('50', '50 cm'),
+    ]
+
+    # Define the selectable options for effective width (copied from sale.order)
+    EFFECTIVE_WIDTH_SELECTIONS = [
+        ('87', '87 cm'),
+        ('90', '90 cm'),
+        ('95', '95 cm'),
+        ('100', '100 cm'),
+    ]
+
+    # New fields to inherit from the Sales Order
+    pitch = fields.Selection(
+        selection=PITCH_SELECTIONS,
+        string='Pitch (cm)',
+        readonly=True,  # Should be read-only on the invoice
+        help="The distance between two consecutive points on the product, inherited from the Sales Order."
+    )
+
+    effective_width = fields.Selection(
+        selection=EFFECTIVE_WIDTH_SELECTIONS,
+        string='Effective Width (cm)',
+        readonly=True,  # Should be read-only on the invoice
+        help="The effective width selected for the product, inherited from the Sales Order."
+    )
+
     commission_record_ids = fields.One2many(
         'commission_system.records',
         'invoice_id',
@@ -37,6 +69,21 @@ class AccountMove(models.Model):
         'res.partner.bank',
         string='Bank Account'
     )
+    is_credit = fields.Boolean(string="Is Credit Order")
+    credit_approver_id = fields.Many2one(
+        'res.partner',
+        string="Credit For",
+        help="Credit Order Belongs to"
+    )
+
+    # 1. Computed Many2one Field to find the Sale Order (Resolves previous KeyError)
+    # sale_order_id = fields.Many2one(
+    #     'sale.order',
+    #     string='Source Sale Order',
+    #     compute='_compute_sale_order_id',
+    #     store=True,
+    #     readonly=True
+    # )
 
     @api.depends('commission_record_ids.amount')
     def _compute_total_commission(self):

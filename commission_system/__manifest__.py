@@ -42,6 +42,8 @@
         'reports/grouped_production_report.xml',
         'views/sales_sketch_views.xml',
         'views/sketch_wizard_views.xml',
+        'views/commission_bill_summary_views.xml',
+        'views/res_users_views.xml',
         # 'views/test.xml',
         # 'views/commission_sketch_wizard_view.xml',
         # 'views/assets.xml',

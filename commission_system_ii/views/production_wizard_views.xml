@@ -1,0 +1,38 @@
+<odoo>
+    <!-- The view for the wizard model -->
+    <record id="production_report_wizard_form_view" model="ir.ui.view">
+        <field name="name">production.report.wizard.form</field>
+        <field name="model">production.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Production Report">
+                <group>
+                    <field name="sale_order_id"/>
+                </group>
+                <footer>
+                    <button name="action_generate_report"
+                            string="Generate Report"
+                            type="object"
+                            class="oe_highlight"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- The action that opens the wizard form view -->
+    <record id="action_open_production_report_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Production Report</field>
+        <field name="res_model">production.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Sub-menu item under Manufacturing -> Operations -->
+    <menuitem id="menu_production_report_wizard"
+              name="Production Report from SO"
+              action="action_open_production_report_wizard"
+              parent="mrp.menu_mrp_manufacturing"
+              sequence="50"/>
+</odoo>

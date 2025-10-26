@@ -15,6 +15,8 @@ from . import models
 from . import sketch_wizard
 from . import stock_move
 from . import procurement_group
+from . import res_users
+
 # from. import mrp_production_report
 # from. import procurement_group
 

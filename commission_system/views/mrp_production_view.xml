@@ -17,10 +17,27 @@
                         <field name="sale_line_id" readonly="1" string="Sale Order Line"/>
                         <field name="length" readonly="1" widget="float"/>
                         <field name="weight" readonly="1" widget="float"/>
-                        <field name="pitch" readonly="1" widget="float"/>
+                        <!--                    <field name="pitch" readonly="1" widget="float"/>-->
+                        <field name="pitch"/>
+                        <!--<field name="effective_width"/>-->
                     </group>
+                    <group string="Production Settings">
+                        <field name="production_priority"/>
+                        <field name="location_id" readonly="1"/>
+                    </group>
+
                     <separator string="Design Sketches"/>
                     <field name="sketch_attachment_ids" widget="many2many_binary" filename="name"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_mrp_production_tree_inherit_loc" model="ir.ui.view">
+            <field name="name">mrp.production.tree.inherit.location</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <field name="location_id"/>
                 </xpath>
             </field>
         </record>

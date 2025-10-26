@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Define the data block to hold the records -->
+    <data>
+        <!--
+            Inherit the existing Manufacturing Order form view to add new elements.
+            The id must be unique, and the model specifies which object we are modifying.
+        -->
+        <record id="mrp_production_form_view_inherit" model="ir.ui.view">
+            <field name="name">mrp.production.form.view.inherit</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group" position="inside">
+
+                    <group string="Dimensional Information">
+                        <field name="sale_line_id" readonly="1" string="Sale Order Line"/>
+                        <field name="length" readonly="1" widget="float"/>
+                        <field name="weight" readonly="1" widget="float"/>
+                        <field name="pitch" readonly="1" widget="float"/>
+                    </group>
+                    <separator string="Design Sketches"/>
+                    <field name="sketch_attachment_ids" widget="many2many_binary" filename="name"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
+

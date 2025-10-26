@@ -23,4 +23,13 @@ class CrmLead(models.Model):
                 vals["code"] = self.env.ref(
                     "crm_lead_code.sequence_lead", raise_if_not_found=False
                 ).next_by_id()
-        return super().create(vals_list)
+                
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.user_id:
+                self.env['kpi.target'].sudo()._update_targets_for_user(
+                    rec.user_id.id,
+                    'crm.lead'
+                )
+
+        return records

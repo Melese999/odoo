@@ -38,12 +38,41 @@
                 <!-- <field name="bank_account_id"/> -->
                 <!-- <field name="bank_reference"/> -->
                 <field name="advance_paid_amount"/>
-                <field name="tin_number"/>
+                <field name="tin_number" readonly="1"/>
                 <field name="mobile_number"/>
             </xpath>
 
         </field>
     </record>
+
+    <record id="view_order_form_inherit_priority" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.priority</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='partner_credit_warning']" position="before">
+                <field name="can_edit_priority" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//group[@name='order_details']" position="after">
+                <group name="production_priority_group" string="Invoice &amp; Production Settings">
+                    <field name="is_credit"/>
+                    <field name="credit_approver_id" placeholder="Select Credit Approver"
+                       domain="[('is_credit_approver', '=', True), ('active', '=', True)]"/> 
+                    <field name="location_id" domain="[('usage', '=', 'production')]" />      
+                    <field name="production_priority" readonly="not can_edit_priority"/>
+                </group>
+                <group name="dimensions_details_group" string="Dimensions Details">
+                    <field name="pitch"/>
+                    <field name="effective_width"/>
+                </group>
+
+            </xpath>
+
+        </field>
+    </record>
+
 
     <record id="view_sale_order_inherit_custom_total" model="ir.ui.view">
         <field name="name">sale.order.inherit.custom.total</field>

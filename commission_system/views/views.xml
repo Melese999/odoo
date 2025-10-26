@@ -581,7 +581,7 @@
                                 type="object"
                                 string="Roll back"
                                 class="btn-primary"
-                                invisible="state == 'draft'"/>  
+                                invisible="state == 'draft'"/>
                         <button name="print_report"
                                 string="Print Bill"
                                 type="object"

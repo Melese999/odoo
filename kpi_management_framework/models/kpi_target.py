@@ -240,9 +240,16 @@ class KpiTarget(models.Model):
             ('confirmation_date', '<=', date_to),
         ]
 
+        lead_domain = [
+            ('user_id', '=', target.user_id.id),
+            ('create_date', '>=', date_from),
+            ('create_date', '<=', date_to),
+        ]
+
         try:
             # Get all telemarketing confirmation records for this user and period
             confirmations = self.env['telemarketing.confirmation'].search(domain)
+            leads = self.env['crm.lead'].search(lead_domain)
 
             total_score = 0
             confirmation_count = len(confirmations)
@@ -266,8 +273,8 @@ class KpiTarget(models.Model):
                 })
 
             # Return average score
-            if confirmation_count > 0:
-                return total_score / confirmation_count
+            if len(leads) > 0:
+                return total_score / len(leads)
             return 0.0
 
         except Exception as e:
@@ -300,6 +307,7 @@ class KpiTarget(models.Model):
             ('date_end', '>=', fields.Date.today()),
             ('date_start', '<=', fields.Date.today()),
         ])
+        print(active_targets)
 
         if active_targets:
             _logger.info(f"Found {len(active_targets)} active targets to update")

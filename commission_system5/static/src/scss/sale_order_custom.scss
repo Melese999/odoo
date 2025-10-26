@@ -1,0 +1,11 @@
+/* Set a custom class for the sales order lines tree view */
+.o_sale_order_tree {
+    /* Target the header of the Product column by its data-name */
+    th[data-name="product_template_id"],
+    th[data-name="product_id"] {
+        /* Set the width to 20% of the tree view's total width */
+        width: 20% !important;
+        /* It's good practice to also set min-width to prevent shrinking */
+        min-width: 150px !important;
+    }
+}

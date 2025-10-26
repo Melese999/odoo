@@ -32,6 +32,7 @@ class StockMove(models.Model):
         result = super(StockMove, self)._action_confirm(merge=merge, merge_into=merge_into)
 
         return result
+
         # Now ensure manufacturing orders have the dimensional data
         for move in self:
             if move.production_id and move.sale_line_id:
