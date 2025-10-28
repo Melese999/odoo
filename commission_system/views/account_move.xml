@@ -9,8 +9,6 @@
                 <xpath expr="//field[@name='payment_reference']" position="after">
                     <field name="agent_id"/>
                     <field name="bank_payment_total"/>
-                    <!-- <field name="bank_account_id"/> -->
-                    <!-- <field name="bank_reference"/> -->
                 </xpath>
             </field>
         </record>

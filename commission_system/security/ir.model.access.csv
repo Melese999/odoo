@@ -7,6 +7,8 @@ access_commission_admin_assignment,Administrator Access for Assignment,model_com
 access_commission_admin_user_activity_log,Administrator Access for User Activity Log,model_commission_system_user_activity_log,commission_system.group_commission_admin,1,1,1,1
 access_commission_admin_tax_bracket,Administrator Access for Tax Bracket,model_commission_system_tax_bracket,commission_system.group_commission_admin,1,1,1,1
 access_commission_admin_report,Administrator Access for Report,model_commission_system_report,commission_system.group_commission_admin,1,1,1,1
+access_sale_order_bank_payment_user,sale.order.bank.payment user,model_sale_order_bank_payment,base.group_user,1,1,1,0
+access_invoice_bank_payment_user,account.move.bank.payment user,model_account_move_bank_payment,base.group_user,1,1,1,0
 
 access_commission_sales_manager_bill,Sales Manager Access for Bill,model_commission_system_bill,commission_system.group_commission_sales_manager,1,1,0,0
 access_commission_sales_manager_worksheet,Sales Manager Access for Worksheet,model_commission_system_worksheet,commission_system.group_commission_sales_manager,1,1,1,0
