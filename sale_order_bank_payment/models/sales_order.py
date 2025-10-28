@@ -8,7 +8,7 @@ class SaleOrderBankPayment(models.Model):
     sale_order_id = fields.Many2one(
         'sale.order', string='Sales Order', ondelete='cascade'
     )
-    bank_id = fields.Many2one(
+    bank_account_id = fields.Many2one(
         'res.bank', string='Bank', required=True
     )
     tt_number = fields.Char(
@@ -32,7 +32,7 @@ class SaleOrderBankPayment(models.Model):
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    bank_payment_ids = fields.One2many(
+    bank_account_payment_ids = fields.One2many(
         'sale.order.bank.payment', 'sale_order_id', string='Bank Payments'
     )
 
@@ -43,7 +43,7 @@ class SaleOrder(models.Model):
         readonly=True
     )
 
-    @api.depends('bank_payment_ids.amount')
+    @api.depends('bank_account_payment_ids.amount')
     def _compute_advance_payment(self):
         for order in self:
-            order.advance_payment = sum(order.bank_payment_ids.mapped('amount'))
+            order.advance_payment = sum(order.bank_account_payment_ids.mapped('amount'))

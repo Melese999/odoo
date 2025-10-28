@@ -13,8 +13,8 @@ class SaleOrderBankPayment(models.Model):
     sale_order_id = fields.Many2one(
         'sale.order', string='Sales Order', ondelete='cascade'
     )
-    bank_id = fields.Many2one(
-        'res.bank', string='Bank', required=True
+    bank_account_id = fields.Many2one(
+        'res.partner.bank', string='Bank', required=True
     )
     tt_number = fields.Char(
         string='TT Number', required=True
@@ -108,7 +108,7 @@ class SaleOrder(models.Model):
              "contact information but can be manually overridden."
     )
 
-    bank_payment_ids = fields.One2many(
+    bank_account_payment_ids = fields.One2many(
         'sale.order.bank.payment', 'sale_order_id', string='Bank Payments'
     )
 
@@ -179,10 +179,10 @@ class SaleOrder(models.Model):
             else:
                 order.tin_number = False
 
-    @api.depends('bank_payment_ids.amount')
+    @api.depends('bank_account_payment_ids.amount')
     def _compute_advance_payment(self):
         for order in self:
-            order.advance_paid_amount = sum(order.bank_payment_ids.mapped('amount'))
+            order.advance_paid_amount = sum(order.bank_account_payment_ids.mapped('amount'))
 
     # --- New Compute Method for UI Control ---
     @api.depends('user_id', 'state')
@@ -256,10 +256,10 @@ class SaleOrder(models.Model):
         for order in self:
             for inv in invoices:
                 # Copy SO bank payments into Invoice Bank Payment
-                for line in order.bank_payment_ids:
+                for line in order.bank_account_payment_ids:
                     self.env['account.move.bank.payment'].create({
                         'invoice_id': inv.id,
-                        'bank_id': line.bank_id.id,
+                        'bank_account_id': line.bank_account_id.id,
                         'tt_number': line.tt_number,
                         'amount': line.amount,
                     })
@@ -446,7 +446,7 @@ class AccountMoveBankPayment(models.Model):
     _description = 'Invoice Bank Payment'
 
     invoice_id = fields.Many2one('account.move', string='Customer Invoice', ondelete='cascade')
-    bank_id = fields.Many2one('res.bank', string='Bank', required=True)
+    bank_account_id = fields.Many2one('res.partner.bank', string='Bank', required=True)
     tt_number = fields.Char(string='TT Number', required=True)
     amount = fields.Float(string='Amount', required=True)
 
@@ -464,7 +464,7 @@ class AccountMoveBankPayment(models.Model):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    bank_payment_ids = fields.One2many(
+    bank_account_payment_ids = fields.One2many(
         'account.move.bank.payment', 'invoice_id', string='Bank Payments'
     )
     bank_payment_total = fields.Float(
@@ -472,10 +472,10 @@ class AccountMove(models.Model):
         compute='_compute_bank_payment_total', store=True
     )
 
-    @api.depends('bank_payment_ids.amount')
+    @api.depends('bank_account_payment_ids.amount')
     def _compute_bank_payment_total(self):
         for inv in self:
-            inv.bank_payment_total = sum(inv.bank_payment_ids.mapped('amount'))
+            inv.bank_payment_total = sum(inv.bank_account_payment_ids.mapped('amount'))
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 

@@ -102,15 +102,15 @@
             <!-- Add new tab for Bank Payments -->
             <xpath expr="//notebook" position="inside">
                 <page string="Bank Payments">
-                    <field name="bank_payment_ids" context="{'default_sale_order_id': active_id}">
+                    <field name="bank_account_payment_ids" context="{'default_sale_order_id': active_id}">
                         <tree editable="bottom">
-                            <field name="bank_id" placeholder="Bank Name"/>
+                            <field name="bank_account_id" placeholder="Bank Name"/>
                             <field name="tt_number" placeholder="Insert Desposit Slip Refernce" />
                             <field name="amount" placeholder="paid amount"/>
                         </tree>
                         <form string="Bank Payment">
                             <group>
-                                <field name="bank_id" placeholder="Bank Name"/>
+                                <field name="bank_account_id" placeholder="Bank Name"/>
                                 <field name="tt_number" placeholder="Insert Desposit Slip Refernce"/>
                                 <field name="amount" placeholder="paid amount"/>
                             </group>
@@ -129,15 +129,15 @@
 
             <xpath expr="//notebook" position="inside">
                 <page string="Bank Payments">
-                    <field name="bank_payment_ids" context="{'default_invoice_id': active_id}">
+                    <field name="bank_account_payment_ids" context="{'default_invoice_id': active_id}">
                         <tree editable="bottom">
-                            <field name="bank_id"/>
+                            <field name="bank_account_id"/>
                             <field name="tt_number"/>
                             <field name="amount"/>
                         </tree>
                         <form string="Bank Payment">
                             <group>
-                                <field name="bank_id"/>
+                                <field name="bank_account_id"/>
                                 <field name="tt_number"/>
                                 <field name="amount"/>
                             </group>

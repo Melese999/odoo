@@ -10,13 +10,13 @@
                 <page string="Bank Payments">
                     <field name="bank_payment_ids" context="{'default_sale_order_id': active_id}">
                         <tree editable="bottom">
-                            <field name="bank_id"/>
+                            <field name="bank_account_id"/>
                             <field name="tt_number"/>
                             <field name="amount"/>
                         </tree>
                         <form string="Bank Payment">
                             <group>
-                                <field name="bank_id"/>
+                                <field name="bank_account_id"/>
                                 <field name="tt_number"/>
                                 <field name="amount"/>
                             </group>
