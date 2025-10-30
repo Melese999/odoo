@@ -9,6 +9,16 @@
                 <xpath expr="//field[@name='payment_reference']" position="after">
                     <field name="agent_id"/>
                     <field name="bank_payment_total"/>
+                    <field name="fs_number" placeholder="Enter FS Number"/>
+                    <!--<field
+                            name="fs_number"
+                            placeholder="Enter FS Number"
+                            readonly="1"
+                            modifiers='{
+                                "readonly": [["state", "!=", "draft"]],
+                                "required": [["is_full_invoice", "=", true]]
+                            }'
+                    />-->
                 </xpath>
             </field>
         </record>

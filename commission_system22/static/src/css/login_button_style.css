@@ -1,0 +1,10 @@
+/* Override primary button on login page */
+.oe_login_buttons .btn.btn-primary {
+    background-color: #263676 !important; /* Change to your desired color */
+    border-color: #263676 !important;
+    color: white !important;
+}
+
+body.login_page .btn.btn-primary {
+    background-color: #263676 !important;
+}

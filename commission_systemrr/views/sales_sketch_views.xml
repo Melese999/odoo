@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit sale order line tree view -->
+        <record id="view_order_line_tree_inherit" model="ir.ui.view">
+            <field name="name">commission.system.order.line.tree.inherit.sketch</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                    <field name="sketch_count" string="Sketches" widget="statinfo"/>
+                    <button name="action_open_sketch_wizard"
+                            string="Sketch"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-plus"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Inherit sale order line form view -->
+        <record id="view_order_line_form_inherit" model="ir.ui.view">
+            <field name="name">commission.system.order.line.form.inherit.sketch</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">
+                    <group string="Design Sketch">
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_sketches"
+                                    string="View Sketches"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-picture-o">
+                                <field name="sketch_count" widget="statinfo" string="Designs"/>
+                            </button>
+                        </div>
+                        <button name="action_open_sketch_wizard"
+                                string="Add New Sketch"
+                                type="object"
+                                class="btn-primary"
+                                icon="fa-pencil"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

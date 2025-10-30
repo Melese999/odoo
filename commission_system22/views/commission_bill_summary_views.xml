@@ -1,0 +1,383 @@
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<odoo>-->
+<!--    -->
+<!--    <record id="view_bill_summary_tree" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.tree</field>-->
+<!--        <field name="model">commission_system.bill.summary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <tree string="Bill Summaries">-->
+<!--                <field name="name"/>-->
+<!--                <field name="date_range"/>-->
+<!--                <field name="generated_by"/>-->
+<!--                <field name="generated_date"/>-->
+<!--                <field name="bill_count"/>-->
+<!--                <field name="total_commission" widget="monetary"/>-->
+<!--                <field name="total_tax" widget="monetary"/>-->
+<!--                <field name="total_net_commission" widget="monetary"/>-->
+<!--            </tree>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    -->
+<!--    <record id="view_bill_summary_form" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.form</field>-->
+<!--        <field name="model">commission_system.bill.summary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <form string="Commission Bill Summary">-->
+<!--                <sheet>-->
+<!--                    <group>-->
+<!--                        <group string="Summary Details">-->
+<!--                            <field name="name" readonly="1"/>-->
+<!--                            &lt;!&ndash;<field name="date_range"/>&ndash;&gt;-->
+<!--                            <field name="start_date"/>-->
+<!--                            <field name="end_date"/>-->
+<!--                        </group>-->
+<!--                        <group string="Generation Info">-->
+<!--                            <field name="generated_by" readonly="1"/>-->
+<!--                            <field name="generated_date" readonly="1"/>-->
+<!--                            <field name="bill_count" readonly="1"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                    <group>-->
+<!--                        <group string="Financial Summary">-->
+<!--                            <field name="total_commission" widget="monetary" readonly="1"/>-->
+<!--                            <field name="total_tax" widget="monetary" readonly="1"/>-->
+<!--                        </group>-->
+<!--                        <group>-->
+<!--                            <field name="total_net_commission" widget="monetary" readonly="1"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                    <field name="bill_ids">-->
+<!--                        <tree string="Bills in Summary">-->
+<!--                            <field name="name"/>-->
+<!--                            <field name="agent_id"/>-->
+<!--                            <field name="total_commission" widget="monetary"/>-->
+<!--                            <field name="total_tax" widget="monetary"/>-->
+<!--                            <field name="net_commission" widget="monetary"/>-->
+<!--                            &lt;!&ndash;<field name="state"/>&ndash;&gt;-->
+<!--                        </tree>-->
+<!--                    </field>-->
+<!--                </sheet>-->
+<!--                <div class="oe_chatter">-->
+<!--                    <field name="message_follower_ids"/>-->
+<!--                    <field name="activity_ids"/>-->
+<!--                    <field name="message_ids"/>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!-- -->
+<!--    <record id="view_bill_summary_search" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.search</field>-->
+<!--        <field name="model">commission_system.bill.summary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <search string="Search Bill Summaries">-->
+<!--                <field name="name" string="Summary Name"/>-->
+<!--                <field name="date_range"/>-->
+<!--                <field name="generated_by"/>-->
+
+<!--                <separator/>-->
+
+<!--                &lt;!&ndash; Date Filters &ndash;&gt;-->
+<!--                <filter name="this_month" string="This Month"-->
+<!--                        domain="[('start_date', '&gt;=', context_today().replace(day=1))]"/>-->
+<!--                <filter name="last_month" string="Last Month"-->
+<!--                        domain="[('start_date', '&gt;=', (context_today().replace(day=1) - relativedelta(months=1))),-->
+<!--                                 ('start_date', '&lt;', context_today().replace(day=1))]"/>-->
+<!--                <filter name="date_range_filter" string="Date Range" date="start_date"/>-->
+
+<!--                <separator/>-->
+
+<!--                -->
+<!--                <group expand="0" string="Group By">-->
+<!--                    <filter string="Generated By" name="group_by_generated_by" context="{'group_by': 'generated_by'}"/>-->
+<!--                    <filter string="Month" name="group_by_month" context="{'group_by': 'start_date:month'}"/>-->
+<!--                </group>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
+
+
+<!--    <record id="action_bill_summary_list" model="ir.actions.act_window">-->
+<!--        <field name="name">Bill Summaries</field>-->
+<!--        <field name="res_model">commission_system.bill.summary</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="search_view_id" ref="commission_system.view_bill_summary_search"/>-->
+<!--        <field name="help" type="html">-->
+<!--            <p class="o_view_nocontent_smiling_face">-->
+<!--                Monthly bill summaries are automatically generated when bills are paid.-->
+<!--            </p>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--   -->
+<!--    <menuitem id="menu_bills" parent="menu_commissionsystem_root" name="Bills" sequence="20"/>-->
+<!--    <menuitem id="menu_bill_summary"-->
+<!--              name="Bill Summaries"-->
+<!--              parent="menu_bills"-->
+<!--              action="action_bill_summary_list"-->
+<!--              sequence="30"/>-->
+<!--</odoo>-->
+
+
+<!--<odoo>-->
+<!--    &lt;!&ndash; Bill Summary Tree View &ndash;&gt;-->
+<!--    <record id="view_bill_summary_tree" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.tree</field>-->
+<!--        <field name="model">commission_system.bill.summary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <tree string="Bill Summaries">-->
+<!--                <field name="name"/>-->
+<!--                &lt;!&ndash;<field name="date_range"/>&ndash;&gt;-->
+<!--                <field name="generated_by"/>-->
+<!--                <field name="generated_date"/>-->
+<!--                <field name="bill_count"/>-->
+<!--                <field name="commission_record_count" string="Total Records"/>-->
+<!--                <field name="total_commission" widget="monetary"/>-->
+<!--                <field name="total_tax" widget="monetary"/>-->
+<!--                <field name="total_net_commission" widget="monetary"/>-->
+<!--            </tree>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Bill Summary Form View &ndash;&gt;-->
+<!--    <record id="view_bill_summary_form" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.form</field>-->
+<!--        <field name="model">commission_system.bill.summary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <form string="Commission Bill Summary">-->
+<!--                <sheet>-->
+<!--                    <group>-->
+<!--                        <group string="Summary Details">-->
+<!--                            <field name="name" readonly="1"/>-->
+<!--                            <field name="date_range"/>-->
+<!--                            <field name="start_date"/>-->
+<!--                            <field name="end_date"/>-->
+<!--                        </group>-->
+<!--                        <group string="Generation Info">-->
+<!--                            <field name="generated_by" readonly="1"/>-->
+<!--                            <field name="generated_date" readonly="1"/>-->
+<!--                            <field name="bill_count" readonly="1"/>-->
+<!--                            &lt;!&ndash;<field name="commission_record_count" readonly="1" string="Total Records"/>&ndash;&gt;-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                    <group>-->
+<!--                        <group string="Financial Summary">-->
+<!--                            <field name="total_commission" widget="monetary" readonly="1"/>-->
+<!--                            <field name="total_tax" widget="monetary" readonly="1"/>-->
+<!--                            <field name="total_net_commission" widget="monetary" readonly="1"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+
+<!--                    <div class="oe_button_box" name="button_box">-->
+<!--                        &lt;!&ndash;<button name="action_view_commission_records"-->
+<!--                                type="object"-->
+<!--                                string="View Commission Records"-->
+<!--                                class="btn-primary"/>&ndash;&gt;-->
+<!--                        <button name="action_view_bills"-->
+<!--                                type="object"-->
+<!--                                string="View Bills"-->
+<!--                                class="btn-primary"/>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Bills included in this summary &ndash;&gt;-->
+<!--                    <label for="bill_ids" string="Bills in this Summary"/>-->
+<!--                    <field name="bill_ids" readonly="1">-->
+<!--                        <tree string="Bills">-->
+<!--                            <field name="name"/>-->
+<!--                            <field name="agent_id"/>-->
+<!--                            <field name="start_date"/>-->
+<!--                            <field name="end_date"/>-->
+<!--                            <field name="total_commission" widget="monetary"/>-->
+<!--                            <field name="total_tax" widget="monetary"/>-->
+<!--                            <field name="net_commission" widget="monetary"/>-->
+<!--                            <field name="state"/>-->
+<!--                        </tree>-->
+<!--                    </field>-->
+<!--                </sheet>-->
+<!--                <div class="oe_chatter">-->
+<!--                    <field name="message_follower_ids"/>-->
+<!--                    <field name="activity_ids"/>-->
+<!--                    <field name="message_ids"/>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Commission Records View for Summary &ndash;&gt;-->
+<!--    <record id="view_bill_summary_records_tree" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.records.tree</field>-->
+<!--        <field name="model">commission_system.records</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <tree string="Commission Records in Summary">-->
+<!--                <field name="name"/>-->
+<!--                <field name="bill_id" string="Bill"/>-->
+<!--                <field name="sales_order_id"/>-->
+<!--                <field name="invoice_id"/>-->
+<!--                <field name="rule_id"/>-->
+<!--                <field name="product_id"/>-->
+<!--                <field name="agent_id"/>-->
+<!--                <field name="amount" widget="monetary"/>-->
+<!--                <field name="invoice_date"/>-->
+<!--                <field name="state"/>-->
+<!--            </tree>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Search View &ndash;&gt;-->
+<!--    <record id="view_bill_summary_search" model="ir.ui.view">-->
+<!--        <field name="name">commission_system.bill.summary.search</field>-->
+<!--        <field name="model">commission_system.bill.summary</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <search string="Search Bill Summaries">-->
+<!--                <field name="name" string="Summary Name"/>-->
+<!--                <field name="date_range"/>-->
+<!--                <field name="generated_by"/>-->
+
+<!--                <separator/>-->
+
+<!--                &lt;!&ndash; Date Filters &ndash;&gt;-->
+<!--                <filter name="this_month" string="This Month"-->
+<!--                        domain="[('start_date', '&gt;=', context_today().replace(day=1))]"/>-->
+<!--                <filter name="last_month" string="Last Month"-->
+<!--                        domain="[('start_date', '&gt;=', (context_today().replace(day=1) - relativedelta(months=1))),-->
+<!--                                 ('start_date', '&lt;', context_today().replace(day=1))]"/>-->
+<!--                <filter name="date_range_filter" string="Date Range" date="start_date"/>-->
+
+<!--                <separator/>-->
+
+<!--                &lt;!&ndash; Group By Options &ndash;&gt;-->
+<!--                <group expand="0" string="Group By">-->
+<!--                    <filter string="Generated By" name="group_by_generated_by" context="{'group_by': 'generated_by'}"/>-->
+<!--                    <filter string="Month" name="group_by_month" context="{'group_by': 'start_date:month'}"/>-->
+<!--                </group>-->
+<!--            </search>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Action for Bill Summary &ndash;&gt;-->
+<!--    <record id="action_bill_summary_list" model="ir.actions.act_window">-->
+<!--        <field name="name">Bill Summaries</field>-->
+<!--        <field name="res_model">commission_system.bill.summary</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="search_view_id" ref="commission_system.view_bill_summary_search"/>-->
+<!--        <field name="help" type="html">-->
+<!--            <p class="o_view_nocontent_smiling_face">-->
+<!--                Monthly bill summaries are automatically generated when bills are paid.-->
+<!--            </p>-->
+<!--        </field>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Action for Commission Records in Summary &ndash;&gt;-->
+<!--    <record id="action_summary_commission_records" model="ir.actions.act_window">-->
+<!--        <field name="name">Commission Records in Summary</field>-->
+<!--        <field name="res_model">commission_system.records</field>-->
+<!--        <field name="view_mode">tree,form</field>-->
+<!--        <field name="view_id" ref="commission_system.view_bill_summary_records_tree"/>-->
+<!--        <field name="search_view_id" ref="commission_system.commission_system_lines_search"/>-->
+<!--    </record>-->
+
+<!--    &lt;!&ndash; Menu Item for Bill Summary &ndash;&gt;-->
+<!--    <menuitem id="menu_bill_summary"-->
+<!--              name="Bill Summaries"-->
+<!--              parent="menu_reports_analytics"-->
+<!--              action="action_bill_summary_list"-->
+<!--              sequence="15"/>-->
+<!--</odoo>-->
+
+<odoo>
+    <!-- Tree View for Bill Summary -->
+    <record id="view_bill_summary_tree" model="ir.ui.view">
+        <field name="name">commission_system.bill.summary.tree</field>
+        <field name="model">commission_system.bill.summary</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date_range"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="bill_count" string="Number of Bills"/>
+                <field name="total_commission" widget="monetary"/>
+                <field name="total_tax" widget="monetary"/>
+                <field name="total_net_commission" widget="monetary"/>
+                <field name="generated_by"/>
+                <field name="generated_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Bill Summary -->
+    <record id="view_bill_summary_form" model="ir.ui.view">
+        <field name="name">commission_system.bill.summary.form</field>
+        <field name="model">commission_system.bill.summary</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_view_bills" type="object" string="View Bills" class="btn-primary"/>
+                    <!--<button name="action_test_connection" type="object" string="Test Connection" class="btn-warning"/>
+                    <button name="action_manual_assign" type="object" string="Assign Bills" class="btn-primary"/>
+                    <button name="action_update_bill_states" string="Update Bills to Completed" type="object" class="btn-primary"/>-->
+
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Generation Info ">
+                            <field name="name"/>
+                            <field name="date_range"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="generated_by" readonly="1"/>
+                            <field name="generated_date" readonly="1"/>
+                        </group>
+                        <group string="Financial Summary">
+                            <field name="bill_count" string="Number of Bills"/>
+                            <field name="total_commission" widget="monetary"/>
+                            <field name="total_tax" widget="monetary"/>
+                            <field name="total_net_commission" widget="monetary"/>
+                        </group>
+                    </group>
+                    <field name="bill_ids" readonly="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="state"/>
+                            <field name="total_commission" widget="monetary"/>
+                            <field name="total_tax" widget="monetary"/>
+                            <field name="net_commission" widget="monetary"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </tree>
+                    </field>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Bill Summary -->
+    <record id="action_commission_bill_summary" model="ir.actions.act_window">
+        <field name="name">Bill Summaries</field>
+        <field name="res_model">commission_system.bill.summary</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_bill_summary_tree"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No bill summaries found.
+            </p>
+            <p>
+                Bill summaries are automatically generated when bills are paid.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for Bill Summary -->
+    <menuitem id="menu_commission_bill_summary"
+              name="Bill Summaries"
+              parent="menu_reports_analytics"
+              action="action_commission_bill_summary"
+              sequence="30"/>
+</odoo>
