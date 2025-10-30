@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_grouped_production" name="Grouped Manufacturing Orders">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Grouped Manufacturing Orders Report</h2>
+                    <p>Date:
+                        <span t-esc="current_date"/>
+                    </p>
+                    <p>Total Manufacturing Orders:
+                        <span t-esc="len(doc_ids)"/>
+                    </p>
+
+                    <t t-foreach="groups" t-as="group">
+                        <div class="sale-order-group" style="margin-bottom: 30px; page-break-inside: avoid;">
+                            <h3 style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff;">
+                                Sales Order:
+                                <span t-esc="group['sale_order'].name"/>
+                                - Customer:
+                                <span t-esc="group['sale_order'].partner_id.name"/>
+                            </h3>
+
+                            <div style="margin-left: 20px;">
+                                <p>
+                                    <strong>Customer Reference:</strong>
+                                    <span t-esc="group['sale_order'].client_order_ref or 'N/A'"/>
+                                    <br/>
+                                    <strong>Order Date:</strong>
+                                    <span t-esc="group['sale_order'].date_order"/>
+                                    <br/>
+                                    <strong>Delivery Date:</strong>
+                                    <span t-esc="group['sale_order'].commitment_date or 'Not specified'"/>
+                                </p>
+
+                                <h4>Manufacturing Orders (<span t-esc="len(group['productions'])"/>)
+                                </h4>
+                                <t t-foreach="group['productions']" t-as="production">
+                                    <div class="production-card"
+                                         style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                        <h5>MO:
+                                            <span t-esc="production.name"/>
+                                        </h5>
+                                        <table style="width: 100%;">
+                                            <tr>
+                                                <td style="width: 50%; vertical-align: top;">
+                                                    <strong>Product:</strong>
+                                                    <span t-esc="production.product_id.display_name"/>
+                                                    <br/>
+                                                    <strong>Quantity:</strong>
+                                                    <span t-esc="production.product_qty"/>
+                                                    <span t-esc="production.product_uom_id.name"/>
+                                                    <br/>
+                                                    <strong>Status:</strong>
+                                                    <span t-esc="production.state"/>
+                                                    <br/>
+                                                    <strong>Planned Date:</strong>
+                                                    <span t-esc="production.date_planned_start"/>
+                                                </td>
+                                                <td style="width: 50%; vertical-align: top;">
+                                                    <strong>Custom Specifications:</strong>
+                                                    <br/>
+                                                    <t t-if="get_custom_fields(production)['length']">
+                                                        Length:
+                                                        <span t-esc="get_custom_fields(production)['length']"/>
+                                                        <br/>
+                                                    </t>
+                                                    <t t-if="get_custom_fields(production)['weight']">
+                                                        Weight:
+                                                        <span t-esc="get_custom_fields(production)['weight']"/>
+                                                        <br/>
+                                                    </t>
+                                                    <t t-if="get_custom_fields(production)['pitch']">
+                                                        Pitch:
+                                                        <span t-esc="get_custom_fields(production)['pitch']"/>
+                                                        <br/>
+                                                    </t>
+                                                    <t t-if="get_custom_fields(production)['total_length']">
+                                                        Total Length:
+                                                        <span t-esc="get_custom_fields(production)['total_length']"/>
+                                                        <br/>
+                                                    </t>
+                                                    <t t-if="get_custom_fields(production)['total_weight']">
+                                                        Total Weight:
+                                                        <span t-esc="get_custom_fields(production)['total_weight']"/>
+                                                        <br/>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <h6 style="margin-top: 15px;">Components:</h6>
+                                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                            <thead>
+                                                <tr style="background-color: #f8f9fa;">
+                                                    <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">
+                                                        Product
+                                                    </th>
+                                                    <th style="text-align: right; padding: 8px; border: 1px solid #ddd;">
+                                                        Quantity
+                                                    </th>
+                                                    <th style="text-align: left; padding: 8px; border: 1px solid #ddd;">
+                                                        UoM
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="production.move_raw_ids" t-as="move">
+                                                    <tr>
+                                                        <td style="padding: 8px; border: 1px solid #ddd;">
+                                                            <span t-esc="move.product_id.display_name"/>
+                                                        </td>
+                                                        <td style="text-align: right; padding: 8px; border: 1px solid #ddd;">
+                                                            <span t-esc="move.product_uom_qty"/>
+                                                        </td>
+                                                        <td style="padding: 8px; border: 1px solid #ddd;">
+                                                            <span t-esc="move.product_uom.name"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

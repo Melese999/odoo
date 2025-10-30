@@ -75,20 +75,6 @@ class SaleOrder(models.Model):
         help="The agent responsible for this invoice"
     )
 
-    bank_name = fields.Char(string="Bank Name")
-    bank_account_id = fields.Many2one(
-        'res.partner.bank',
-        string='Bank Account',
-        domain="[('partner_id', '=', 'AMG Holdings')]",
-        help="Select the bank account for this sale order."
-    )
-
-    bank_reference = fields.Char(
-        string="Bank Reference / TT Number",
-        copy=False,
-        help="The Bank Reference / TT Number must be unique.",
-        required=True
-    )
 
     tin_number = fields.Char(
         string='TIN Number',

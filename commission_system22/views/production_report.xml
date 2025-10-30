@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Report Action for Production Orders -->
+        <record id="commission_system.action_report_production_order" model="ir.actions.report">
+            <field name="name">Production Orders</field>
+            <field name="model">mrp.production</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">commission_system.report_production_order_document</field>
+            <field name="report_file">commission_system.report_production_order_document</field>
+            <field name="print_report_name">'Production Orders for SO: %s' % (object.origin or 'Unknown SO')</field>
+            <field name="binding_model_id" eval="False"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- Common header template -->
+        <template id="report_production_common_header">
+            <div style="border-bottom: 2px solid #263676; padding-bottom: 15px; margin-bottom: 25px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <!-- Logo Column -->
+                        <td style="width: 25%; vertical-align: middle; padding-right: 20px;">
+                            <t t-set="company" t-value="user.company_id"/>
+                            <t t-if="company and company.logo">
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <img t-attf-src="data:image/png;base64,{{ company.logo }}"
+                                         style="max-height: 100px; max-width: 180px; object-fit: contain;"/>
+                                </div>
+                            </t>
+                        </td>
+
+                        <!-- Empty spacer column -->
+                        <td style="width: 40%;"></td>
+
+                        <!-- Company Info Column -->
+                        <td style="width: 35%; vertical-align: top; text-align: right;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                <div style="font-weight: bold; font-size: 18px; color: #2c3e50; margin-bottom: 10px;">
+                                    <span t-esc="company.name if company else 'Company'"/>
+                                </div>
+                                <t t-if="company">
+                                    <div style="border-top: 1px dashed #263676; padding-top: 10px; margin-top: 10px;">
+                                        <t t-if="company.street">
+                                            <div style="color: #555; font-size: 13px; line-height: 1.5;"
+                                                 t-esc="company.street"/>
+                                        </t>
+                                        <t t-if="company.street2">
+                                            <div style="color: '555'; font-size: 13px; line-height: 1.5;"
+                                                 t-esc="company.street2"/>
+                                        </t>
+                                        <t t-if="company.city or company.zip or company.state_id or company.country_id">
+                                            <div style="color: #555; font-size: 13px; line-height: 1.5;">
+                                                <t t-if="company.city" t-esc="company.city"/>
+                                                <t t-if="company.zip">,
+                                                    <t t-esc="company.zip"/>
+                                                </t>
+                                                <t t-if="company.state_id">,
+                                                    <t t-esc="company.state_id.name"/>
+                                                </t>
+                                                <t t-if="company.country_id">,
+                                                    <t t-esc="company.country_id.name"/>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div style="border-top: 1px dashed #263676; padding-top: 10px; margin-top: 10px;">
+                                        <t t-if="company.phone">
+                                            <div style="color: #555; font-size: 13px;">
+                                                <i class="fa fa-phone" style="margin-right: 5px; color: #263676;"/>
+                                                <span t-esc="company.phone"/>
+                                            </div>
+                                        </t>
+                                        <t t-if="company.email">
+                                            <div style="color: #555; font-size: 13px;">
+                                                <i class="fa fa-envelope" style="margin-right: 5px; color: #263676;"/>
+                                                <span t-esc="company.email"/>
+                                            </div>
+                                        </t>
+                                        <t t-if="company.website">
+                                            <div style="color: 555; font-size: 13px;">
+                                                <i class="fa fa-globe" style="margin-right: 5px; color: #263676;"/>
+                                                <span t-esc="company.website"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </template>
+
+        <!-- QWeb Report Template for Production Orders -->
+        <template id="commission_system.report_production_order_document">
+            <t t-call="web.html_container">
+                <t t-call="web.internal_layout">
+                    <t t-set="sale_order_name" t-value="docs[0].origin if docs else ''"/>
+                    <t t-set="sale_order"
+                       t-value="env['sale.order'].search([('name', '=', sale_order_name)], limit=1)"/>
+
+                    <!-- Include common header -->
+                    <t t-call="commission_system.report_production_common_header"/>
+
+                    <!-- Report Header Section -->
+                    <div style="background: linear-gradient(to right, #263676, #A0522D); color: white; padding: 15px; border-radius: 5px 5px 0 0; margin-bottom: 20px;">
+                        <table style="width: 100%; color: white;">
+                            <tr>
+                                <td style="width: 70%; vertical-align: middle;">
+                                    <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 1px;">
+                                        PRODUCTION ORDER REPORT
+                                    </h1>
+                                </td>
+                                <td style="width: 30%; text-align: right; vertical-align: middle;">
+                                    <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">
+                                        <span style="background: white; color: #263676; padding: 3px 10px; border-radius: 3px;">
+                                            <span t-esc="sale_order_name or 'Sales Order'"/>
+                                        </span>
+                                    </div>
+                                    <!--<div style="font-size: 14px;">
+                                        <i class="fa fa-calendar" style="margin-right: 5px; color: #263676;"/>
+                                        <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                                        <span t-esc="current_date"/>
+                                    </div>-->
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Customer Information Section -->
+                    <div style="background: #ffffff; padding: 15px; border-radius: 5px; margin-bottom: 25px; border-left: 4px solid #263676;">
+                        <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2c3e50;">
+                            <i class="fa fa-user" style="margin-right: 8px; color: #263676;"/>
+                            CUSTOMER INFORMATION
+                        </h3>
+                        <t t-if="sale_order and sale_order.partner_id">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <!-- Customer Details Column -->
+                                    <td width="50%" valign="top" style="padding-right: 10px;">
+                                        <div style="background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%;">
+                                            <h4 style="margin: 0 0 12px 0; font-size: 16px; color: #263676; border-bottom: 2px solid #263676; padding-bottom: 8px;">
+                                                <i class="fa fa-user" style="margin-right: 8px; color: #263676;"/>
+                                                CUSTOMER DETAILS
+                                            </h4>
+                                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                                <div>
+                                                    <div style="font-weight: bold; color: #263676; margin-bottom: 5px;">
+                                                        CUSTOMER NAME
+                                                    </div>
+                                                    <div style="font-size: 16px; color: #555;">
+                                                        <span t-field="sale_order.partner_id.name"/>
+                                                    </div>
+                                                </div>
+                                                <t t-if="sale_order.partner_id.parent_id">
+                                                    <div>
+                                                        <div style="font-weight: bold; color: #263676; margin-bottom: 5px;">
+                                                            PARENT COMPANY
+                                                        </div>
+                                                        <div style="font-size: 14px; color: #777;">
+                                                            <span t-field="sale_order.partner_id.parent_id.name"/>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                                <t t-if="sale_order.partner_id.vat">
+                                                    <div>
+                                                        <div style="font-weight: bold; color: #263676; margin-bottom: 5px;">
+                                                            TAX ID
+                                                        </div>
+                                                        <div style="font-size: 14px; color: #555;">
+                                                            <span t-field="sale_order.partner_id.vat"/>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Contact Information Column -->
+                                    <td width="50%" valign="top" style="padding-left: 10px;">
+                                        <div style="background: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 100%;">
+                                            <h4 style="margin: 0 0 12px 0; font-size: 16px; color: #2c3e50; border-bottom: 2px solid #263676; padding-bottom: 8px;">
+                                                <i class="fa fa-address-card"
+                                                   style="margin-right: 8px; color: #263676;"/>
+                                                CONTACT INFORMATION
+                                            </h4>
+                                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                                <!-- Address Section -->
+                                                <t t-if="sale_order.partner_id.street or sale_order.partner_id.street2 or sale_order.partner_id.city or sale_order.partner_id.zip">
+                                                    <div>
+                                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                                            ADDRESS
+                                                        </div>
+                                                        <div style="font-size: 14px; color: #555; line-height: 1.4;">
+                                                            <t t-if="sale_order.partner_id.street">
+                                                                <div>
+                                                                    <i class="fa fa-map-marker"
+                                                                       style="margin-right: 8px; color: #263676;"/>
+                                                                    <span t-field="sale_order.partner_id.street"/>
+                                                                </div>
+                                                            </t>
+                                                            <t t-if="sale_order.partner_id.street2">
+                                                                <div style="margin-left: 24px;">
+                                                                    <span t-field="sale_order.partner_id.street2"/>
+                                                                </div>
+                                                            </t>
+                                                            <t t-if="sale_order.partner_id.city or sale_order.partner_id.zip or sale_order.partner_id.state_id or sale_order.partner_id.country_id">
+                                                                <div style="margin-left: 24px;">
+                                                                    <t t-if="sale_order.partner_id.city"
+                                                                       t-esc="sale_order.partner_id.city"/>
+                                                                    <t t-if="sale_order.partner_id.zip">,
+                                                                        <t t-esc="sale_order.partner_id.zip"/>
+                                                                    </t>
+                                                                    <t t-if="sale_order.partner_id.state_id">,
+                                                                        <t t-esc="sale_order.partner_id.state_id.name"/>
+                                                                    </t>
+                                                                    <t t-if="sale_order.partner_id.country_id">,
+                                                                        <t t-esc="sale_order.partner_id.country_id.name"/>
+                                                                    </t>
+                                                                </div>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </t>
+
+                                                <!-- Contact Details -->
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                                    <t t-if="sale_order.partner_id.phone">
+                                                        <div>
+                                                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                                                PHONE
+                                                            </div>
+                                                            <div style="font-size: 14px; color: #555;">
+                                                                <i class="fa fa-phone"
+                                                                   style="margin-right: 8px; color: #263676;"/>
+                                                                <span t-field="sale_order.partner_id.phone"/>
+                                                            </div>
+                                                        </div>
+                                                    </t>
+                                                    <t t-if="sale_order.partner_id.email">
+                                                        <div>
+                                                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                                                EMAIL
+                                                            </div>
+                                                            <div style="font-size: 14px; color: #555;">
+                                                                <i class="fa fa-envelope"
+                                                                   style="margin-right: 8px; color: #263676;"/>
+                                                                <span t-field="sale_order.partner_id.email"/>
+                                                            </div>
+                                                        </div>
+                                                    </t>
+                                                    <t t-if="sale_order.partner_id.website">
+                                                        <div>
+                                                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                                                WEBSITE
+                                                            </div>
+                                                            <div style="font-size: 14px; color: #555;">
+                                                                <i class="fa fa-globe"
+                                                                   style="margin-right: 8px; color: #263676;"/>
+                                                                <span t-field="sale_order.partner_id.website"/>
+                                                            </div>
+                                                        </div>
+                                                    </t>
+                                                </div>
+
+                                                <!-- Notes Section -->
+                                                <t t-if="sale_order.partner_id.comment">
+                                                    <div style="padding-top: 12px; border-top: 1px dashed #263676;">
+                                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                                            NOTES
+                                                        </div>
+                                                        <div style="font-size: 14px; color: #555; font-style: italic;">
+                                                            <i class="fa fa-sticky-note"
+                                                               style="margin-right: 8px; color: #263676;"/>
+                                                            <span t-field="sale_order.partner_id.comment"/>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="page">
+                        <!-- Group Manufacturing Orders by Product -->
+                        <t t-set="product_groups" t-value="{}"/>
+
+                        <!-- First, collect all moves grouped by product -->
+                        <t t-foreach="docs" t-as="doc">
+                            <t t-foreach="doc.move_finished_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
+                                <t t-set="product_id" t-value="move.product_id.id"/>
+                                <t t-set="product_key" t-value="'product_' + str(product_id)"/>
+
+                                <t t-if="product_key not in product_groups">
+                                    <t t-set="product_groups" t-value="dict(product_groups, **{product_key: []})"/>
+                                </t>
+
+                                <!-- Add move to the product group -->
+                                <t t-set="current_list" t-value="product_groups[product_key]"/>
+                                <t t-set="new_list" t-value="current_list + [move]"/>
+                                <t t-set="product_groups" t-value="dict(product_groups, **{product_key: new_list})"/>
+                            </t>
+                        </t>
+
+                        <!-- Display a table for each product -->
+                        <t t-foreach="product_groups.keys()" t-as="product_key">
+                            <t t-set="product_moves" t-value="product_groups[product_key]"/>
+                            <t t-set="first_move" t-value="product_moves[0]"/>
+                            <t t-set="product" t-value="first_move.product_id"/>
+
+                            <div style="margin-bottom: 30px;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #2c3e50; padding-bottom: 8px; border-bottom: 2px solid #263676;">
+                                    <i class="fa fa-cube" style="margin-right: 8px; color: #263676;"/>
+                                    PRODUCT:
+                                    <span t-esc="product.display_name"/>
+                                </h3>
+
+                                <table class="table"
+                                       style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 5px; overflow: hidden;">
+                                    <thead>
+                                        <tr style="background: #263676; color: white;">
+                                            <th style="text-align: left; padding: 12px 15px; font-weight: 500; width: 15%;">
+                                                Manuf. Order
+                                            </th>
+                                            <th style="text-align: right; padding: 12px 15px; font-weight: 500; width: 8%;">
+                                                Quantity
+                                            </th>
+                                            <th style="text-align: center; padding: 12px 15px; font-weight: 500; width: 8%;">UoM
+                                            </th>
+                                            <th style="text-align: right; padding: 12px 15px; font-weight: 500; width: 10%;">Length
+                                                (m)
+                                            </th>
+                                            <th style="text-align: right; padding: 12px 15px; font-weight: 500; width: 10%;">Total
+                                                Length (m)
+                                            </th>
+                                            <th style="text-align: right; padding: 12px 15px; font-weight: 500; width: 10%;">Weight
+                                                (kg)
+                                            </th>
+                                            <th style="text-align: right; padding: 12px 15px; font-weight: 500; width: 10%;">Total
+                                                Weight (kg)
+                                            </th>
+                                            <th style="text-align: center; padding: 12px 15px; font-weight: 500; width: 29%;">
+                                                Design Sketch
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="product_total_length" t-value="0"/>
+                                        <t t-set="product_total_weight" t-value="0"/>
+
+                                        <t t-foreach="product_moves" t-as="move">
+                                            <t t-set="production" t-value="move.production_id"/>
+
+                                            <!-- Get dimensional data directly from the manufacturing order -->
+                                            <t t-set="length" t-value="production.length or 0"/>
+                                            <t t-set="weight" t-value="production.weight or 0"/>
+                                            <t t-set="total_length"
+                                               t-value="production.total_length or (length * move.product_uom_qty)"/>
+                                            <t t-set="total_weight"
+                                               t-value="production.total_weight or (weight * move.product_uom_qty)"/>
+
+                                            <t t-set="product_total_length"
+                                               t-value="product_total_length + total_length"/>
+                                            <t t-set="product_total_weight"
+                                               t-value="product_total_weight + total_weight"/>
+
+                                            <tr>
+                                                <td style="padding: 10px 15px; border-bottom: 1px solid #eee; width: 15%;">
+                                                    <span t-field="production.name"/>
+                                                </td>
+                                                <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace; width: 8%;">
+                                                    <span t-field="move.product_uom_qty"/>
+                                                </td>
+                                                <td style="text-align: center; padding: 10px 15px; border-bottom: 1px solid #eee; width: 8%;">
+                                                    <span t-field="move.product_uom.name"/>
+                                                </td>
+                                                <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace; width: 10%;">
+                                                    <span t-esc="'{0:.2f}'.format(length)"/>
+                                                </td>
+                                                <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace; width: 10%;">
+                                                    <span t-esc="'{0:.2f}'.format(total_length)"/>
+                                                </td>
+                                                <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace; width: 10%;">
+                                                    <span t-esc="'{0:.2f}'.format(weight)"/>
+                                                </td>
+                                                <td style="text-align: right; padding: 10px 15px; border-bottom: 1px solid #eee; font-family: monospace; width: 10%;">
+                                                    <span t-esc="'{0:.2f}'.format(total_weight)"/>
+                                                </td>
+                                                <td style="text-align: center; padding: 10px 15px; border-bottom: 1px solid #eee; width: 29%;">
+                                                    <t t-if="production.sketch_attachment_ids">
+                                                        <t t-foreach="production.sketch_attachment_ids" t-as="sketch">
+                                                            <t t-if="sketch.mimetype and 'image' in sketch.mimetype">
+                                                                <div style="max-width: 150px; max-height: 100px; margin: 0 auto;">
+                                                                    <img t-att-src="'/web/image/%s?width=150&amp;height=100' % sketch.id"
+                                                                         style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                         alt="Design Sketch"/>
+                                                                </div>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <div style="text-align: center;">
+                                                                    <i class="fa fa-file" style="font-size: 32px; color: #263676;"/>
+                                                                </div>
+                                                            </t>
+                                                        </t>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div style="color: #999; font-style: italic; font-size: 12px;">
+                                                            No sketch
+                                                        </div>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+
+                                        <!-- Product Totals Row -->
+                                        <tr style="background: #f8f9fa; font-weight: bold;">
+                                            <td colspan="3"
+                                                style="text-align: right; padding: 12px 15px; border-top: 2px solid #263676;">
+                                                PRODUCT TOTALS:
+                                            </td>
+                                            <td style="text-align: right; padding: 12px 15px; border-top: 2px solid #263676; font-family: monospace;">
+                                                -
+                                            </td>
+                                            <td style="text-align: right; padding: 12px 15px; border-top: 2px solid #263676; font-family: monospace;">
+                                                <span t-esc="'{0:.2f}'.format(product_total_length)"/>
+                                            </td>
+                                            <td style="text-align: right; padding: 12px 15px; border-top: 2px solid #263676; font-family: monospace;">
+                                                -
+                                            </td>
+                                            <td style="text-align: right; padding: 12px 15px; border-top: 2px solid #263676; font-family: monospace;">
+                                                <span t-esc="'{0:.2f}'.format(product_total_weight)"/>
+                                            </td>
+                                            <td style="text-align: center; padding: 12px 15px; border-top: 2px solid #263676;">
+                                                -
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+
+                        <!-- Display message if no products found -->
+                        <t t-if="not product_groups">
+                            <div style="text-align: center; padding: 20px; color: #777; font-style: italic;">
+                                No finished products recorded for any manufacturing orders
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Footer Section -->
+                    <div class="footer"
+                         style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #263676; color: #777; font-size: 12px;">
+                        <div style="text-align: center;">
+                            <div style="margin-bottom: 5px;">
+                                <t t-set="company" t-value="user.company_id"/>
+                                <span t-esc="company.name if company else 'Company'"/>
+                                • Generated on
+                                <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                            </div>
+                            <div>
+                                Page
+                                <span class="page"/>
+                                of
+                                <span class="topage"/>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 11px; color: #999;">
+                                Total Manufacturing Orders:
+                                <t t-esc="len(docs)"/>
+                                •
+                                Total Products:
+                                <t t-esc="len(product_groups) if product_groups else 0"/>
+                                •
+                                Total Items:
+                                <t t-esc="sum(len(product_groups[product_key]) for product_key in product_groups.keys()) if product_groups else 0"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

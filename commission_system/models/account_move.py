@@ -59,22 +59,38 @@ class AccountMove(models.Model):
         tracking=True
     )
 
-    bank_reference = fields.Char(
-        string="Bank Reference / TT Number",
-        copy=False,
-        help="The Bank Reference / TT Number must be unique."
-    )
-
-    bank_account_id = fields.Many2one(
-        'res.partner.bank',
-        string='Bank Account'
-    )
     is_credit = fields.Boolean(string="Is Credit Order")
     credit_approver_id = fields.Many2one(
         'res.partner',
         string="Credit For",
         help="Credit Order Belongs to"
     )
+
+    fs_number = fields.Char(
+        string="FS Number",
+        help="Fiscal Serial Number (FS) entered by cashier for Full Invoices.",
+        copy=False
+    )
+
+    is_full_invoice = fields.Boolean(
+        string="Is Full Invoice",
+        compute="_compute_is_full_invoice",
+        store=True
+    )
+
+    @api.depends('move_type')
+    def _compute_is_full_invoice(self):
+        """Flag only customer invoices (Full Invoices)."""
+        for move in self:
+            move.is_full_invoice = move.move_type == 'out_invoice'  # adjust if you use a custom type
+
+    _sql_constraints = [
+        (
+            'unique_fs_number',
+            'unique(fs_number)',
+            'FS Number must be unique across all invoices!'
+        ),
+    ]
 
     # 1. Computed Many2one Field to find the Sale Order (Resolves previous KeyError)
     # sale_order_id = fields.Many2one(

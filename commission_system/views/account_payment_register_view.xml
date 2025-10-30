@@ -1,0 +1,13 @@
+<odoo>
+    <record id="view_account_payment_register_form_inherit_crv" model="ir.ui.view">
+        <field name="name">account.payment.register.form.inherit.crv</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <!-- Add CRV Number below the Memo field -->
+            <xpath expr="//field[@name='communication']" position="after">
+                <field name="crv_number" placeholder="Enter CRV number from register"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
